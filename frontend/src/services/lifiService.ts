@@ -1,0 +1,118 @@
+// LI.FI integration configuration & helpers for GriffinSwap
+
+export const LIFI_CONFIG = {
+  integrator: "GriffinSwap",
+  fee: 0.005, // 0.5% integrator fee
+  apiUrl: "https://li.quest/v1",
+};
+
+export interface ChainOption {
+  id: number;
+  name: string;
+  key: string;
+  logo: string;
+  isPopularInIran?: boolean;
+}
+
+export const POPULAR_CHAINS: ChainOption[] = [
+  { id: 1, name: "Ethereum", key: "eth", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ethereum.svg" },
+  { id: 42161, name: "Arbitrum", key: "arb", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg", isPopularInIran: true },
+  { id: 56, name: "BNB Chain (BSC)", key: "bsc", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg", isPopularInIran: true },
+  { id: 137, name: "Polygon", key: "pol", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg", isPopularInIran: true },
+  { id: 8453, name: "Base", key: "base", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/base.svg", isPopularInIran: true },
+  { id: 10, name: "Optimism", key: "opt", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/optimism.svg" },
+  { id: 43114, name: "Avalanche", key: "ava", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/avalanche.svg" },
+  { id: 1151111081099710, name: "Solana", key: "sol", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/solana.svg", isPopularInIran: true },
+];
+
+// Persian translation overrides for LI.FI Widget
+export const PERSIAN_WIDGET_TRANSLATIONS = {
+  button: {
+    connectWallet: "اتصال کیف پول",
+    resetSettings: "بازنشانی تنظیمات",
+    light: "روشن",
+    dark: "تاریک",
+    auto: "خودکار",
+    ok: "تأیید",
+    swap: "انجام مبادله",
+    buy: "خرید",
+    cancel: "انصراف",
+    continue: "ادامه",
+    copyAddress: "کپی کردن آدرس",
+    viewOnExplorer: "مشاهده در بلاک‌چین",
+    disconnect: "قطع اتصال",
+    reviewSwap: "بررسی مبادله",
+  },
+  header: {
+    swap: "مبادله و پل بین‌زنجیره‌ای",
+    selectWallet: "کیف پول خود را انتخاب کنید",
+    settings: "تنظیمات پیشرفته",
+    from: "مبدأ (پرداخت)",
+    to: "مقصد (دریافت)",
+    routes: "مسیرهای پیشنهادی",
+    swapHistory: "تاریخچه مبادلات",
+  },
+  swap: {
+    from: "از",
+    to: "به",
+    fromAmount: "شما پرداخت می‌کنید",
+    toAmount: "شما دریافت می‌کنید",
+    tags: {
+      recommended: "پیشنهادی",
+      fastest: "سریع‌ترین",
+      cheapest: "ارزان‌ترین",
+      safest: "امن‌ترین",
+    },
+    warning: {
+      message: {
+        insufficientFunds: "موجودی شما برای انجام این تراکنش کافی نیست.",
+        insufficientGas: "موجودی کارمزد شبکه (گس) کافی نیست.",
+      },
+    },
+    selectChainAndToken: "انتخاب شبکه و رمزارز",
+    tokenSearch: "جستجوی نام یا آدرس قرارداد توکن...",
+    sendToWallet: "ارسال به آدرس دیگر",
+    walletAddressOrEns: "آدرس کیف پول یا دامنه ENS",
+  },
+  settings: {
+    routePriority: "اولویت انتخاب مسیر",
+    slippage: "میزان لغزش مجاز (اسلیپیج)",
+    showDestinationWallet: "نمایش کیف پول مقصد",
+    enabledBridges: "پل‌های فعال",
+    enabledExchanges: "صرافی‌های فعال",
+    gasPrice: {
+      slow: "آرام",
+      normal: "عادی",
+      fast: "سریع",
+      title: "هزینه گس شبکه",
+    },
+  },
+};
+
+// Direct quote fetch via LI.FI REST API
+export async function getDirectQuote(params: {
+  fromChain: number;
+  toChain: number;
+  fromToken: string;
+  toToken: string;
+  fromAmount: string;
+  fromAddress?: string;
+}) {
+  const query = new URLSearchParams({
+    fromChain: params.fromChain.toString(),
+    toChain: params.toChain.toString(),
+    fromToken: params.fromToken,
+    toToken: params.toToken,
+    fromAmount: params.fromAmount,
+    integrator: LIFI_CONFIG.integrator,
+    fee: LIFI_CONFIG.fee.toString(),
+    ...(params.fromAddress ? { fromAddress: params.fromAddress } : {}),
+  });
+
+  const res = await fetch(`${LIFI_CONFIG.apiUrl}/quote?${query.toString()}`);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "خطا در دریافت نرخ مسیر مبادله");
+  }
+  return await res.json();
+}

@@ -1,0 +1,24 @@
+{
+  "name": "griffinswap-workspace",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Full-fledged cross-chain DEX & Web3 Portfolio tailored for Iranian users",
+  "scripts": {
+    "start:backend": "node Project/Backend/server.js",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "preview:frontend": "npm --prefix frontend run preview"
+  },
+  "keywords": [
+    "dex",
+    "cross-chain",
+    "lifi",
+    "iran",
+    "persian",
+    "moralis",
+    "web3",
+    "portfolio"
+  ],
+  "author": "GriffinSwap Team",
+  "license": "MIT"
+}

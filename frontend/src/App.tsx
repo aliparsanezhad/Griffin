@@ -1,0 +1,157 @@
+import { useState, useEffect } from 'react';
+import { Navbar, type NavTab } from './components/Navbar';
+import { SwapSection } from './components/SwapSection';
+import { PortfolioSection } from './components/PortfolioSection';
+import { EarnSection } from './components/EarnSection';
+import { TomanCalculator } from './components/TomanCalculator';
+import { GasTracker } from './components/GasTracker';
+import { SecurityHub } from './components/SecurityHub';
+import { Footer } from './components/Footer';
+import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
+
+export function App() {
+  const [activeTab, setActiveTab] = useState<NavTab>('swap');
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [lang, setLang] = useState<'fa' | 'en'>('fa');
+  const [tomanRate, setTomanRate] = useState<number>(FALLBACK_RATE.usdt_irt);
+  const [rateChange, setRateChange] = useState<string>(FALLBACK_RATE.change_24h);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  // Sync direction with language
+  useEffect(() => {
+    document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  // Sync theme
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.remove('bg-slate-100', 'text-slate-900');
+      document.body.classList.add('bg-[#0b0817]', 'text-slate-100');
+    } else {
+      document.body.classList.remove('bg-[#0b0817]', 'text-slate-100');
+      document.body.classList.add('bg-slate-100', 'text-slate-900');
+    }
+  }, [isDarkMode]);
+
+  // Fetch live Toman rate on mount and every 60 seconds
+  useEffect(() => {
+    const loadRate = async () => {
+      const data = await fetchLiveTomanRate();
+      setTomanRate(data.usdt_irt);
+      setRateChange(data.change_24h);
+    };
+    loadRate();
+    const interval = setInterval(loadRate, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Connect wallet handler (MetaMask, Rabby, Trust Wallet, etc.)
+  const handleConnectWallet = async () => {
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      try {
+        const accounts = await (window as any).ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+        if (accounts && accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+        }
+      } catch (err) {
+        console.warn('Wallet connection cancelled or failed', err);
+      }
+    } else {
+      // If no wallet extension detected, use a sample demo address for immediate exploration
+      setWalletAddress('0x71C8705a2B88e3083feC7B58273683243354438F');
+    }
+  };
+
+  const handleDisconnectWallet = () => {
+    setWalletAddress(null);
+  };
+
+  const handleSelectVaultToDeposit = (_vault: any) => {
+    setActiveTab('swap');
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col justify-between relative overflow-hidden ${isDarkMode ? 'bg-[#0b0817]' : 'bg-slate-100'}`}>
+      
+      {/* Dynamic Mythical Griffin Background Aura / Glow */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute -top-40 right-1/4 w-[500px] h-[500px] rounded-full ambient-glow-1 blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute top-1/3 -left-20 w-[450px] h-[450px] rounded-full ambient-glow-2 blur-3xl opacity-30" />
+        <div className="absolute -bottom-20 right-10 w-[600px] h-[600px] rounded-full ambient-glow-3 blur-3xl opacity-25" />
+      </div>
+
+      {/* Main Top Navigation */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tomanRate={tomanRate}
+        rateChange={rateChange}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        lang={lang}
+        setLang={setLang}
+        walletAddress={walletAddress}
+        onConnectWallet={handleConnectWallet}
+        onDisconnectWallet={handleDisconnectWallet}
+      />
+
+      {/* Dynamic Main Body Content */}
+      <main className="flex-1 w-full flex flex-col items-center">
+        {activeTab === 'swap' && (
+          <SwapSection
+            tomanRate={tomanRate}
+            isDarkMode={isDarkMode}
+            lang={lang}
+            walletAddress={walletAddress}
+          />
+        )}
+
+        {activeTab === 'portfolio' && (
+          <PortfolioSection
+            walletAddress={walletAddress}
+            onConnectWallet={handleConnectWallet}
+            tomanRate={tomanRate}
+            lang={lang}
+          />
+        )}
+
+        {activeTab === 'earn' && (
+          <EarnSection
+            tomanRate={tomanRate}
+            lang={lang}
+            onSelectVaultToDeposit={handleSelectVaultToDeposit}
+          />
+        )}
+
+        {activeTab === 'calculator' && (
+          <TomanCalculator
+            tomanRate={tomanRate}
+            rateChange={rateChange}
+            lang={lang}
+          />
+        )}
+
+        {activeTab === 'gas' && (
+          <GasTracker
+            tomanRate={tomanRate}
+            lang={lang}
+          />
+        )}
+
+        {activeTab === 'security' && (
+          <SecurityHub
+            lang={lang}
+          />
+        )}
+      </main>
+
+      {/* Modern Persian Footer */}
+      <Footer lang={lang} />
+    </div>
+  );
+}
+
+export default App;
