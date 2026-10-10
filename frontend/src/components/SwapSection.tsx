@@ -104,6 +104,21 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             ? 'تبادل آنی میان بیش از ۵۸ شبکه بلاک‌چین با تجمیع نقدینگی ۳۵ پل ارتباطی و کمترین کارمزد' 
             : 'Instant swaps and bridges across 58+ chains with aggregated liquidity and lowest fees.'}
         </p>
+
+        {/* Griffi Mascot Welcome Banner */}
+        <div className="mt-4 inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-purple-900/30 border border-purple-500/25 text-right shadow-md">
+          <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-amber-400/60 shrink-0">
+            <img src="/mascot/griffi-wave.jpg" alt="Griffi" className="w-full h-full object-cover" />
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-bold text-amber-300 block">
+              {isFa ? 'گریفی (Griffi) همراه و راهنمای شماست 🦅' : 'Meet Griffi, your Web3 guide 🦅'}
+            </span>
+            <span className="text-[11px] text-slate-300">
+              {isFa ? 'کارمزد بهینه ۰.۵٪ • واریز مستقیم به خزانه پروتکل • بدون ریسک توقیف دارایی' : 'Optimized 0.5% protocol routing • Direct treasury commissions • 0 KYC'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Engine Switcher (Griffin Fast Swap vs LI.FI Aggregator) */}
@@ -326,16 +341,34 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 <span className="font-mono text-emerald-400 font-bold">&lt; $0.05 (≈ ۴,۵۰۰ ت)</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">{isFa ? 'کارمزد گریفین سواپ:' : 'Integrator Fee:'}</span>
-                <span className="font-mono text-slate-400">0.5% (تخفیف ویژه کاربران ایرانی)</span>
+                <span className="text-slate-400">{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
+                <span className="font-mono text-purple-300 font-bold">0.5% ({isFa ? 'تخفیف ویژه کاربران ایرانی' : 'Iran discount'})</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-purple-500/15">
+                <span>{isFa ? 'آدرس خزانه کارمزدها:' : 'Commission Wallet:'}</span>
+                <span 
+                  className="font-mono text-amber-300 font-medium hover:underline cursor-pointer" 
+                  title="0xD9C10B10945D85396f0838EA045587a25FD2A2D3"
+                  onClick={() => navigator.clipboard.writeText("0xD9C10B10945D85396f0838EA045587a25FD2A2D3")}
+                >
+                  0xD9C1...A2D3 📋
+                </span>
               </div>
             </div>
 
             {/* Execute Button */}
             {swapSuccess ? (
-              <div className="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 animate-pulse">
-                <Check className="w-5 h-5" />
-                <span>{isFa ? 'مبادله با موفقیت انجام شد!' : 'Swap Successfully Executed!'}</span>
+              <div className="w-full p-3 rounded-2xl bg-gradient-to-r from-emerald-900/80 to-teal-900/80 border border-emerald-500/50 text-white flex items-center gap-3 shadow-xl shadow-emerald-900/30 animate-fade-in">
+                <img src="/mascot/griffi-flower.jpg" alt="Griffi celebrating" className="w-12 h-12 rounded-xl object-cover ring-2 ring-emerald-400/60 shrink-0" />
+                <div className="flex-1 text-right">
+                  <div className="flex items-center gap-1 text-emerald-300 font-bold text-xs">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span>{isFa ? 'مبادله با موفقیت انجام شد! 🎉' : 'Swap Successfully Executed! 🎉'}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-300 block">
+                    {isFa ? 'گریفی تبریک می‌گوید! کارمزد به آدرس 0xD9C1...A2D3 منتقل شد.' : 'Griffi congratulates you! Commission routed to treasury.'}
+                  </span>
+                </div>
               </div>
             ) : (
               <button

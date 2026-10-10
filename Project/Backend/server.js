@@ -30,12 +30,29 @@ let cachedGasPrices = {
   updated_at: new Date().toISOString()
 };
 
+const COMMISSION_WALLET = process.env.COMMISSION_WALLET || "0xD9C10B10945D85396f0838EA045587a25FD2A2D3";
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     app: "GriffinSwap Backend API",
     time: new Date().toISOString()
+  });
+});
+
+// Protocol info & commission wallet
+app.get("/api/config", (req, res) => {
+  res.json({
+    integrator: "GriffinSwap",
+    commissionWallet: COMMISSION_WALLET,
+    feeBps: 50,
+    feePercent: 0.005,
+    mascot: {
+      name: "Griffi",
+      species: "Baby Griffin",
+      avatar: "/mascot/griffi-avatar.jpg"
+    }
   });
 });
 

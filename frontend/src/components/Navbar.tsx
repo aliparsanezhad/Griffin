@@ -78,8 +78,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setActiveTab('swap')}
               className="flex items-center gap-2.5 text-right hover:opacity-90 transition-opacity"
             >
-              <div className="relative w-9 h-9 lg:w-10 lg:h-10 rounded-xl p-1 bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <img src="/logo.png" alt="Griffin" className="w-7 h-7 lg:w-8 lg:h-8 object-contain rounded-lg drop-shadow" />
+              <div className="relative w-9 h-9 lg:w-10 lg:h-10 rounded-xl p-0.5 bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-500/20 overflow-hidden ring-1 ring-amber-400/50">
+                <img src="/mascot/griffi-avatar.jpg" alt="Griffi Mascot" className="w-full h-full object-cover rounded-[10px]" />
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-base lg:text-lg tracking-tight griffin-gradient-text">

@@ -6,6 +6,7 @@ import { EarnSection } from './components/EarnSection';
 import { TomanCalculator } from './components/TomanCalculator';
 import { GasTracker } from './components/GasTracker';
 import { SecurityHub } from './components/SecurityHub';
+import { GriffiAssistant } from './components/GriffiAssistant';
 import { Footer } from './components/Footer';
 import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
 
@@ -147,6 +148,9 @@ export function App() {
           />
         )}
       </main>
+
+      {/* Griffi Baby Griffin Floating Mascot Guide */}
+      <GriffiAssistant lang={lang} isDarkMode={isDarkMode} />
 
       {/* Modern Persian Footer */}
       <Footer lang={lang} />

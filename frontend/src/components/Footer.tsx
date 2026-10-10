@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
         {/* Brand & Mission */}
         <div className="flex flex-col items-center md:items-start text-center md:text-right gap-1.5">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Griffin" className="w-6 h-6 object-contain rounded-md" />
+            <img src="/mascot/griffi-avatar.jpg" alt="Griffi" className="w-6 h-6 object-cover rounded-md ring-1 ring-amber-400/50" />
             <span className="font-extrabold text-sm text-white griffin-gradient-text">
               {isFa ? 'گریفین سواپ (GriffinSwap)' : 'GriffinSwap'}
             </span>
@@ -83,15 +83,15 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-600/30 flex items-center justify-center">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" />
+              <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-amber-400/60 shadow-lg bg-purple-600/30 flex items-center justify-center shrink-0">
+                <img src="/mascot/griffi-wave.jpg" alt="Griffi Mascot" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="font-extrabold text-white text-base">
                   {isFa ? 'پروژه گریفین سواپ (GriffinSwap)' : 'About GriffinSwap'}
                 </h3>
-                <span className="text-xs text-purple-300">
-                  {isFa ? 'طراحی شده برای کاربران فارسی‌زبان' : 'Built for the Global Persian Web3 Community'}
+                <span className="text-xs text-amber-300 font-medium">
+                  {isFa ? 'همراه با گریفی، دستیار و نماد دوست‌داشتنی وب۳' : 'With Griffi, the friendly Web3 mascot'}
                 </span>
               </div>
             </div>
@@ -103,6 +103,10 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
               <p>
                 با بهره‌گیری از پروتکل‌های قدرتمند LI.FI و Moralis، گریفین سواپ امکان انتقال نقدینگی را میان ۵۸ شبکه بلاک‌چین با کمترین کارمزد، بدون نیاز به احراز هویت (KYC) و بدون خطر مسدودسازی حساب فراهم می‌آورد.
               </p>
+              <div className="p-2.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-[11px] text-slate-300 space-y-1">
+                <div className="font-bold text-amber-300">خزانه و آدرس رسمی دریافت کارمزدها:</div>
+                <div className="font-mono text-purple-200 select-all text-[10px] break-all">0xD9C10B10945D85396f0838EA045587a25FD2A2D3</div>
+              </div>
               <p className="text-[11px] text-amber-300 bg-amber-400/10 p-2.5 rounded-xl border border-amber-400/20">
                 🔒 گریفین سواپ کاملاً غیرحضانتی (Non-Custodial) است؛ هیچ نهادی کلید خصوصی یا دارایی‌های شما را کنترل نمی‌کند.
               </p>

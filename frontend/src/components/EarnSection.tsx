@@ -112,6 +112,21 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
             ? 'سود سالانه پایدار روی تتر و استیبل‌کوین‌ها در معتبرترین پروتکل‌های دیفای، بدون دخالت بانک و بدون تحریم'
             : 'Deposit stablecoins and blue-chip tokens into audited yield vaults with 1-click execution.'}
         </p>
+
+        {/* Griffi Earn Mascot Banner */}
+        <div className="mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/50 to-amber-950/30 border border-purple-500/30 flex items-center gap-4 text-right shadow-lg max-w-xl mx-auto">
+          <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-amber-400/60 shrink-0 shadow-md">
+            <img src="/mascot/griffi-flower.jpg" alt="Griffi Earn" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <span className="font-bold text-amber-300 text-xs block">
+              {isFa ? 'سپرده‌گذاری هوشمند با همراهی گریفی 🌼' : 'Smart Staking with Griffi 🌼'}
+            </span>
+            <span className="text-[11px] text-slate-300">
+              {isFa ? 'صندوق‌های بدون قفل زمانی • کارمزد پلتفرم مستقیماً به خزانه 0xD9C1...A2D3 واریز می‌شود' : 'Non-custodial vaults • Commissions directed to treasury 0xD9C1...A2D3'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Yield Calculator Banner */}

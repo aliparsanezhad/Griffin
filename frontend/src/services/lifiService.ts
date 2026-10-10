@@ -3,6 +3,8 @@
 export const LIFI_CONFIG = {
   integrator: "GriffinSwap",
   fee: 0.005, // 0.5% integrator fee
+  feeRecipient: "0xD9C10B10945D85396f0838EA045587a25FD2A2D3", // Official GriffinSwap commission & treasury wallet
+  commissionWallet: "0xD9C10B10945D85396f0838EA045587a25FD2A2D3",
   apiUrl: "https://li.quest/v1",
 };
 
@@ -106,6 +108,7 @@ export async function getDirectQuote(params: {
     fromAmount: params.fromAmount,
     integrator: LIFI_CONFIG.integrator,
     fee: LIFI_CONFIG.fee.toString(),
+    feeRecipient: LIFI_CONFIG.feeRecipient,
     ...(params.fromAddress ? { fromAddress: params.fromAddress } : {}),
   });
 
