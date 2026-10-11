@@ -11,7 +11,10 @@ import {
   GitFork, 
   Award,
   Copy,
-  Check
+  Check,
+  Flame,
+  CreditCard,
+  Globe
 } from 'lucide-react';
 import { LIFI_CONFIG } from '../services/lifiService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -191,6 +194,86 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
       ],
       tipFa: 'هرگز توکن‌هایی با مالیات فروش بالای ۱۰٪ یا قراردادهای دارای تابع Blacklist را معامله نکنید.',
       tipEn: 'Never trade tokens with sell taxes over 10% or contracts with active blacklist functions.'
+    },
+    {
+      titleFa: 'معاملات تعهدی و فیوچرز دائمی غیرمتمرکز 🚀',
+      titleEn: 'Decentralized Perpetual Futures up to 50x 🚀',
+      badgeFa: 'فیوچرز و اهرم',
+      badgeEn: 'Perpetual Futures',
+      icon: Flame,
+      image: '/mascot/griffi-futures.jpg',
+      contentFa: [
+        'معاملات لانگ و شورت روی بیت‌کوین، اتریوم، طلا و آربیتروم با اهرم دلخواه تا ۵۰ برابر.',
+        'بدون نیاز به احراز هویت (Zero-KYC) و بدون خطر بسته شدن حساب یا خطای آی‌پی ۴۰۳.',
+        'تسویه سود لحظه‌ای به تتر روی شبکه‌های لایه دو کم‌کارمزد با محاسبه زنده قیمت لیکوئید شدن.'
+      ],
+      contentEn: [
+        'Trade Long & Short positions on BTC, ETH, PAXG, and ARB with up to 50x leverage.',
+        'Zero KYC required; immune to geoblocking or exchange freezes with self-custody smart contracts.',
+        'Instant USDT profit settlement on low-fee Layer 2 with real-time liquidation price tracking.'
+      ],
+      tipFa: 'همیشه حد ضرر (Stop Loss) را تنظیم کنید تا از نوسانات بازار در امان بمانید.',
+      tipEn: 'Always set a Stop Loss (SL) to protect your collateral against volatility.'
+    },
+    {
+      titleFa: 'کارت‌های اعتباری وب۳ و گیفت‌کارت‌های جهانی 💳',
+      titleEn: 'Web3 Virtual Cards & Global Vouchers 💳',
+      badgeFa: 'کارت و اشتراک',
+      badgeEn: 'Virtual Cards',
+      icon: CreditCard,
+      image: '/mascot/griffi-card.jpg',
+      contentFa: [
+        'خرید آنی مسترکارت مجازی بین‌المللی و اشتراک تلگرام پریمیوم و اپل آیتونز با تتر.',
+        'بدون نیاز به ویزاکارت فیزیکی یا حساب‌های بانکی خارجی تحریم‌شده.',
+        'صدور آنی کد ووچر و اطلاعات کارت به صورت غیرحضانتی در کسری از ثانیه.'
+      ],
+      contentEn: [
+        'Mint prepaid virtual Mastercards and subscription vouchers (OpenAI, Telegram, Apple) with crypto.',
+        'Bypass international payment sanctions without needing foreign bank accounts.',
+        'Instant non-custodial voucher code and card delivery on-chain.'
+      ],
+      tipFa: 'مناسب برای پرداخت مستقیم اشتراک ChatGPT Plus، Claude و سرورهای خارجی.',
+      tipEn: 'Perfect for ChatGPT Plus, Claude Pro, and VPS hosting payments.'
+    },
+    {
+      titleFa: 'شناسه ماندگار tehran.griffi بدون هزینه تمدید 🌐',
+      titleEn: 'Web3 Human Handles & Domains 🌐',
+      badgeFa: 'دامنه‌های وب۳',
+      badgeEn: 'Web3 Identity',
+      icon: Globe,
+      image: '/mascot/griffi-domains.jpg',
+      contentFa: [
+        'جایگزینی آدرس‌های طولانی با دامنه‌های کوتاه tehran.griffi و .iran.',
+        'مالکیت دائمی و مادام‌العمر؛ صفر دلار هزینه تمدید سالانه (برخلاف اتریوم).',
+        'ثبت با کمترین گس روی شبکه آربیتروم و دریافت پاسپورت NFT.'
+      ],
+      contentEn: [
+        'Replace long 0x addresses with tehran.griffi and .iran human-readable handles.',
+        'Lifetime ownership with zero yearly renewal fees.',
+        'Minted as an ERC-721 NFT badge with negligible Layer-2 gas fees.'
+      ],
+      tipFa: 'انتقال و دریافت آسان رمزارز با تایپ نام کاربری به جای آدرس‌های طولانی 0x.',
+      tipEn: 'Send and receive tokens easily using your custom domain handle.'
+    },
+    {
+      titleFa: 'حفظ ارزش دارایی با طلای دیجیتال و اسکرو P2P 👑',
+      titleEn: 'Digital Gold Hedging & P2P Escrow 👑',
+      badgeFa: 'طلا و اسکرو',
+      badgeEn: 'Gold & Escrow',
+      icon: Coins,
+      image: '/mascot/griffi-gold-treasury.jpg',
+      contentFa: [
+        'خرید طلای فیزیکی بدون حباب ۲۰ درصدی سکه امامی و بدون اجرت طلافروشی با توکن PAXG.',
+        'مبادله همتابه‌همتای تتر و تومان از طریق قرارداد هوشمند اسکرو امن.',
+        'واریز مستقیم ریال به شماره شبای تاییدشده بانکی با سیستم داوری غیرمتمرکز.'
+      ],
+      contentEn: [
+        'Hedge against inflation with physical gold tokens (PAXG) saving on domestic coin bubbles and jeweler fees.',
+        'Trade P2P USDT/Toman safely through non-custodial smart contract escrow.',
+        'Direct Iranian bank Sheba settlement with decentralized dispute arbitration.'
+      ],
+      tipFa: 'طلای دیجیتال PAXG قابلیت تقسیم‌پذیری تا سوت را بدون افت ارزش فراهم می‌کند.',
+      tipEn: 'PAXG tokens allow buying physical gold fractions with high liquidity.'
     },
     {
       titleFa: 'شفافیت ۱۰۰٪ کارمزدها و دریافت پرهای گریفی 🪶',
