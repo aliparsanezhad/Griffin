@@ -84,6 +84,30 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       points: 80,
       completed: false,
       icon: '🌼'
+    },
+    {
+      id: 'task-limit-order',
+      titleFa: 'ثبت یک سفارش لیمیت آف‌چین بدون گس با Permit2',
+      titleEn: 'Place a gasless Permit2 limit order',
+      points: 60,
+      completed: true,
+      icon: '📈'
+    },
+    {
+      id: 'task-audit-token',
+      titleFa: 'اسکن سلامت یک قرارداد در دیدبان هانی‌پات گریفی',
+      titleEn: 'Audit a token contract with Griffi Honeypot Scanner',
+      points: 40,
+      completed: true,
+      icon: '🔍'
+    },
+    {
+      id: 'task-cex-compare',
+      titleFa: 'محاسبه صرفه‌جویی کارمزد خروج در مقایسه دکس با صرافی‌ها',
+      titleEn: 'Calculate CEX vs DEX withdrawal savings',
+      points: 30,
+      completed: false,
+      icon: '⚖️'
     }
   ]);
 
