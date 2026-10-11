@@ -18,6 +18,7 @@ import { toPersianDigits, formatToman, usdToToman } from '../services/tomanServi
 import { PriceChart } from './PriceChart';
 import { ArbitrageScanner } from './ArbitrageScanner';
 import { RouteInspector } from './RouteInspector';
+import { CexVsDexComparison } from './CexVsDexComparison';
 import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
 import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
 
@@ -65,7 +66,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
-  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes'>('chart');
+  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare'>('chart');
   const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
 
   const handleSelectToken = (token: TokenItem) => {
@@ -538,6 +539,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               <GitFork className="w-3.5 h-3.5 text-amber-400" />
               <span>{isFa ? 'دیدبان پل‌ها و مسیرها' : 'Route Inspector'}</span>
             </button>
+
+            <button
+              onClick={() => setCompanionView(companionView === 'cexCompare' ? 'none' : 'cexCompare')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                companionView === 'cexCompare'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'مقایسه با نوبیتکس و صرافی‌ها' : 'CEX vs DEX'}</span>
+            </button>
           </div>
 
           <span className="text-[11px] text-slate-400 hidden sm:inline">
@@ -560,6 +573,12 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         {companionView === 'routes' && (
           <div className="animate-fade-in">
             <RouteInspector tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {companionView === 'cexCompare' && (
+          <div className="animate-fade-in">
+            <CexVsDexComparison tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
           </div>
         )}
       </div>
