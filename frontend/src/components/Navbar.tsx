@@ -20,10 +20,12 @@ import {
   Volume2, 
   VolumeX,
   GitFork,
-  HelpCircle
+  HelpCircle,
+  Send
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { isSoundMuted, setSoundMuted, playClickSound } from '../services/soundService';
+import { AntiPhishingModal } from './AntiPhishingModal';
 
 export type NavTab = 
   | 'swap' 
@@ -36,6 +38,7 @@ export type NavTab =
   | 'calculator' 
   | 'gas' 
   | 'security' 
+  | 'telegram'
   | 'loyalty';
 
 interface NavbarProps {
@@ -70,6 +73,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [muted, setMuted] = useState<boolean>(() => isSoundMuted());
+  const [showAntiPhishingModal, setShowAntiPhishingModal] = useState<boolean>(false);
+  const [antiPhishingPhrase, setAntiPhishingPhrase] = useState<string>(() => localStorage.getItem('griffi_antiphishing_phrase') || 'شیردال زرین');
+  const [antiPhishingEmoji, setAntiPhishingEmoji] = useState<string>(() => localStorage.getItem('griffi_antiphishing_emoji') || '🦅🛡️');
 
   const handleToggleSound = () => {
     const next = !muted;
@@ -93,6 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'calculator', label: isFa ? 'ماشین‌حساب' : 'Calculator', icon: Calculator },
     { id: 'gas', label: isFa ? 'کارمزد شبکه' : 'Gas Tracker', icon: Fuel },
     { id: 'security', label: isFa ? 'امنیت و هانی‌پات' : 'Security & Audit', icon: ShieldCheck },
+    { id: 'telegram', label: isFa ? 'تلگرام و TON' : 'Telegram & TON', icon: Send },
     { id: 'loyalty', label: isFa ? 'پرهای گریفی' : 'Griffi Pass', icon: Gift },
   ];
 
@@ -178,6 +185,23 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Action Bar */}
           <div className="flex items-center gap-2">
             
+            {/* Anti-Phishing Safety Code Button */}
+            <button
+              onClick={() => {
+                playClickSound();
+                setShowAntiPhishingModal(true);
+              }}
+              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                isDarkMode
+                  ? 'border-emerald-500/30 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/40'
+                  : 'border-emerald-500/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+              }`}
+              title={isFa ? 'کد اختصاصی ضد فیشینگ شما' : 'Your Anti-Phishing Passphrase'}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[11px] font-mono">{antiPhishingEmoji} {antiPhishingPhrase.length > 8 ? antiPhishingPhrase.slice(0, 8) + '...' : antiPhishingPhrase}</span>
+            </button>
+
             {/* Guided Tour Trigger Button */}
             {onOpenTour && (
               <button
@@ -284,6 +308,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
 
+            {/* Anti-Phishing mobile button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setShowAntiPhishingModal(true);
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 mb-2"
+            >
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>{isFa ? 'سپر ضد فیشینگ و کد امنیتی' : 'Anti-Phishing Security'}</span>
+              </span>
+              <span className="font-mono text-[11px] bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                {antiPhishingEmoji} {antiPhishingPhrase.length > 8 ? antiPhishingPhrase.slice(0, 8) + '...' : antiPhishingPhrase}
+              </span>
+            </button>
+
             {onOpenTour && (
               <button
                 onClick={() => {
@@ -323,6 +364,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         )}
       </header>
+
+      {/* Anti-Phishing Guard Modal */}
+      <AntiPhishingModal
+        isOpen={showAntiPhishingModal}
+        onClose={() => {
+          setShowAntiPhishingModal(false);
+          setAntiPhishingPhrase(localStorage.getItem('griffi_antiphishing_phrase') || 'شیردال زرین');
+          setAntiPhishingEmoji(localStorage.getItem('griffi_antiphishing_emoji') || '🦅🛡️');
+        }}
+        lang={lang}
+        isDarkMode={isDarkMode}
+      />
 
       {/* Wallet Details Modal */}
       {showWalletModal && walletAddress && (

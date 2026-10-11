@@ -11,6 +11,7 @@ import { ArbitrageScanner } from './components/ArbitrageScanner';
 import { DcaSection } from './components/DcaSection';
 import { GriffiLoyalty } from './components/GriffiLoyalty';
 import { RouteInspector } from './components/RouteInspector';
+import { TelegramMiniAppSection } from './components/TelegramMiniAppSection';
 import { GriffiAssistant } from './components/GriffiAssistant';
 import { GriffiTour } from './components/GriffiTour';
 import { MarketTicker } from './components/MarketTicker';
@@ -216,6 +217,16 @@ export function App() {
             lang={lang}
             isDarkMode={isDarkMode}
           />
+        )}
+
+        {activeTab === 'telegram' && (
+          <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
+            <TelegramMiniAppSection
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
         )}
       </main>
 
