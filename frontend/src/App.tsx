@@ -12,6 +12,8 @@ import { DcaSection } from './components/DcaSection';
 import { GriffiLoyalty } from './components/GriffiLoyalty';
 import { RouteInspector } from './components/RouteInspector';
 import { TelegramMiniAppSection } from './components/TelegramMiniAppSection';
+import { GoldHedgingDesk } from './components/GoldHedgingDesk';
+import { P2pEscrowSection } from './components/P2pEscrowSection';
 import { GriffiAssistant } from './components/GriffiAssistant';
 import { GriffiTour } from './components/GriffiTour';
 import { MarketTicker } from './components/MarketTicker';
@@ -152,6 +154,27 @@ export function App() {
             rateChange={rateChange}
             lang={lang}
           />
+        )}
+
+        {activeTab === 'gold' && (
+          <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
+            <GoldHedgingDesk
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+              onInitiateSwap={() => setActiveTab('swap')}
+            />
+          </div>
+        )}
+
+        {activeTab === 'p2p' && (
+          <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
+            <P2pEscrowSection
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
         )}
 
         {activeTab === 'gas' && (

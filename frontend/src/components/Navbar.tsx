@@ -21,7 +21,9 @@ import {
   VolumeX,
   GitFork,
   HelpCircle,
-  Send
+  Send,
+  Coins,
+  Users
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { isSoundMuted, setSoundMuted, playClickSound } from '../services/soundService';
@@ -36,6 +38,8 @@ export type NavTab =
   | 'portfolio' 
   | 'earn' 
   | 'calculator' 
+  | 'gold'
+  | 'p2p'
   | 'gas' 
   | 'security' 
   | 'telegram'
@@ -97,6 +101,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'portfolio', label: isFa ? 'پرتفولیو' : 'Portfolio', icon: Wallet },
     { id: 'earn', label: isFa ? 'کسب سود' : 'Earn', icon: Percent },
     { id: 'calculator', label: isFa ? 'ماشین‌حساب' : 'Calculator', icon: Calculator },
+    { id: 'gold', label: isFa ? 'طلا و سکه' : 'Gold & Seke', icon: Coins },
+    { id: 'p2p', label: isFa ? 'اسکرو P2P' : 'P2P Escrow', icon: Users },
     { id: 'gas', label: isFa ? 'کارمزد شبکه' : 'Gas Tracker', icon: Fuel },
     { id: 'security', label: isFa ? 'امنیت و هانی‌پات' : 'Security & Audit', icon: ShieldCheck },
     { id: 'telegram', label: isFa ? 'تلگرام و TON' : 'Telegram & TON', icon: Send },
