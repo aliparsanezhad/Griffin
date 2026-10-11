@@ -5,9 +5,12 @@ import {
   DollarSign, 
   Clock,
   Copy,
-  Check
+  Check,
+  Scale
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
+import { InflationPnlTracker } from './InflationPnlTracker';
+import { playClickSound } from '../services/soundService';
 
 interface TomanCalculatorProps {
   tomanRate: number;
@@ -22,6 +25,9 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
 }) => {
   const isFa = lang === 'fa';
   
+  // Tab mode: 'converter' (Tether & Gold) vs 'pnl' (Inflation & Devaluation Shield)
+  const [calcMode, setCalcMode] = useState<'converter' | 'pnl'>('converter');
+
   // Bidirectional state
   const [usdtValue, setUsdtValue] = useState<string>('500');
   const [tomanValue, setTomanValue] = useState<string>((500 * tomanRate).toString());
@@ -61,139 +67,185 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
   };
 
   return (
-    <div className="w-full py-6 px-4 max-w-4xl mx-auto animate-fade-in space-y-8">
+    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in space-y-6 text-right">
       
-      {/* Title */}
-      <div className="text-center max-w-xl mx-auto">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2">
-          <Calculator className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isFa ? 'محاسبه‌گر دوطرفه تتر و تومان' : 'Two-Way Crypto Converter'}</span>
-        </div>
-        <h1 className="text-2xl md:text-4xl font-extrabold griffin-gradient-text">
-          {isFa ? 'ماشین‌حساب لحظه‌ای ارزهای دیجیتال' : 'Live Tether & Toman Calculator'}
-        </h1>
-        <p className="text-xs md:text-sm text-slate-400 mt-1">
-          {isFa
-            ? 'تبدیل آنی و دوطرفه تتر به تومان، ریال، اتریوم و بیت‌کوین بر مبنای آخرین نرخ اوراکل'
-            : 'Convert dynamically between USDT, Toman, IRR, ETH, and BTC in real time.'}
-        </p>
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <button
+          onClick={() => {
+            playClickSound();
+            setCalcMode('converter');
+          }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md ${
+            calcMode === 'converter'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-1 ring-purple-400'
+              : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+          }`}
+        >
+          <Calculator className="w-4 h-4" />
+          <span>{isFa ? 'ماشین‌حساب دوطرفه تتر و طلا' : 'Two-Way Crypto Converter'}</span>
+        </button>
+
+        <button
+          onClick={() => {
+            playClickSound();
+            setCalcMode('pnl');
+          }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md ${
+            calcMode === 'pnl'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white ring-1 ring-purple-400'
+              : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+          }`}
+        >
+          <Scale className="w-4 h-4 text-amber-400" />
+          <span>{isFa ? 'تحلیلگر سود/زیان و سپر تورم ریال 🛡️' : 'P&L & Inflation Shield 🛡️'}</span>
+        </button>
       </div>
 
-      {/* Main Converter Card */}
-      <div className="glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl space-y-6">
-        
-        {/* Rate Banner */}
-        <div className="flex flex-wrap items-center justify-between p-4 rounded-2xl bg-purple-950/50 border border-purple-500/20 text-xs gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-slate-300">{isFa ? 'نرخ اوراکل هر تتر (USDT):' : 'Current USDT Rate:'}</span>
-            <span className="font-extrabold text-amber-300 font-mono text-sm">
-              {isFa ? `${toPersianDigits(formatToman(tomanRate))} تومان` : `${formatToman(tomanRate, false)} Toman`}
-            </span>
-            <span className="text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold">
-              {rateChange}
-            </span>
+      {/* VIEW 1: Standard Converter */}
+      {calcMode === 'converter' && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Title */}
+          <div className="text-center max-w-xl mx-auto">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2">
+              <Calculator className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'محاسبه‌گر دوطرفه تتر و تومان' : 'Two-Way Crypto Converter'}</span>
+            </div>
+            <h1 className="text-2xl md:text-4xl font-extrabold griffin-gradient-text">
+              {isFa ? 'ماشین‌حساب لحظه‌ای ارزهای دیجیتال' : 'Live Tether & Toman Calculator'}
+            </h1>
+            <p className="text-xs md:text-sm text-slate-400 mt-1">
+              {isFa
+                ? 'تبدیل آنی و دوطرفه تتر به تومان، ریال، اتریوم، بیت‌کوین و سکه بهار آزادی'
+                : 'Convert dynamically between USDT, Toman, IRR, ETH, BTC, and Gold coins in real time.'}
+            </p>
           </div>
 
-          <div className="flex items-center gap-2 text-slate-400 text-[11px]">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{isFa ? 'بروزرسانی زنده' : 'Live Oracle Feed'}</span>
-          </div>
-        </div>
+          {/* Main Converter Card */}
+          <div className="glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl space-y-6">
+            
+            {/* Rate Banner */}
+            <div className="flex flex-wrap items-center justify-between p-4 rounded-2xl bg-purple-950/50 border border-purple-500/20 text-xs gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-slate-300">{isFa ? 'نرخ اوراکل هر تتر (USDT):' : 'Current USDT Rate:'}</span>
+                <span className="font-extrabold text-amber-300 font-mono text-sm">
+                  {isFa ? `${toPersianDigits(formatToman(tomanRate))} تومان` : `${formatToman(tomanRate, false)} Toman`}
+                </span>
+                <span className="text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold">
+                  {rateChange}
+                </span>
+              </div>
 
-        {/* Input Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          
-          {/* USDT Input */}
-          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 space-y-1">
-            <label className="text-xs text-slate-400 font-semibold flex items-center justify-between">
-              <span>{isFa ? 'مقدار تتر (USDT)' : 'Tether Amount (USDT)'}</span>
-              <DollarSign className="w-4 h-4 text-purple-400" />
-            </label>
-            <input
-              type="number"
-              value={usdtValue}
-              onChange={(e) => handleUsdtChange(e.target.value)}
-              className="w-full bg-transparent text-2xl font-mono font-black text-white focus:outline-none"
-              placeholder="0"
-            />
-          </div>
+              <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{isFa ? 'بروزرسانی زنده اوراکل' : 'Live Oracle Feed'}</span>
+              </div>
+            </div>
 
-          {/* Toman Input */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 to-indigo-950/60 border border-purple-500/30 space-y-1">
-            <label className="text-xs text-amber-300 font-semibold flex items-center justify-between">
-              <span>{isFa ? 'مقدار تومان (IRT)' : 'Toman Amount (IRT)'}</span>
-              <Coins className="w-4 h-4 text-amber-400" />
-            </label>
-            <input
-              type="number"
-              value={tomanValue}
-              onChange={(e) => handleTomanChange(e.target.value)}
-              className="w-full bg-transparent text-2xl font-mono font-black text-amber-300 focus:outline-none"
-              placeholder="0"
-            />
-            <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
-              <span>
-                {isFa ? `معادل ریال: ${toPersianDigits(formatToman(currentRial))} ریال` : `IRR: ${formatToman(currentRial, false)} Rial`}
+            {/* Input Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              
+              {/* USDT Input */}
+              <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 space-y-1">
+                <label className="text-xs text-slate-400 font-semibold flex items-center justify-between">
+                  <span>{isFa ? 'مقدار تتر (USDT)' : 'Tether Amount (USDT)'}</span>
+                  <DollarSign className="w-4 h-4 text-purple-400" />
+                </label>
+                <input
+                  type="number"
+                  value={usdtValue}
+                  onChange={(e) => handleUsdtChange(e.target.value)}
+                  className="w-full bg-transparent text-2xl font-mono font-black text-white focus:outline-none"
+                  placeholder="0"
+                />
+              </div>
+
+              {/* Toman Input */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 to-indigo-950/60 border border-purple-500/30 space-y-1">
+                <label className="text-xs text-amber-300 font-semibold flex items-center justify-between">
+                  <span>{isFa ? 'مقدار تومان (IRT)' : 'Toman Amount (IRT)'}</span>
+                  <Coins className="w-4 h-4 text-amber-400" />
+                </label>
+                <input
+                  type="number"
+                  value={tomanValue}
+                  onChange={(e) => handleTomanChange(e.target.value)}
+                  className="w-full bg-transparent text-2xl font-mono font-black text-amber-300 focus:outline-none"
+                  placeholder="0"
+                />
+                <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
+                  <span>
+                    {isFa ? `معادل ریال: ${toPersianDigits(formatToman(currentRial))} ریال` : `IRR: ${formatToman(currentRial, false)} Rial`}
+                  </span>
+                  <button
+                    onClick={() => handleCopy(currentToman.toString())}
+                    className="text-purple-400 hover:text-white flex items-center gap-1"
+                    title={isFa ? 'کپی رقم' : 'Copy'}
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{isFa ? (copied ? 'کپی شد' : 'کپی') : (copied ? 'Copied' : 'Copy')}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div>
+              <span className="text-xs text-slate-400 block mb-2 font-medium">
+                {isFa ? 'مبالغ پرکاربرد:' : 'Quick Presets:'}
               </span>
-              <button
-                onClick={() => handleCopy(currentToman.toString())}
-                className="text-purple-400 hover:text-white flex items-center gap-1"
-                title={isFa ? 'کپی رقم' : 'Copy'}
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{isFa ? (copied ? 'کپی شد' : 'کپی') : (copied ? 'Copied' : 'Copy')}</span>
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {[100, 250, 500, 1000, 2500, 5000].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => handleUsdtChange(val.toString())}
+                    className="px-3 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-800/40 border border-purple-500/20 text-xs font-mono font-semibold text-purple-200 hover:text-white transition-all active:scale-95"
+                  >
+                    ${val} USDT
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Multi-Asset & Gold Equivalents */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-purple-500/15">
+              <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
+                <span className="text-slate-400">{isFa ? 'معادل اتریوم (ETH):' : 'ETH Equivalent:'}</span>
+                <span className="font-mono font-bold text-white mt-1">
+                  ≈ {ethEquivalent.toFixed(4)} ETH
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
+                <span className="text-slate-400">{isFa ? 'معادل بیت‌کوین (BTC):' : 'BTC Equivalent:'}</span>
+                <span className="font-mono font-bold text-white mt-1">
+                  ≈ {btcEquivalent.toFixed(6)} BTC
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+                <span className="text-amber-300 font-semibold">{isFa ? 'معادل سکه بهار آزادی:' : 'Gold Coin (Seke):'}</span>
+                <span className="font-mono font-bold text-amber-200 mt-1">
+                  ≈ {sekeEquivalent.toFixed(3)} {isFa ? 'سکه' : 'Coin'}
+                </span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+                <span className="text-amber-300 font-semibold">{isFa ? 'معادل طلای ۱۸ عیار:' : '18k Gold:'}</span>
+                <span className="font-mono font-bold text-amber-200 mt-1">
+                  ≈ {goldGramEquivalent.toFixed(2)} {isFa ? 'گرم' : 'g'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Quick Presets */}
-        <div>
-          <span className="text-xs text-slate-400 block mb-2 font-medium">
-            {isFa ? 'مبالغ پرکاربرد:' : 'Quick Presets:'}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {[100, 250, 500, 1000, 2500, 5000].map((val) => (
-              <button
-                key={val}
-                onClick={() => handleUsdtChange(val.toString())}
-                className="px-3 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-800/40 border border-purple-500/20 text-xs font-mono font-semibold text-purple-200 hover:text-white transition-all active:scale-95"
-              >
-                ${val} USDT
-              </button>
-            ))}
-          </div>
+      {/* VIEW 2: Inflation & PnL Shield Tracker */}
+      {calcMode === 'pnl' && (
+        <div className="animate-fade-in">
+          <InflationPnlTracker tomanRate={tomanRate} lang={lang} isDarkMode={true} />
         </div>
+      )}
 
-        {/* Multi-Asset & Gold Equivalents */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-purple-500/15">
-          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
-            <span className="text-slate-400">{isFa ? 'معادل اتریوم (ETH):' : 'ETH Equivalent:'}</span>
-            <span className="font-mono font-bold text-white mt-1">
-              ≈ {ethEquivalent.toFixed(4)} ETH
-            </span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
-            <span className="text-slate-400">{isFa ? 'معادل بیت‌کوین (BTC):' : 'BTC Equivalent:'}</span>
-            <span className="font-mono font-bold text-white mt-1">
-              ≈ {btcEquivalent.toFixed(6)} BTC
-            </span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
-            <span className="text-amber-300 font-semibold">{isFa ? 'معادل سکه بهار آزادی:' : 'Gold Coin (Seke):'}</span>
-            <span className="font-mono font-bold text-amber-200 mt-1">
-              ≈ {sekeEquivalent.toFixed(3)} {isFa ? 'سکه' : 'Coin'}
-            </span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
-            <span className="text-amber-300 font-semibold">{isFa ? 'معادل طلای ۱۸ عیار:' : '18k Gold:'}</span>
-            <span className="font-mono font-bold text-amber-200 mt-1">
-              ≈ {goldGramEquivalent.toFixed(2)} {isFa ? 'گرم' : 'g'}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

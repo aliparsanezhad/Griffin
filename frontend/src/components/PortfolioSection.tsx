@@ -6,11 +6,13 @@ import {
   Layers, 
   ExternalLink, 
   ArrowUpRight, 
-  Sparkles,
-  RefreshCw,
-  Search
+  Sparkles, 
+  RefreshCw, 
+  Search,
+  PieChart
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
+import { playClickSound } from '../services/soundService';
 
 interface TokenItem {
   symbol: string;
@@ -19,6 +21,7 @@ interface TokenItem {
   balance: number;
   priceUsd: number;
   logo: string;
+  color: string;
 }
 
 interface TxItem {
@@ -53,7 +56,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
   const currentAddress = searchAddress || walletAddress || '0x71C8705a2B88e3083feC7B58273683243354438F';
   const isDemo = !walletAddress && !searchAddress;
 
-  // Portfolio token mock / live items
+  // Portfolio token items
   const tokens: TokenItem[] = [
     {
       symbol: "USDT",
@@ -61,7 +64,8 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Arbitrum One",
       balance: 1450.5,
       priceUsd: 1.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg"
+      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg",
+      color: "bg-emerald-500",
     },
     {
       symbol: "ETH",
@@ -69,7 +73,8 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Ethereum",
       balance: 0.85,
       priceUsd: 3420.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg"
+      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg",
+      color: "bg-indigo-500",
     },
     {
       symbol: "ARB",
@@ -77,7 +82,8 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Arbitrum One",
       balance: 1250.0,
       priceUsd: 0.88,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg"
+      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg",
+      color: "bg-cyan-500",
     },
     {
       symbol: "BNB",
@@ -85,7 +91,8 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "BNB Chain",
       balance: 1.2,
       priceUsd: 590.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg"
+      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg",
+      color: "bg-amber-500",
     },
     {
       symbol: "POL",
@@ -93,7 +100,8 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Polygon",
       balance: 620.0,
       priceUsd: 0.45,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg"
+      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg",
+      color: "bg-purple-500",
     }
   ];
 
@@ -132,13 +140,20 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
   const totalUsdValue = tokens.reduce((sum, t) => sum + (t.balance * t.priceUsd), 0);
   const totalTomanValue = usdToToman(totalUsdValue, tomanRate);
 
+  // Gold & Seke parity
+  const sekePriceToman = 54000000;
+  const goldGramPriceToman = 4750000;
+  const sekeEquiv = totalTomanValue / sekePriceToman;
+  const goldGramEquiv = totalTomanValue / goldGramPriceToman;
+
   const handleRefresh = () => {
+    playClickSound();
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 800);
   };
 
   return (
-    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in space-y-8">
+    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in space-y-6 text-right">
       
       {/* Header & Wallet Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -176,7 +191,10 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
 
           {!walletAddress && (
             <button 
-              onClick={onConnectWallet}
+              onClick={() => {
+                playClickSound();
+                onConnectWallet();
+              }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition-transform active:scale-95"
             >
               <Wallet className="w-3.5 h-3.5" />
@@ -186,32 +204,50 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
         </div>
       </div>
 
-      {/* Net Worth Card */}
+      {/* Net Worth Card with Mascot Vault Showcase */}
       <div className="glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl relative overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
-          <div className="md:col-span-2 space-y-2">
-            <span className="text-xs font-bold text-purple-300 tracking-wide uppercase flex items-center gap-2">
+          {/* Griffi Vault Mini Showcase (3 Cols) */}
+          <div className="md:col-span-3 flex justify-center md:justify-start">
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden ring-2 ring-amber-400/70 shadow-2xl bg-purple-950/50">
+              <img 
+                src="/mascot/griffi-vault.jpg" 
+                alt="Griffi Vault" 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+          </div>
+
+          {/* Net Worth Metrics (6 Cols) */}
+          <div className="md:col-span-6 space-y-2 text-right">
+            <span className="text-xs font-bold text-purple-300 tracking-wide uppercase flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              {isFa ? 'مجموع ارزش تخمینی پورتفولیو (دلار و تومان)' : 'Total Net Worth'}
+              <span>{isFa ? 'مجموع ارزش تخمینی پورتفولیو (دلار و تومان)' : 'Total Net Worth'}</span>
             </span>
 
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-3">
-              <span className="text-3xl md:text-5xl font-black text-white font-mono tracking-tight">
+              <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">
                 ${totalUsdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
-              <span className="text-lg md:text-2xl font-black text-amber-400 font-mono">
+              <span className="text-base sm:text-xl font-black text-amber-400 font-mono">
                 ≈ {isFa ? `${toPersianDigits(formatToman(totalTomanValue))} تومان` : `${formatToman(totalTomanValue, false)} Toman`}
               </span>
             </div>
 
-            <p className="text-xs text-slate-400">
-              {isFa ? `نرخ مبنای محاسبه: هر تتر = ${toPersianDigits(formatToman(tomanRate))} تومان` : `Valued at 1 USDT = ${formatToman(tomanRate, false)} Toman`}
-            </p>
+            {/* Gold Parity Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-mono">
+              <span className="px-2 py-0.5 rounded-lg bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[11px] font-bold">
+                ≈ {sekeEquiv.toFixed(2)} {isFa ? 'سکه تمام بهار آزادی' : 'Gold Coins'}
+              </span>
+              <span className="px-2 py-0.5 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[11px] font-bold">
+                ≈ {goldGramEquiv.toFixed(1)} {isFa ? 'گرم طلای ۱۸ عیار' : 'g 18k Gold'}
+              </span>
+            </div>
           </div>
 
-          {/* Monitored Address details */}
-          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20 text-xs space-y-1.5">
+          {/* Monitored Address details (3 Cols) */}
+          <div className="md:col-span-3 p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20 text-xs space-y-1.5">
             <div className="flex justify-between items-center text-slate-400">
               <span>{isFa ? 'آدرس در حال رصد:' : 'Monitored Wallet:'}</span>
               <span className="text-emerald-400 font-semibold">{isFa ? 'فعال' : 'Active'}</span>
@@ -226,12 +262,54 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
             )}
           </div>
         </div>
+
+        {/* Asset Allocation Multi-Color Progress Bar */}
+        <div className="mt-6 pt-5 border-t border-purple-500/20 space-y-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-slate-300 font-bold flex items-center gap-1.5">
+              <PieChart className="w-3.5 h-3.5 text-purple-400" />
+              <span>{isFa ? 'توزیع و تنوع دارایی‌ها در سبد:' : 'Asset Allocation Distribution:'}</span>
+            </span>
+          </div>
+
+          <div className="w-full h-3 rounded-full bg-black/40 overflow-hidden flex">
+            {tokens.map((token) => {
+              const usdVal = token.balance * token.priceUsd;
+              const percent = totalUsdValue > 0 ? (usdVal / totalUsdValue) * 100 : 0;
+              return (
+                <div
+                  key={token.symbol}
+                  className={`${token.color} h-full transition-all duration-500`}
+                  style={{ width: `${percent}%` }}
+                  title={`${token.symbol}: ${percent.toFixed(1)}%`}
+                />
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-[11px]">
+            {tokens.map((token) => {
+              const usdVal = token.balance * token.priceUsd;
+              const percent = totalUsdValue > 0 ? (usdVal / totalUsdValue) * 100 : 0;
+              return (
+                <div key={token.symbol} className="flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${token.color}`} />
+                  <span className="text-slate-300 font-bold">{token.symbol}</span>
+                  <span className="text-slate-400 font-mono">({percent.toFixed(1)}%)</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Sub Tabs */}
       <div className="flex items-center gap-2 border-b border-purple-500/20 pb-3">
         <button
-          onClick={() => setActiveTab('tokens')}
+          onClick={() => {
+            playClickSound();
+            setActiveTab('tokens');
+          }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'tokens'
               ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
@@ -246,7 +324,10 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
         </button>
 
         <button
-          onClick={() => setActiveTab('transactions')}
+          onClick={() => {
+            playClickSound();
+            setActiveTab('transactions');
+          }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'transactions'
               ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'

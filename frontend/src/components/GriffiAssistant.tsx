@@ -13,7 +13,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator'>('wave');
+  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator' | 'analyst'>('wave');
 
   const commissionWallet = LIFI_CONFIG.feeRecipient;
 
@@ -31,6 +31,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     flying: '/mascot/griffi-hero-banner.jpg',
     vault: '/mascot/griffi-vault.jpg',
     navigator: '/mascot/griffi-navigator.jpg',
+    analyst: '/mascot/griffi-analyst.jpg',
   };
 
   return (
@@ -143,7 +144,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
             <div className="flex flex-wrap items-center gap-1.5 mb-4 bg-purple-950/40 p-1.5 rounded-xl border border-purple-500/20">
               <button
                 onClick={() => setSelectedPose('wave')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'wave' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -152,8 +153,18 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 {isFa ? 'سلام 👋' : 'Wave 👋'}
               </button>
               <button
+                onClick={() => setSelectedPose('analyst')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'analyst' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'تحلیل 📊' : 'P&L 📊'}
+              </button>
+              <button
                 onClick={() => setSelectedPose('navigator')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'navigator' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -163,7 +174,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </button>
               <button
                 onClick={() => setSelectedPose('flying')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'flying' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -173,7 +184,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </button>
               <button
                 onClick={() => setSelectedPose('vault')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'vault' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -183,7 +194,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </button>
               <button
                 onClick={() => setSelectedPose('flower')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'flower' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -193,7 +204,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </button>
               <button
                 onClick={() => setSelectedPose('egg')}
-                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'egg' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
