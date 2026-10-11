@@ -13,6 +13,7 @@ import { GriffiLoyalty } from './components/GriffiLoyalty';
 import { RouteInspector } from './components/RouteInspector';
 import { GriffiAssistant } from './components/GriffiAssistant';
 import { GriffiTour } from './components/GriffiTour';
+import { MarketTicker } from './components/MarketTicker';
 import { Footer } from './components/Footer';
 import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
 
@@ -105,6 +106,15 @@ export function App() {
         onConnectWallet={handleConnectWallet}
         onDisconnectWallet={handleDisconnectWallet}
         onOpenTour={() => setShowTour(true)}
+      />
+
+      {/* Real-Time Iranian & Global Market Ticker Ribbon */}
+      <MarketTicker
+        tomanRate={tomanRate}
+        rateChange={rateChange}
+        lang={lang}
+        isDarkMode={isDarkMode}
+        onSelectPair={(_pairId) => setActiveTab('chart')}
       />
 
       {/* Dynamic Main Body Content */}

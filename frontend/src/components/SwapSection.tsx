@@ -19,6 +19,7 @@ import { PriceChart } from './PriceChart';
 import { ArbitrageScanner } from './ArbitrageScanner';
 import { RouteInspector } from './RouteInspector';
 import { CexVsDexComparison } from './CexVsDexComparison';
+import { TxPreFlightModal } from './TxPreFlightModal';
 import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
 import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
 
@@ -66,6 +67,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
+  const [showPreFlightModal, setShowPreFlightModal] = useState<boolean>(false);
   const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare'>('chart');
   const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
 
@@ -432,7 +434,10 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
             ) : (
               <button
-                onClick={handleExecuteNativeSwap}
+                onClick={() => {
+                  playClickSound();
+                  setShowPreFlightModal(true);
+                }}
                 disabled={isSwapping || numericFrom <= 0}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
@@ -446,8 +451,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                     <Zap className="w-4 h-4 text-amber-300" />
                     <span>
                       {walletAddress 
-                        ? (isFa ? 'تأیید و انجام مبادله' : 'Confirm & Swap') 
-                        : (isFa ? 'مبادله رمزارز' : 'Swap Tokens')}
+                        ? (isFa ? 'شبیه‌سازی امنیتی و انجام مبادله' : 'Simulate & Swap') 
+                        : (isFa ? 'شبیه‌سازی و مبادله رمزارز' : 'Simulate & Swap Tokens')}
                     </span>
                   </>
                 )}
@@ -627,6 +632,31 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         onClose={() => setSelectingFor(null)}
         onSelectToken={handleSelectToken}
         selectedTokenSymbol={selectingFor === 'from' ? fromToken.symbol : toToken.symbol}
+        lang={lang}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Pre-Flight Transaction Simulation & MEV Guard Modal */}
+      <TxPreFlightModal
+        isOpen={showPreFlightModal}
+        onClose={() => setShowPreFlightModal(false)}
+        onConfirmSuccess={handleExecuteNativeSwap}
+        fromToken={{
+          symbol: fromToken.symbol,
+          amount: fromAmount,
+          priceUsd: fromToken.priceUsd,
+          logo: fromToken.logo,
+          chain: fromToken.chain,
+        }}
+        toToken={{
+          symbol: toToken.symbol,
+          estimatedAmount: calculatedOutput.toFixed(4),
+          priceUsd: toToken.priceUsd,
+          logo: toToken.logo,
+          chain: toToken.chain,
+        }}
+        slippage={slippage}
+        tomanRate={tomanRate}
         lang={lang}
         isDarkMode={isDarkMode}
       />
