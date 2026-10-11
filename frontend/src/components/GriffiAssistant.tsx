@@ -25,7 +25,8 @@ type GriffiPose =
   | 'accountant'
   | 'router'
   | 'escrow'
-  | 'futures';
+  | 'futures'
+  | 'cards';
 
 export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
@@ -60,6 +61,10 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
         return isFa
           ? 'با معاملات فیوچرز غیرمتمرکز، بدون نیاز به احراز هویت تا ۵۰ برابر اهرم بگیرید! همیشه حد ضرر بگذارید تا از نوسانات بازار در امان بمانید.'
           : 'Trade decentralized perpetuals with up to 50x leverage and zero KYC! Remember to manage margin and set stop-loss.';
+      case 'cards':
+        return isFa
+          ? 'با کارت‌های اعتباری مجازی وب۳، اشتراک‌های هوش مصنوعی مثل ChatGPT Plus و تلگرام پریمیوم رو مستقیم با تتر بخرید بدون اینکه تحریم‌ها مانع بشن!'
+          : 'Mint virtual Web3 Mastercards and vouchers for OpenAI, Claude, and Telegram with zero KYC!';
       case 'gas':
         return isFa 
           ? 'دیگر نگران نداشتن اتریوم نباشید! با سیستم پی‌مستر گریفین، کارمزد تراکنش را مستقیماً با تتر پرداخت کنید یا هر روز یک سهمیه سوخت رایگان از من هدیه بگیرید.'
@@ -137,6 +142,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     router: '/mascot/griffi-smart-router.jpg',
     escrow: '/mascot/griffi-escrow.jpg',
     futures: '/mascot/griffi-futures.jpg',
+    cards: '/mascot/griffi-card.jpg',
   };
 
   return (
@@ -386,6 +392,16 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 }`}
               >
                 {isFa ? 'اهرم 🚀' : 'Perp 🚀'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('cards')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'cards' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'کارت 💳' : 'Card 💳'}
               </button>
             </div>
 

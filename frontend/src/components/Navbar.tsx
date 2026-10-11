@@ -24,7 +24,8 @@ import {
   Send,
   Coins,
   Users,
-  Flame
+  Flame,
+  CreditCard
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { isSoundMuted, setSoundMuted, playClickSound } from '../services/soundService';
@@ -33,6 +34,7 @@ import { AntiPhishingModal } from './AntiPhishingModal';
 export type NavTab = 
   | 'swap' 
   | 'futures'
+  | 'cards'
   | 'chart' 
   | 'arbitrage' 
   | 'routes'
@@ -97,6 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = [
     { id: 'swap', label: isFa ? 'سواپ و بریج' : 'Swap & Bridge', icon: ArrowLeftRight },
     { id: 'futures', label: isFa ? 'فیوچرز و اهرم' : 'Perp Futures', icon: Flame },
+    { id: 'cards', label: isFa ? 'کارت و اشتراک وب۳' : 'Web3 Cards', icon: CreditCard },
     { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
     { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
     { id: 'routes', label: isFa ? 'دیدبان پل‌ها' : 'Bridges & Routes', icon: GitFork },

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navbar, type NavTab } from './components/Navbar';
 import { SwapSection } from './components/SwapSection';
 import { PerpFuturesSection } from './components/PerpFuturesSection';
+import { Web3CardsSection } from './components/Web3CardsSection';
 import { PortfolioSection } from './components/PortfolioSection';
 import { EarnSection } from './components/EarnSection';
 import { TomanCalculator } from './components/TomanCalculator';
@@ -136,6 +137,16 @@ export function App() {
         {activeTab === 'futures' && (
           <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
             <PerpFuturesSection
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
+        {activeTab === 'cards' && (
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+            <Web3CardsSection
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
