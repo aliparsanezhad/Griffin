@@ -11,6 +11,7 @@ import {
 import { ANTI_CENSORSHIP_RPCS, IRANIAN_SECURITY_TIPS } from '../services/securityTips';
 import { RpcMonitor } from './RpcMonitor';
 import { SecurityScanner } from './SecurityScanner';
+import { RpcNodeManager } from './RpcNodeManager';
 import { playClickSound } from '../services/soundService';
 
 interface SecurityHubProps {
@@ -113,6 +114,9 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
       {/* MODE 2: Anti-Censorship RPCs & Tips */}
       {activeSecurityTab === 'rpcs' && (
         <div className="space-y-10 animate-fade-in">
+          {/* Interactive Anti-Censorship RPC Node Manager */}
+          <RpcNodeManager lang={lang} isDarkMode={isDarkMode} />
+
           {/* Safety Tips Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {IRANIAN_SECURITY_TIPS.map((tip) => (

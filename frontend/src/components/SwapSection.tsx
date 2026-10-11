@@ -11,7 +11,8 @@ import {
   Check,
   TrendingUp,
   ChevronDown,
-  GitFork
+  GitFork,
+  Compass
 } from 'lucide-react';
 import { LIFI_CONFIG, POPULAR_CHAINS } from '../services/lifiService';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
@@ -19,6 +20,7 @@ import { PriceChart } from './PriceChart';
 import { ArbitrageScanner } from './ArbitrageScanner';
 import { RouteInspector } from './RouteInspector';
 import { CexVsDexComparison } from './CexVsDexComparison';
+import { MarketSentimentGauge } from './MarketSentimentGauge';
 import { TxPreFlightModal } from './TxPreFlightModal';
 import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
 import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
@@ -68,7 +70,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showPreFlightModal, setShowPreFlightModal] = useState<boolean>(false);
-  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare'>('chart');
+  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare' | 'sentiment'>('chart');
   const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
 
   const handleSelectToken = (token: TokenItem) => {
@@ -556,6 +558,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>{isFa ? 'مقایسه با نوبیتکس و صرافی‌ها' : 'CEX vs DEX'}</span>
             </button>
+
+            <button
+              onClick={() => setCompanionView(companionView === 'sentiment' ? 'none' : 'sentiment')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                companionView === 'sentiment'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'سنتیمنت و طمع/ترس' : 'Market Sentiment'}</span>
+            </button>
           </div>
 
           <span className="text-[11px] text-slate-400 hidden sm:inline">
@@ -584,6 +598,12 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         {companionView === 'cexCompare' && (
           <div className="animate-fade-in">
             <CexVsDexComparison tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {companionView === 'sentiment' && (
+          <div className="animate-fade-in">
+            <MarketSentimentGauge tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
           </div>
         )}
       </div>

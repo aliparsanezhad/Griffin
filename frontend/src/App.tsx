@@ -7,6 +7,7 @@ import { TomanCalculator } from './components/TomanCalculator';
 import { GasTracker } from './components/GasTracker';
 import { SecurityHub } from './components/SecurityHub';
 import { PriceChart } from './components/PriceChart';
+import { MarketSentimentGauge } from './components/MarketSentimentGauge';
 import { ArbitrageScanner } from './components/ArbitrageScanner';
 import { DcaSection } from './components/DcaSection';
 import { GriffiLoyalty } from './components/GriffiLoyalty';
@@ -185,11 +186,18 @@ export function App() {
         )}
 
         {activeTab === 'chart' && (
-          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in space-y-8">
             <PriceChart
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
+            />
+            <MarketSentimentGauge
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+              onNavigateSwap={() => setActiveTab('swap')}
+              onNavigateDca={() => setActiveTab('dca')}
             />
           </div>
         )}
