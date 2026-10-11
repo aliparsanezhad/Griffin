@@ -12,11 +12,25 @@ import {
   Moon, 
   Globe, 
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  TrendingUp,
+  Sparkles,
+  Calendar,
+  Gift
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 
-export type NavTab = 'swap' | 'portfolio' | 'earn' | 'calculator' | 'gas' | 'security';
+export type NavTab = 
+  | 'swap' 
+  | 'chart' 
+  | 'arbitrage' 
+  | 'dca' 
+  | 'portfolio' 
+  | 'earn' 
+  | 'calculator' 
+  | 'gas' 
+  | 'security' 
+  | 'loyalty';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -52,11 +66,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'swap', label: isFa ? 'سواپ و بریج' : 'Swap & Bridge', icon: ArrowLeftRight },
+    { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
+    { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
+    { id: 'dca', label: isFa ? 'خرید پله‌ای' : 'DCA & Limit', icon: Calendar },
     { id: 'portfolio', label: isFa ? 'پرتفولیو' : 'Portfolio', icon: Wallet },
     { id: 'earn', label: isFa ? 'کسب سود' : 'Earn', icon: Percent },
-    { id: 'calculator', label: isFa ? 'ماشین‌حساب تتر' : 'Toman Calc', icon: Calculator },
+    { id: 'calculator', label: isFa ? 'ماشین‌حساب' : 'Calculator', icon: Calculator },
     { id: 'gas', label: isFa ? 'کارمزد شبکه' : 'Gas Tracker', icon: Fuel },
-    { id: 'security', label: isFa ? 'راهنمای ضدتحریم' : 'Anti-Censorship', icon: ShieldCheck },
+    { id: 'security', label: isFa ? 'ضدتحریم' : 'Anti-Censorship', icon: ShieldCheck },
+    { id: 'loyalty', label: isFa ? 'پرهای گریفی' : 'Griffi Pass', icon: Gift },
   ];
 
   const shortenAddress = (addr: string) => {

@@ -8,12 +8,14 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { ANTI_CENSORSHIP_RPCS, IRANIAN_SECURITY_TIPS } from '../services/securityTips';
+import { RpcMonitor } from './RpcMonitor';
 
 interface SecurityHubProps {
   lang: 'fa' | 'en';
+  isDarkMode?: boolean;
 }
 
-export const SecurityHub: React.FC<SecurityHubProps> = ({ lang }) => {
+export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = true }) => {
   const isFa = lang === 'fa';
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
@@ -116,6 +118,9 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang }) => {
           ))}
         </div>
       </div>
+
+      {/* Live Anti-Censorship RPC Latency Ping Radar */}
+      <RpcMonitor lang={lang} isDarkMode={isDarkMode ?? true} />
 
       {/* Tutorial: How to change RPC in MetaMask / Rabby */}
       <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs text-slate-300 space-y-3">

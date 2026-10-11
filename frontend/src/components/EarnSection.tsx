@@ -113,18 +113,23 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
             : 'Deposit stablecoins and blue-chip tokens into audited yield vaults with 1-click execution.'}
         </p>
 
-        {/* Griffi Earn Mascot Banner */}
-        <div className="mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/50 to-amber-950/30 border border-purple-500/30 flex items-center gap-4 text-right shadow-lg max-w-xl mx-auto">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-amber-400/60 shrink-0 shadow-md">
-            <img src="/mascot/griffi-flower.jpg" alt="Griffi Earn" className="w-full h-full object-cover" />
+        {/* Griffi Earn 3D Vault Banner */}
+        <div className="mt-5 p-4 rounded-3xl bg-gradient-to-r from-purple-950/80 via-indigo-950/60 to-amber-950/40 border border-purple-500/30 flex flex-col sm:flex-row items-center gap-5 text-right shadow-2xl max-w-2xl mx-auto">
+          <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-amber-400/80 shrink-0 shadow-lg bg-black/40">
+            <img src="/mascot/griffi-vault.jpg" alt="Griffi DeFi Vault" className="w-full h-full object-cover" />
           </div>
-          <div>
-            <span className="font-bold text-amber-300 text-xs block">
-              {isFa ? 'سپرده‌گذاری هوشمند با همراهی گریفی 🌼' : 'Smart Staking with Griffi 🌼'}
+          <div className="flex-1">
+            <span className="font-black text-amber-300 text-sm flex items-center gap-1.5 mb-1">
+              <span>{isFa ? 'خزانه‌های سود پایدار با گریفی 🌼💎' : 'Stable Yield Vaults with Griffi 🌼💎'}</span>
             </span>
-            <span className="text-[11px] text-slate-300">
-              {isFa ? 'صندوق‌های بدون قفل زمانی • کارمزد پلتفرم مستقیماً به خزانه 0xD9C1...A2D3 واریز می‌شود' : 'Non-custodial vaults • Commissions directed to treasury 0xD9C1...A2D3'}
-            </span>
+            <p className="text-xs text-slate-300 leading-relaxed mb-2">
+              {isFa 
+                ? 'استخرهای دیفای ممیزی‌شده با بازدهی سالانه تا ۱۴.۸٪ روی تتر و استیبل‌کوین‌ها بدون خطر قفل سرمایه یا توقیف.' 
+                : 'Curated high-yield non-custodial vaults with up to 14.8% APY on stablecoins.'}
+            </p>
+            <div className="inline-flex items-center gap-1.5 text-[10px] text-purple-200 bg-purple-900/50 px-2.5 py-1 rounded-xl font-mono">
+              <span>{isFa ? 'خزانه رسمی کارمزدها: 0xD9C1...A2D3' : 'Official Treasury: 0xD9C1...A2D3'}</span>
+            </div>
           </div>
         </div>
       </div>

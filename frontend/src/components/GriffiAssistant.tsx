@@ -11,7 +11,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero'>('wave');
+  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault'>('wave');
 
   const commissionWallet = LIFI_CONFIG.feeRecipient;
 
@@ -26,6 +26,8 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     egg: '/mascot/griffi-egg.jpg',
     flower: '/mascot/griffi-flower.jpg',
     hero: '/mascot/griffi-hero.jpg',
+    flying: '/mascot/griffi-hero-banner.jpg',
+    vault: '/mascot/griffi-vault.jpg',
   };
 
   return (
@@ -150,7 +152,27 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isFa ? 'تندیس ۳بعدی 🏆' : 'Figurine 🏆'}
+                {isFa ? 'تندیس 🏆' : 'Hero 🏆'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('flying')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'flying' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'پرواز 🦅' : 'Fly 🦅'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('vault')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'vault' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'خزانه 💎' : 'Vault 💎'}
               </button>
             </div>
 

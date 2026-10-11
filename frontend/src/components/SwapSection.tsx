@@ -8,10 +8,13 @@ import {
   ArrowDownUp,
   Settings,
   HelpCircle,
-  Check
+  Check,
+  TrendingUp
 } from 'lucide-react';
 import { LIFI_CONFIG, POPULAR_CHAINS } from '../services/lifiService';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
+import { PriceChart } from './PriceChart';
+import { ArbitrageScanner } from './ArbitrageScanner';
 
 interface SwapSectionProps {
   tomanRate: number;
@@ -57,6 +60,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
+  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage'>('chart');
 
   // Calculations
   const numericFrom = parseFloat(fromAmount) || 0;
@@ -105,18 +109,38 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             : 'Instant swaps and bridges across 58+ chains with aggregated liquidity and lowest fees.'}
         </p>
 
-        {/* Griffi Mascot Welcome Banner */}
-        <div className="mt-4 inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-purple-900/30 border border-purple-500/25 text-right shadow-md">
-          <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-amber-400/60 shrink-0">
-            <img src="/mascot/griffi-wave.jpg" alt="Griffi" className="w-full h-full object-cover" />
-          </div>
-          <div className="text-right">
-            <span className="text-xs font-bold text-amber-300 block">
-              {isFa ? 'گریفی (Griffi) همراه و راهنمای شماست 🦅' : 'Meet Griffi, your Web3 guide 🦅'}
-            </span>
-            <span className="text-[11px] text-slate-300">
-              {isFa ? 'کارمزد بهینه ۰.۵٪ • واریز مستقیم به خزانه پروتکل • بدون ریسک توقیف دارایی' : 'Optimized 0.5% protocol routing • Direct treasury commissions • 0 KYC'}
-            </span>
+        {/* Griffi Flying 3D Hero Banner Showcase */}
+        <div className="mt-6 w-full max-w-3xl rounded-3xl overflow-hidden border border-purple-500/30 relative shadow-2xl group">
+          <div className="relative h-48 sm:h-56 w-full overflow-hidden">
+            <img 
+              src="/mascot/griffi-hero-banner.jpg" 
+              alt="Griffi Cross-Chain Web3 Hero" 
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0b0817] via-[#0b0817]/40 to-transparent" />
+            
+            <div className="absolute bottom-4 right-4 left-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-right">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-[11px] font-bold text-amber-300 mb-1 backdrop-blur-md">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>{isFa ? 'سواپ بدون تحریم با گریفی 🦅' : 'Censorship-Free Swaps with Griffi'}</span>
+                </span>
+                <h2 className="text-base sm:text-lg font-black text-white drop-shadow">
+                  {isFa ? 'پرواز آزاد دارایی‌ها میان ۵۸ بلاک‌چین' : 'Frictionless Cross-Chain Liquidity'}
+                </h2>
+                <p className="text-[11px] text-slate-300 max-w-md hidden sm:block">
+                  {isFa 
+                    ? 'پروتکل گریفین‌سواپ با تجمیع ۳۵ پل ارتباطی، کمترین کارمزد و بدون احراز هویت را برای کاربران ایرانی فراهم می‌سازد.' 
+                    : 'Instant multi-chain routing with zero geoblocking and automated gas saver.'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 self-end">
+                <span className="text-[10px] text-purple-200 bg-purple-950/80 border border-purple-500/30 px-2.5 py-1 rounded-xl backdrop-blur-md font-mono">
+                  {isFa ? 'کارمزد خزانه: ۰.۵٪' : 'Treasury Fee: 0.5%'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -438,6 +462,53 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Interactive Companion Panels (Price Chart & Arbitrage Radar) */}
+      <div className="mt-10 w-full max-w-5xl">
+        <div className="flex items-center justify-between mb-4 border-b border-purple-500/20 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCompanionView(companionView === 'chart' ? 'none' : 'chart')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                companionView === 'chart'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'نمودار زنده قیمت' : 'Price Chart'}</span>
+            </button>
+
+            <button
+              onClick={() => setCompanionView(companionView === 'arbitrage' ? 'none' : 'arbitrage')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                companionView === 'arbitrage'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'دیدبان آربیتراژ بازار ایران' : 'Arbitrage Radar'}</span>
+            </button>
+          </div>
+
+          <span className="text-[11px] text-slate-400 hidden sm:inline">
+            {isFa ? 'بروزرسانی زنده اوراکل تتر و رمزارزها' : 'Live Oracle Feeds'}
+          </span>
+        </div>
+
+        {companionView === 'chart' && (
+          <div className="animate-fade-in">
+            <PriceChart tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {companionView === 'arbitrage' && (
+          <div className="animate-fade-in">
+            <ArbitrageScanner tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          </div>
+        )}
       </div>
 
       {/* Help & FAQ Modal */}

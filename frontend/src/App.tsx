@@ -6,6 +6,10 @@ import { EarnSection } from './components/EarnSection';
 import { TomanCalculator } from './components/TomanCalculator';
 import { GasTracker } from './components/GasTracker';
 import { SecurityHub } from './components/SecurityHub';
+import { PriceChart } from './components/PriceChart';
+import { ArbitrageScanner } from './components/ArbitrageScanner';
+import { DcaSection } from './components/DcaSection';
+import { GriffiLoyalty } from './components/GriffiLoyalty';
 import { GriffiAssistant } from './components/GriffiAssistant';
 import { Footer } from './components/Footer';
 import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
@@ -142,9 +146,51 @@ export function App() {
           />
         )}
 
+        {activeTab === 'chart' && (
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+            <PriceChart
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
+        {activeTab === 'arbitrage' && (
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+            <ArbitrageScanner
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
+        {activeTab === 'dca' && (
+          <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
+            <DcaSection
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
+        {activeTab === 'loyalty' && (
+          <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
+            <GriffiLoyalty
+              lang={lang}
+              isDarkMode={isDarkMode}
+              walletAddress={walletAddress}
+              onConnectWallet={handleConnectWallet}
+            />
+          </div>
+        )}
+
         {activeTab === 'security' && (
           <SecurityHub
             lang={lang}
+            isDarkMode={isDarkMode}
           />
         )}
       </main>
