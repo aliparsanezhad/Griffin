@@ -43,11 +43,16 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
   const currentToman = parseFloat(tomanValue) || 0;
   const currentRial = currentToman * 10;
 
-  // Crypto conversion estimates
+  // Crypto and Gold conversion estimates
   const ethPrice = 3420;
   const btcPrice = 89500;
   const ethEquivalent = ethPrice > 0 ? (currentUsdt / ethPrice) : 0;
   const btcEquivalent = btcPrice > 0 ? (currentUsdt / btcPrice) : 0;
+
+  const sekePriceToman = 54000000; // Seke Bahar Azadi in Tomans
+  const goldGramPriceToman = 4750000; // 1g of 18k Gold in Tomans
+  const sekeEquivalent = currentToman > 0 ? (currentToman / sekePriceToman) : 0;
+  const goldGramEquivalent = currentToman > 0 ? (currentToman / goldGramPriceToman) : 0;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -161,18 +166,30 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
           </div>
         </div>
 
-        {/* Multi-Asset Equivalents */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-purple-500/15">
-          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex items-center justify-between text-xs">
+        {/* Multi-Asset & Gold Equivalents */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-purple-500/15">
+          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
             <span className="text-slate-400">{isFa ? 'معادل اتریوم (ETH):' : 'ETH Equivalent:'}</span>
-            <span className="font-mono font-bold text-white">
+            <span className="font-mono font-bold text-white mt-1">
               ≈ {ethEquivalent.toFixed(4)} ETH
             </span>
           </div>
-          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex items-center justify-between text-xs">
+          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/10 flex flex-col justify-between text-xs">
             <span className="text-slate-400">{isFa ? 'معادل بیت‌کوین (BTC):' : 'BTC Equivalent:'}</span>
-            <span className="font-mono font-bold text-white">
+            <span className="font-mono font-bold text-white mt-1">
               ≈ {btcEquivalent.toFixed(6)} BTC
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+            <span className="text-amber-300 font-semibold">{isFa ? 'معادل سکه بهار آزادی:' : 'Gold Coin (Seke):'}</span>
+            <span className="font-mono font-bold text-amber-200 mt-1">
+              ≈ {sekeEquivalent.toFixed(3)} {isFa ? 'سکه' : 'Coin'}
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+            <span className="text-amber-300 font-semibold">{isFa ? 'معادل طلای ۱۸ عیار:' : '18k Gold:'}</span>
+            <span className="font-mono font-bold text-amber-200 mt-1">
+              ≈ {goldGramEquivalent.toFixed(2)} {isFa ? 'گرم' : 'g'}
             </span>
           </div>
         </div>

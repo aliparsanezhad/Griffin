@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { Sparkles, X, Copy, Check, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles, X, Copy, Check, ShieldCheck, Heart, HelpCircle } from 'lucide-react';
 import { LIFI_CONFIG } from '../services/lifiService';
+import { playClickSound } from '../services/soundService';
 
 interface GriffiAssistantProps {
   lang: 'fa' | 'en';
   isDarkMode: boolean;
+  onStartTour?: () => void;
 }
 
-export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode }) => {
+export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault'>('wave');
+  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator'>('wave');
 
   const commissionWallet = LIFI_CONFIG.feeRecipient;
 
@@ -28,6 +30,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     hero: '/mascot/griffi-hero.jpg',
     flying: '/mascot/griffi-hero-banner.jpg',
     vault: '/mascot/griffi-vault.jpg',
+    navigator: '/mascot/griffi-navigator.jpg',
   };
 
   return (
@@ -38,7 +41,10 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
         className="fixed bottom-6 left-6 z-40 flex items-center gap-3 animate-bounce-subtle"
       >
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            playClickSound();
+            setIsOpen(!isOpen);
+          }}
           className="group relative flex items-center gap-2.5 px-3.5 py-2 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 border bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-amber-900/40 border-purple-400/40 backdrop-blur-md text-white"
           title={isFa ? 'گفتگو با گریفی، دستیار صرافی گریفین' : 'Chat with Griffi, the GriffinSwap mascot'}
         >
@@ -68,7 +74,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div 
-            className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all text-right ${
+            className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all text-right max-h-[90vh] overflow-y-auto ${
               isDarkMode 
                 ? 'bg-[#150f2f]/95 border-purple-500/30 text-slate-100 shadow-purple-900/40' 
                 : 'bg-white/95 border-purple-200 text-slate-800 shadow-xl'
@@ -112,51 +118,52 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </div>
             </div>
 
+            {/* Interactive Guided Tour Banner Button */}
+            {onStartTour && (
+              <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-600/20 to-indigo-600/20 border border-amber-400/40 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="text-xs font-bold text-white">
+                    {isFa ? 'آشنایی گام‌به‌گام با سواپ و ترفندهای کاهش کارمزد' : 'Step-by-step low-fee tour'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onStartTour();
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md transition-all active:scale-95 shrink-0"
+                >
+                  {isFa ? 'شروع تور 🎓' : 'Start Tour 🎓'}
+                </button>
+              </div>
+            )}
+
             {/* Pose Selector Tabs */}
-            <div className="flex items-center gap-2 mb-4 bg-purple-950/40 p-1 rounded-xl border border-purple-500/20">
+            <div className="flex flex-wrap items-center gap-1.5 mb-4 bg-purple-950/40 p-1.5 rounded-xl border border-purple-500/20">
               <button
                 onClick={() => setSelectedPose('wave')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'wave' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isFa ? 'خوش‌آمدگویی 👋' : 'Waving 👋'}
+                {isFa ? 'سلام 👋' : 'Wave 👋'}
               </button>
               <button
-                onClick={() => setSelectedPose('egg')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPose === 'egg' 
+                onClick={() => setSelectedPose('navigator')}
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'navigator' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isFa ? 'تولد و تخم 🥚' : 'Hatched 🥚'}
-              </button>
-              <button
-                onClick={() => setSelectedPose('flower')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPose === 'flower' 
-                    ? 'bg-purple-600 text-white shadow' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {isFa ? 'کسب سود 🌼' : 'Earn 🌼'}
-              </button>
-              <button
-                onClick={() => setSelectedPose('hero')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPose === 'hero' 
-                    ? 'bg-purple-600 text-white shadow' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {isFa ? 'تندیس 🏆' : 'Hero 🏆'}
+                {isFa ? 'ناوبری 🧭' : 'Nav 🧭'}
               </button>
               <button
                 onClick={() => setSelectedPose('flying')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'flying' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
@@ -166,13 +173,33 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </button>
               <button
                 onClick={() => setSelectedPose('vault')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'vault' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {isFa ? 'خزانه 💎' : 'Vault 💎'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('flower')}
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'flower' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'سود 🌼' : 'Earn 🌼'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('egg')}
+                className={`flex-1 min-w-[70px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'egg' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'تولد 🥚' : 'Egg 🥚'}
               </button>
             </div>
 

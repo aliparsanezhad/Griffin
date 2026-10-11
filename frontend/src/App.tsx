@@ -10,7 +10,9 @@ import { PriceChart } from './components/PriceChart';
 import { ArbitrageScanner } from './components/ArbitrageScanner';
 import { DcaSection } from './components/DcaSection';
 import { GriffiLoyalty } from './components/GriffiLoyalty';
+import { RouteInspector } from './components/RouteInspector';
 import { GriffiAssistant } from './components/GriffiAssistant';
+import { GriffiTour } from './components/GriffiTour';
 import { Footer } from './components/Footer';
 import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
 
@@ -21,6 +23,7 @@ export function App() {
   const [tomanRate, setTomanRate] = useState<number>(FALLBACK_RATE.usdt_irt);
   const [rateChange, setRateChange] = useState<string>(FALLBACK_RATE.change_24h);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [showTour, setShowTour] = useState<boolean>(false);
 
   // Sync direction with language
   useEffect(() => {
@@ -101,6 +104,7 @@ export function App() {
         walletAddress={walletAddress}
         onConnectWallet={handleConnectWallet}
         onDisconnectWallet={handleDisconnectWallet}
+        onOpenTour={() => setShowTour(true)}
       />
 
       {/* Dynamic Main Body Content */}
@@ -166,6 +170,16 @@ export function App() {
           </div>
         )}
 
+        {activeTab === 'routes' && (
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+            <RouteInspector
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
         {activeTab === 'dca' && (
           <div className="w-full max-w-5xl py-6 px-4 animate-fade-in">
             <DcaSection
@@ -196,7 +210,19 @@ export function App() {
       </main>
 
       {/* Griffi Baby Griffin Floating Mascot Guide */}
-      <GriffiAssistant lang={lang} isDarkMode={isDarkMode} />
+      <GriffiAssistant 
+        lang={lang} 
+        isDarkMode={isDarkMode} 
+        onStartTour={() => setShowTour(true)} 
+      />
+
+      {/* Guided Tour Interactive Modal */}
+      <GriffiTour
+        isOpen={showTour}
+        onClose={() => setShowTour(false)}
+        lang={lang}
+        isDarkMode={isDarkMode}
+      />
 
       {/* Modern Persian Footer */}
       <Footer lang={lang} />

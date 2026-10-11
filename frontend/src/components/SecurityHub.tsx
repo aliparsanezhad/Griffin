@@ -44,6 +44,27 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
         </p>
       </div>
 
+      {/* Griffi Security 3D Shield Showcase */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/80 via-indigo-950/60 to-emerald-950/40 border border-emerald-500/30 flex flex-col sm:flex-row items-center gap-5 text-right shadow-2xl">
+        <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-emerald-400/80 shrink-0 shadow-lg bg-black/40">
+          <img src="/mascot/griffi-security.jpg" alt="Griffi Security Shield" className="w-full h-full object-cover" />
+        </div>
+        <div className="flex-1">
+          <span className="font-black text-emerald-300 text-sm flex items-center gap-1.5 mb-1">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>{isFa ? 'سپر امنیتی گریفی در برابر تحریم‌ها و سانسور 🛡️' : 'Griffi Anti-Censorship Shield 🛡️'}</span>
+          </span>
+          <p className="text-xs text-slate-300 leading-relaxed mb-2">
+            {isFa 
+              ? 'گریفین‌سواپ بدون نیاز به ایمیل یا احراز هویت (KYC) فعالیت می‌کند. برای حفظ امنیت حداکثری از فیلترشکن‌های عمومی با نشت دی‌ان‌اس (DNS Leak) خودداری کرده و از نودهای غیرمتمرکز اختصاصی استفاده کنید.' 
+              : 'GriffinSwap is 100% non-custodial and KYC-free. Shield your metadata and safeguard your digital sovereignty.'}
+          </p>
+          <div className="inline-flex items-center gap-1.5 text-[10px] text-emerald-200 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-xl font-mono">
+            <span>{isFa ? 'خزانه رسمی کارمزدها: 0xD9C1...A2D3' : 'Official Treasury: 0xD9C1...A2D3'}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Safety Tips Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {IRANIAN_SECURITY_TIPS.map((tip) => (

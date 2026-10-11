@@ -9,12 +9,17 @@ import {
   Settings,
   HelpCircle,
   Check,
-  TrendingUp
+  TrendingUp,
+  ChevronDown,
+  GitFork
 } from 'lucide-react';
 import { LIFI_CONFIG, POPULAR_CHAINS } from '../services/lifiService';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { PriceChart } from './PriceChart';
 import { ArbitrageScanner } from './ArbitrageScanner';
+import { RouteInspector } from './RouteInspector';
+import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
+import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
 
 interface SwapSectionProps {
   tomanRate: number;
@@ -60,7 +65,28 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
-  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage'>('chart');
+  const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes'>('chart');
+  const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
+
+  const handleSelectToken = (token: TokenItem) => {
+    if (selectingFor === 'from') {
+      setFromToken({
+        symbol: token.symbol,
+        name: token.name,
+        chain: token.chain,
+        priceUsd: token.priceUsd,
+        logo: token.logo,
+      });
+    } else if (selectingFor === 'to') {
+      setToToken({
+        symbol: token.symbol,
+        name: token.name,
+        chain: token.chain,
+        priceUsd: token.priceUsd,
+        logo: token.logo,
+      });
+    }
+  };
 
   // Calculations
   const numericFrom = parseFloat(fromAmount) || 0;
@@ -73,16 +99,19 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const toToman = usdToToman(toUsd, tomanRate);
 
   const handleFlipTokens = () => {
+    playClickSound();
     const temp = fromToken;
     setFromToken(toToken);
     setToToken(temp);
   };
 
   const handleExecuteNativeSwap = () => {
+    playSwapStartSound();
     setIsSwapping(true);
     setTimeout(() => {
       setIsSwapping(false);
       setSwapSuccess(true);
+      playSwapSuccessSound();
       setTimeout(() => setSwapSuccess(false), 4000);
     }, 1500);
   };
@@ -265,20 +294,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                   placeholder="0.0"
                 />
 
-                <select
-                  value={fromToken.symbol}
-                  onChange={(e) => {
-                    const found = AVAILABLE_TOKENS.find(t => t.symbol === e.target.value);
-                    if (found) setFromToken(found);
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setSelectingFor('from');
                   }}
-                  className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-2 px-3 rounded-xl border-none focus:outline-none shadow-md cursor-pointer"
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md transition-all hover:scale-105 shrink-0"
                 >
-                  {AVAILABLE_TOKENS.map(t => (
-                    <option key={t.symbol} value={t.symbol} className="bg-slate-900 text-white">
-                      {t.symbol} ({t.chain})
-                    </option>
-                  ))}
-                </select>
+                  <img src={fromToken.logo} alt={fromToken.symbol} className="w-5 h-5 rounded-full object-cover" />
+                  <span>{fromToken.symbol}</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </button>
               </div>
 
               {/* Toman & USD estimate for input */}
@@ -323,20 +350,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                   {calculatedOutput > 0 ? calculatedOutput.toFixed(4) : '0.00'}
                 </div>
 
-                <select
-                  value={toToken.symbol}
-                  onChange={(e) => {
-                    const found = AVAILABLE_TOKENS.find(t => t.symbol === e.target.value);
-                    if (found) setToToken(found);
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setSelectingFor('to');
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2 px-3 rounded-xl border-none focus:outline-none shadow-md cursor-pointer"
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-md transition-all hover:scale-105 shrink-0"
                 >
-                  {AVAILABLE_TOKENS.map(t => (
-                    <option key={t.symbol} value={t.symbol} className="bg-slate-900 text-white">
-                      {t.symbol} ({t.chain})
-                    </option>
-                  ))}
-                </select>
+                  <img src={toToken.logo} alt={toToken.symbol} className="w-5 h-5 rounded-full object-cover" />
+                  <span>{toToken.symbol}</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </button>
               </div>
 
               {/* Toman & USD estimate for output */}
@@ -356,8 +381,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             }`}>
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">{isFa ? 'مسیر تجمیع نقدینگی:' : 'Routing:'}</span>
-                <span className="font-semibold text-purple-400 flex items-center gap-1">
-                  <span>LI.FI Protocol (Stargate V2 + Uniswap)</span>
+                <span className="font-semibold text-purple-400 flex items-center gap-1.5">
+                  <span>Across V3 + Stargate V2</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      setCompanionView('routes');
+                    }}
+                    className="text-[10px] text-amber-400 hover:text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 transition-all"
+                  >
+                    {isFa ? 'تحلیل پل‌ها 🔍' : 'Inspect 🔍'}
+                  </button>
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -464,10 +499,10 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         </div>
       </div>
 
-      {/* Interactive Companion Panels (Price Chart & Arbitrage Radar) */}
+      {/* Interactive Companion Panels (Price Chart & Arbitrage Radar & Route Inspector) */}
       <div className="mt-10 w-full max-w-5xl">
         <div className="flex items-center justify-between mb-4 border-b border-purple-500/20 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setCompanionView(companionView === 'chart' ? 'none' : 'chart')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -491,6 +526,18 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>{isFa ? 'دیدبان آربیتراژ بازار ایران' : 'Arbitrage Radar'}</span>
             </button>
+
+            <button
+              onClick={() => setCompanionView(companionView === 'routes' ? 'none' : 'routes')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                companionView === 'routes'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <GitFork className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'دیدبان پل‌ها و مسیرها' : 'Route Inspector'}</span>
+            </button>
           </div>
 
           <span className="text-[11px] text-slate-400 hidden sm:inline">
@@ -507,6 +554,12 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         {companionView === 'arbitrage' && (
           <div className="animate-fade-in">
             <ArbitrageScanner tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {companionView === 'routes' && (
+          <div className="animate-fade-in">
+            <RouteInspector tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
           </div>
         )}
       </div>
@@ -548,6 +601,16 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
           </div>
         </div>
       )}
+
+      {/* Searchable Multi-Token Modal */}
+      <TokenSelectModal
+        isOpen={selectingFor !== null}
+        onClose={() => setSelectingFor(null)}
+        onSelectToken={handleSelectToken}
+        selectedTokenSymbol={selectingFor === 'from' ? fromToken.symbol : toToken.symbol}
+        lang={lang}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };

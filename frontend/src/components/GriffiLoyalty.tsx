@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { toPersianDigits } from '../services/tomanService';
 import { LIFI_CONFIG } from '../services/lifiService';
+import { playCoinDingSound, playClickSound } from '../services/soundService';
 
 interface GriffiLoyaltyProps {
   lang: 'fa' | 'en';
@@ -93,6 +94,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
 
   const handleDailyCheckIn = () => {
     if (checkedInToday) return;
+    playCoinDingSound();
     setCheckedInToday(true);
     setPoints(prev => prev + 25);
     setStreak(prev => prev + 1);
@@ -102,6 +104,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const handleCompleteTask = (taskId: string, taskPoints: number) => {
     setTasks(prev => prev.map(t => {
       if (t.id === taskId && !t.completed) {
+        playCoinDingSound();
         setPoints(p => p + taskPoints);
         return { ...t, completed: true };
       }
@@ -127,6 +130,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const referralLink = `https://griffinswap.io/?ref=${referralCode}&treasury=${LIFI_CONFIG.feeRecipient}`;
 
   const handleCopyReferral = () => {
+    playClickSound();
     navigator.clipboard.writeText(referralLink);
     setCopiedReferral(true);
     setTimeout(() => setCopiedReferral(false), 2000);

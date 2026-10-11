@@ -11,19 +11,25 @@ import {
   Sun, 
   Moon, 
   Globe, 
-  CheckCircle2,
-  ExternalLink,
-  TrendingUp,
-  Sparkles,
-  Calendar,
-  Gift
+  CheckCircle2, 
+  ExternalLink, 
+  TrendingUp, 
+  Sparkles, 
+  Calendar, 
+  Gift, 
+  Volume2, 
+  VolumeX,
+  GitFork,
+  HelpCircle
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
+import { isSoundMuted, setSoundMuted, playClickSound } from '../services/soundService';
 
 export type NavTab = 
   | 'swap' 
   | 'chart' 
   | 'arbitrage' 
+  | 'routes'
   | 'dca' 
   | 'portfolio' 
   | 'earn' 
@@ -44,6 +50,7 @@ interface NavbarProps {
   walletAddress: string | null;
   onConnectWallet: () => void;
   onDisconnectWallet: () => void;
+  onOpenTour?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -58,9 +65,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   walletAddress,
   onConnectWallet,
   onDisconnectWallet,
+  onOpenTour,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [muted, setMuted] = useState<boolean>(() => isSoundMuted());
+
+  const handleToggleSound = () => {
+    const next = !muted;
+    setMuted(next);
+    setSoundMuted(next);
+    if (!next) {
+      playClickSound();
+    }
+  };
 
   const isFa = lang === 'fa';
 
@@ -68,6 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'swap', label: isFa ? 'سواپ و بریج' : 'Swap & Bridge', icon: ArrowLeftRight },
     { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
     { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
+    { id: 'routes', label: isFa ? 'دیدبان پل‌ها' : 'Bridges & Routes', icon: GitFork },
     { id: 'dca', label: isFa ? 'خرید پله‌ای' : 'DCA & Limit', icon: Calendar },
     { id: 'portfolio', label: isFa ? 'پرتفولیو' : 'Portfolio', icon: Wallet },
     { id: 'earn', label: isFa ? 'کسب سود' : 'Earn', icon: Percent },
@@ -141,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as NavTab)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
                       : isDarkMode
@@ -159,6 +178,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Action Bar */}
           <div className="flex items-center gap-2">
             
+            {/* Guided Tour Trigger Button */}
+            {onOpenTour && (
+              <button
+                onClick={() => {
+                  playClickSound();
+                  onOpenTour();
+                }}
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-xs transition-all shadow-sm ${
+                  isDarkMode 
+                    ? 'border-amber-400/50 bg-amber-400/15 text-amber-300 hover:bg-amber-400/25' 
+                    : 'border-amber-500/60 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                }`}
+                title={isFa ? 'تور آموزشی تعاملی با گریفی' : 'Guided Tour with Griffi'}
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isFa ? 'تور گریفی' : 'Tour'}</span>
+              </button>
+            )}
+
             {/* Language Switch */}
             <button
               onClick={() => setLang(isFa ? 'en' : 'fa')}
@@ -184,6 +222,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               title={isDarkMode ? 'حالت روشن' : 'حالت تاریک'}
             >
               {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5 text-purple-600" />}
+            </button>
+
+            {/* Sound FX Toggle */}
+            <button
+              onClick={handleToggleSound}
+              className={`p-2 rounded-xl border transition-colors ${
+                isDarkMode 
+                  ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300 hover:text-white' 
+                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
+              }`}
+              title={muted ? (isFa ? 'فعال‌سازی صدا' : 'Unmute') : (isFa ? 'بی‌صدا کردن' : 'Mute')}
+            >
+              {muted ? <VolumeX className="w-3.5 h-3.5 text-slate-400" /> : <Volume2 className="w-3.5 h-3.5 text-amber-300" />}
             </button>
 
             {/* Wallet Button */}
@@ -232,6 +283,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {isFa ? `${toPersianDigits(formatToman(tomanRate, false))} ت` : `${formatToman(tomanRate, false)} T`}
               </span>
             </div>
+
+            {onOpenTour && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenTour();
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2"
+              >
+                <HelpCircle className="w-4 h-4 text-amber-400" />
+                <span>{isFa ? 'شروع تور راهنمای گریفی 🦅' : 'Guided Tour with Griffi 🦅'}</span>
+              </button>
+            )}
 
             {navItems.map((item) => {
               const Icon = item.icon;

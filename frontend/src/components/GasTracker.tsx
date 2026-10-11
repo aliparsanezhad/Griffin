@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Fuel, 
-  Zap
+  Zap,
+  Clock,
+  ShieldCheck,
+  Sparkles,
+  TrendingDown
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
+import { playClickSound } from '../services/soundService';
 
 interface GasInfo {
   chain: string;
@@ -22,6 +27,7 @@ interface GasTrackerProps {
 
 export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
   const isFa = lang === 'fa';
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'l2' | 'l1'>('all');
 
   const gasData: GasInfo[] = [
     {
@@ -80,8 +86,18 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
     }
   ];
 
+  const filteredData = gasData.filter((item) => {
+    if (selectedFilter === 'l2') {
+      return item.chain === 'Base' || item.chain === 'Arbitrum One' || item.chain === 'Optimism' || item.chain === 'Polygon (PoS)';
+    }
+    if (selectedFilter === 'l1') {
+      return item.chain === 'Ethereum Mainnet' || item.chain === 'BNB Smart Chain (BSC)';
+    }
+    return true;
+  });
+
   return (
-    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in">
+    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in text-right">
       
       {/* Title */}
       <div className="text-center max-w-xl mx-auto mb-8">
@@ -97,11 +113,54 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
             ? 'مقایسه هزینه تقریبی هر سواپ به دلار و تومان برای انتخاب بهینه‌ترین زمان و شبکه'
             : 'Compare estimated swap costs across networks in USD and Toman.'}
         </p>
+
+        {/* Filter Tabs */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button
+            onClick={() => {
+              playClickSound();
+              setSelectedFilter('all');
+            }}
+            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              selectedFilter === 'all'
+                ? 'bg-purple-600 text-white shadow'
+                : 'bg-purple-950/40 text-slate-400 hover:text-white'
+            }`}
+          >
+            {isFa ? 'همه شبکه‌ها' : 'All Chains'}
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setSelectedFilter('l2');
+            }}
+            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              selectedFilter === 'l2'
+                ? 'bg-purple-600 text-white shadow'
+                : 'bg-purple-950/40 text-slate-400 hover:text-white'
+            }`}
+          >
+            {isFa ? 'لایه‌های ۲ ارزان (L2)' : 'Cheap L2s'}
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setSelectedFilter('l1');
+            }}
+            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              selectedFilter === 'l1'
+                ? 'bg-purple-600 text-white shadow'
+                : 'bg-purple-950/40 text-slate-400 hover:text-white'
+            }`}
+          >
+            {isFa ? 'لایه‌های اصلی (L1)' : 'Layer 1s'}
+          </button>
+        </div>
       </div>
 
       {/* Grid of Gas Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {gasData.map((item) => {
+        {filteredData.map((item) => {
           const costToman = usdToToman(item.estSwapCostUsd, tomanRate);
           return (
             <div
@@ -141,6 +200,41 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
         })}
       </div>
 
+      {/* Tehran Timezone Low-Gas Radar Window */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/60 to-purple-950/40 border border-indigo-500/30 space-y-2">
+          <div className="flex items-center gap-2 text-indigo-300 font-bold text-sm">
+            <Clock className="w-4 h-4 text-amber-400" />
+            <span>{isFa ? 'ساعات طلایی کمترین کارمزد (به وقت تهران):' : 'Golden Low-Fee Hours (Iran Time):'}</span>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {isFa 
+              ? 'ترافیک شبکه اتریوم در ساعات ۰۴:۰۰ صبح تا ۰۹:۳۰ صبح به وقت ایران (همزمان با بسته بودن بازارهای مالی آمریکا و آسیا) به حداقل می‌رسد. در این ساعات گس اتریوم معمولاً زیر ۱۰ Gwei سقوط کرده و هزینه تراکنش تا ۷۰٪ ارزان‌تر می‌شود.'
+              : 'Ethereum congestion is lowest between 04:00 AM and 09:30 AM Tehran Time. Gas drops under 10 Gwei, saving up to 70%.'}
+          </p>
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+            <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isFa ? 'توصیه گریفی: تراکنش‌های بزرگ را صبح زود ثبت کنید' : 'Griffi Tip: Execute large trades early morning'}</span>
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 to-amber-950/30 border border-purple-500/30 space-y-2">
+          <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>{isFa ? 'حفاظت ضد ساندویچ و MEV Blocker:' : 'Anti-Sandwich & MEV Protection:'}</span>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {isFa 
+              ? 'ربات‌های فرانت‌رانینگ (Front-running) می‌توانند با افزایش کارمزد، تراکنش شما را ساندویچ کرده و اسلیپیج تحمیل کنند. گریفین‌سواپ از مم‌پول خصوصی Flashbots Protect برای ارسال امن تراکنش‌های بزرگ بدون خطر دیده شدن در مم‌پول عمومی پشتیبانی می‌کند.'
+              : 'Front-running bots can sandwich large swaps in public mempools. GriffinSwap supports private Flashbots RPC endpoints to shield orders.'}
+          </p>
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-xl border border-purple-500/20">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>{isFa ? 'پروتکل امن غیرحضانتی بدون نشت داده' : 'Private Mempool Guard Active'}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Advice Box for Iranian Users */}
       <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs text-slate-300 leading-relaxed space-y-2">
         <h4 className="font-bold text-white text-sm flex items-center gap-2 text-amber-300">
@@ -153,6 +247,7 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
             : 'For transfers under $500, always prefer Layer-2 networks (Arbitrum, Base). Fees are below $0.05 compared to $2+ on Ethereum Mainnet.'}
         </p>
       </div>
+
     </div>
   );
 };
