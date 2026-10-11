@@ -26,7 +26,8 @@ type GriffiPose =
   | 'router'
   | 'escrow'
   | 'futures'
-  | 'cards';
+  | 'cards'
+  | 'domains';
 
 export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
@@ -65,6 +66,10 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
         return isFa
           ? 'با کارت‌های اعتباری مجازی وب۳، اشتراک‌های هوش مصنوعی مثل ChatGPT Plus و تلگرام پریمیوم رو مستقیم با تتر بخرید بدون اینکه تحریم‌ها مانع بشن!'
           : 'Mint virtual Web3 Mastercards and vouchers for OpenAI, Claude, and Telegram with zero KYC!';
+      case 'domains':
+        return isFa
+          ? 'آدرس‌های طولانی کیف پول رو با شناسه کوتاه tehran.griffi جایگزین کنید! مالکیت دائمی و مادام‌العمر بدون هزینه تمدید سالانه.'
+          : 'Replace long 0x addresses with tehran.griffi! Lifetime ownership with zero annual renewal fees.';
       case 'gas':
         return isFa 
           ? 'دیگر نگران نداشتن اتریوم نباشید! با سیستم پی‌مستر گریفین، کارمزد تراکنش را مستقیماً با تتر پرداخت کنید یا هر روز یک سهمیه سوخت رایگان از من هدیه بگیرید.'
@@ -143,6 +148,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     escrow: '/mascot/griffi-escrow.jpg',
     futures: '/mascot/griffi-futures.jpg',
     cards: '/mascot/griffi-card.jpg',
+    domains: '/mascot/griffi-domains.jpg',
   };
 
   return (
@@ -402,6 +408,16 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 }`}
               >
                 {isFa ? 'کارت 💳' : 'Card 💳'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('domains')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'domains' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'دامنه 🌐' : 'Domain 🌐'}
               </button>
             </div>
 

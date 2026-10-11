@@ -35,6 +35,7 @@ export type NavTab =
   | 'swap' 
   | 'futures'
   | 'cards'
+  | 'domains'
   | 'chart' 
   | 'arbitrage' 
   | 'routes'
@@ -100,6 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'swap', label: isFa ? 'سواپ و بریج' : 'Swap & Bridge', icon: ArrowLeftRight },
     { id: 'futures', label: isFa ? 'فیوچرز و اهرم' : 'Perp Futures', icon: Flame },
     { id: 'cards', label: isFa ? 'کارت و اشتراک وب۳' : 'Web3 Cards', icon: CreditCard },
+    { id: 'domains', label: isFa ? 'دامنه‌های .griffi' : 'Web3 Domains', icon: Globe },
     { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
     { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
     { id: 'routes', label: isFa ? 'دیدبان پل‌ها' : 'Bridges & Routes', icon: GitFork },
