@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, X, Copy, Check, ShieldCheck, Heart, HelpCircle } from 'lucide-react';
+import { Sparkles, X, Copy, Check, ShieldCheck, Heart, HelpCircle, Volume2 } from 'lucide-react';
 import { LIFI_CONFIG } from '../services/lifiService';
 import { playClickSound } from '../services/soundService';
 
@@ -9,12 +9,28 @@ interface GriffiAssistantProps {
   onStartTour?: () => void;
 }
 
+type GriffiPose = 
+  | 'wave' 
+  | 'egg' 
+  | 'flower' 
+  | 'hero' 
+  | 'flying' 
+  | 'vault' 
+  | 'navigator' 
+  | 'analyst' 
+  | 'trader' 
+  | 'inspector'
+  | 'gas'
+  | 'gold'
+  | 'accountant'
+  | 'router'
+  | 'escrow';
+
 export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator' | 'analyst' | 'trader' | 'inspector'>('wave');
-
+  const [selectedPose, setSelectedPose] = useState<GriffiPose>('wave');
   const commissionWallet = LIFI_CONFIG.feeRecipient;
 
   const handleCopy = () => {
@@ -23,7 +39,83 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const poseImages = {
+  const handleSpeakAdvice = (text: string) => {
+    playClickSound();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = isFa ? 'fa-IR' : 'en-US';
+        utterance.rate = 0.95;
+        utterance.pitch = 1.15;
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {}
+    }
+  };
+
+  const getAdviceText = (pose: GriffiPose): string => {
+    switch (pose) {
+      case 'gas':
+        return isFa 
+          ? 'دیگر نگران نداشتن اتریوم نباشید! با سیستم پی‌مستر گریفین، کارمزد تراکنش را مستقیماً با تتر پرداخت کنید یا هر روز یک سهمیه سوخت رایگان از من هدیه بگیرید.'
+          : 'Never get stuck without ETH again! Pay gas directly in USDT with Griffi Paymaster.';
+      case 'gold':
+        return isFa 
+          ? 'بیش از ۲۰ درصد قیمت سکه امامی حباب است! با تبدیل تتر به طلای دیجیتال پکس‌گلد، بدون حباب و بدون اجرت طلافروشی سرمایه‌گذاری کنید.'
+          : 'Save on coin bubbles by swapping USDT directly to physical gold tokens (PAXG).';
+      case 'accountant':
+        return isFa 
+          ? 'گزارش حسابداری تومانی تمام مبادلات خود را همراه با محاسبه سود و زیان محقق‌شده به راحتی در قالب اکسل استخراج کنید.'
+          : 'Export your multi-chain Web3 tax and P&L statements calculated in Tomans with 1 click.';
+      case 'router':
+        return isFa 
+          ? 'مسیریاب هوشمند چندمسیری گریفین، سفارش‌های بزرگ شما را بین استخرها تقسیم می‌کند تا اسلیپیج و لغزش قیمت به صفر میل کند.'
+          : 'Our smart order router splits volume across Uniswap, Sushi, and Griffin deep liquidity pools.';
+      case 'escrow':
+        return isFa 
+          ? 'خرید و فروش همتا‌به‌همتای تتر با تومان از طریق قرارداد هوشمند اسکرو امن است و ریال مستقیماً به شبای تاییدشده واریز می‌شود.'
+          : 'Trade P2P safely with non-custodial smart contract escrow and verified bank Sheba accounts.';
+      case 'trader':
+        return isFa 
+          ? 'سفارشات لیمیت آف‌چین با استاندارد Permit2 بدون نیاز به پرداخت گس ثبت می‌شوند! بدون ریسک مسدود شدن حساب معامله کنید.' 
+          : 'Trade with gasless Permit2 limit orders with zero custodial risk!';
+      case 'inspector':
+        return isFa 
+          ? 'پیش از خرید هر توکن، آن را با رادار گریفی اسکن کنید تا گرفتار هانی‌پات و دام‌های مالیاتی نشوید.' 
+          : 'Scan any token with Griffi Radar before buying to avoid honeypots!';
+      case 'analyst':
+        return isFa 
+          ? 'ماشین‌حساب هوشمند ما ارزش دارایی شما را بر مبنای تورم ریال و طلای ۱۸ عیار مقایسه می‌کند.' 
+          : 'Compare returns against Rial inflation and gold purchasing power.';
+      case 'navigator':
+        return isFa 
+          ? 'پل‌های چندزنجیره‌ای گریفین سریع‌ترین و کم‌کارمزدترین مسیرها را در میان ۵۸ بلاک‌چین برایتان انتخاب می‌کنند.' 
+          : 'Bridge assets across 58 blockchains with minimum fees.';
+      case 'vault':
+        return isFa 
+          ? 'استخرهای دیفای سود پایدار ارزی روی استیبل‌کوین‌ها تولید می‌کنند تا قدرت خرید سرمایه شما حفظ شود.' 
+          : 'Earn high annual yield on stablecoins to beat inflation.';
+      case 'flying':
+        return isFa 
+          ? 'بال‌های گریفین با سرعت صوت تراکنش‌های شما را میان آربیتروم، بیس و پالیگان جابجا می‌کنند!' 
+          : 'Soar through Layer-2 networks with lightning speed!';
+      case 'wave':
+        return isFa 
+          ? 'خوش آمدید! گریفین‌سواپ پلی امن، سریع و بدون تحریم میان ریال، تتر و رمزارزهاست.' 
+          : 'Welcome to GriffinSwap, the cross-chain DEX tailored for Iranian traders.';
+      case 'flower':
+        return isFa 
+          ? 'امیدوارم معاملاتت پر از سود و برکت باشه! هر زمان کمکی خواستی من اینجام.' 
+          : 'Wishing you prosperous trades! Feel free to ask me anything.';
+      case 'egg':
+      default:
+        return isFa 
+          ? 'هر معامله موفق یک پر جادویی به وفاداری شما اضافه می‌کنه!' 
+          : 'Every trade earns magical feathers for your loyalty pass!';
+    }
+  };
+
+  const poseImages: Record<GriffiPose, string> = {
     wave: '/mascot/griffi-wave.jpg',
     egg: '/mascot/griffi-egg.jpg',
     flower: '/mascot/griffi-flower.jpg',
@@ -34,6 +126,11 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     analyst: '/mascot/griffi-analyst.jpg',
     trader: '/mascot/griffi-trader.jpg',
     inspector: '/mascot/griffi-inspector.jpg',
+    gas: '/mascot/griffi-gas-station.jpg',
+    gold: '/mascot/griffi-gold-treasury.jpg',
+    accountant: '/mascot/griffi-accountant.jpg',
+    router: '/mascot/griffi-smart-router.jpg',
+    escrow: '/mascot/griffi-escrow.jpg',
   };
 
   return (
@@ -225,33 +322,74 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 {isFa ? 'کارآگاه 🛡️' : 'Audit 🛡️'}
               </button>
               <button
-                onClick={() => setSelectedPose('egg')}
+                onClick={() => setSelectedPose('gas')}
                 className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPose === 'egg' 
+                  selectedPose === 'gas' 
                     ? 'bg-purple-600 text-white shadow' 
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isFa ? 'تولد 🥚' : 'Egg 🥚'}
+                {isFa ? 'سوخت ⛽' : 'Gas ⛽'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('gold')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'gold' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'طلا 👑' : 'Gold 👑'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('router')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'router' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'مسیر 🔀' : 'Route 🔀'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('accountant')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'accountant' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'حساب 📑' : 'Tax 📑'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('escrow')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'escrow' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'اسکرو 🛡️' : 'Escrow 🛡️'}
               </button>
             </div>
 
-            {/* Dynamic Griffi Speech Bubble */}
-            <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-purple-900/60 via-indigo-950/60 to-purple-950/60 border border-purple-400/30 text-xs text-purple-100 leading-relaxed shadow-lg">
-              <span className="font-bold text-amber-300 block mb-1">
-                {isFa ? 'پیام گریفی: 🦅✨' : 'Griffi Whispers: 🦅✨'}
-              </span>
-              <p>
-                {selectedPose === 'trader' && (isFa ? 'سفارشات لیمیت آف‌چین با استاندارد Permit2 ثبت می‌شوند و نیازی به پرداخت کارمزد گس در هنگام ثبت یا لغو ندارند! بدون نگرانی از مسدود شدن حساب در صرافی‌های متمرکز، معامله کنید.' : 'Trade with gasless Permit2 limit orders with zero custodial confiscation risk!')}
-                {selectedPose === 'inspector' && (isFa ? 'پیش از خرید هر میم‌کوین یا توکن، با رادار گریفی آن را اسکن کنید تا گرفتار هانی‌پات یا مالیات ۹۹٪ نشوید!' : 'Scan any token with Griffi Radar before buying to avoid honeypots and drainers!')}
-                {selectedPose === 'analyst' && (isFa ? 'ماشین‌حساب ضدتورم ما سود ارزی شما را همزمان با ارزش سکه بهار آزادی و تورم ریال مقایسه می‌کند.' : 'Our inflation shield tracks your returns against Rial inflation and gold purchasing power.')}
-                {selectedPose === 'navigator' && (isFa ? 'پل‌های Across و Stargate امن‌ترین و ارزان‌ترین مسیرهای انتقال دارایی میان شبکه‌ها هستند.' : 'Across and Stargate offer the fastest, lowest-fee cross-chain transfer paths.')}
-                {selectedPose === 'vault' && (isFa ? 'استخرهای غیرمتمرکز سود سالانه پایداری روی استیبل‌کوین‌ها برای حفظ ارزش پس‌انداز تولید می‌کنند.' : 'DeFi vaults yield steady returns on stablecoins to protect purchasing power.')}
-                {selectedPose === 'flying' && (isFa ? 'بال‌های گریفین با سرعت صوت تراکنش‌های شما را میان آربیتروم، بیس و پالیگان جابجا می‌کنند!' : 'Soar through Layer-2 networks with lightning-fast speeds and ultra-low gas!')}
-                {selectedPose === 'wave' && (isFa ? 'خوش آمدید! گریفین‌سواپ پلی امن، سریع و بدون تحریم میان ریال، تتر و ارزهای دیجیتال است.' : 'Welcome! GriffinSwap bridges Rial, USDT, and crypto seamlessly with zero censorship.')}
-                {selectedPose === 'flower' && (isFa ? 'امیدوارم معاملاتت پر از سود و برکت باشه! هر سوالی داری از من بپرس.' : 'Wishing you prosperous trades! Feel free to ask me anything.')}
-                {selectedPose === 'egg' && (isFa ? 'هر معامله موفق یک پر جادویی به وفاداری شما اضافه می‌کنه!' : 'Every successful swap awards magical feathers to your loyalty pass!')}
-              </p>
+            {/* Dynamic Griffi Speech Bubble with Persian Voice Readout */}
+            <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/60 via-indigo-950/60 to-purple-950/60 border border-purple-400/30 text-xs text-purple-100 leading-relaxed shadow-lg">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isFa ? 'پیام راهنمای گریفی: 🦅✨' : 'Griffi Whispers: 🦅✨'}</span>
+                </span>
+                <button
+                  onClick={() => handleSpeakAdvice(getAdviceText(selectedPose))}
+                  className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-amber-300 text-[10px] font-bold flex items-center gap-1 transition-all active:scale-95"
+                  title={isFa ? 'شنیدن پیام با صدای هوش مصنوعی گریفی' : 'Listen to Griffi voice'}
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isFa ? 'پخش صوتی 🔊' : 'Voice 🔊'}</span>
+                </button>
+              </div>
+              <p>{getAdviceText(selectedPose)}</p>
             </div>
 
             {/* Key Information & Commission Transparency */}
