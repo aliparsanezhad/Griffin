@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
+import { GasStationSection } from './GasStationSection';
 
 interface GasInfo {
   chain: string;
@@ -27,6 +28,7 @@ interface GasTrackerProps {
 
 export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
   const isFa = lang === 'fa';
+  const [subTab, setSubTab] = useState<'station' | 'radar'>('station');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'l2' | 'l1'>('all');
 
   const gasData: GasInfo[] = [
@@ -97,66 +99,104 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
   });
 
   return (
-    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in text-right">
+    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in text-right space-y-6">
       
-      {/* Title */}
-      <div className="text-center max-w-xl mx-auto mb-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2">
-          <Fuel className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isFa ? 'رهگیری آنی کارمزد گس شبکه‌ها' : 'Real-Time Gas Tracker'}</span>
-        </div>
-        <h1 className="text-2xl md:text-4xl font-extrabold griffin-gradient-text">
-          {isFa ? 'هزینه تراکنش در بلاک‌چین‌ها' : 'Multi-Chain Gas Fees'}
-        </h1>
-        <p className="text-xs md:text-sm text-slate-400 mt-1">
-          {isFa
-            ? 'مقایسه هزینه تقریبی هر سواپ به دلار و تومان برای انتخاب بهینه‌ترین زمان و شبکه'
-            : 'Compare estimated swap costs across networks in USD and Toman.'}
-        </p>
-
-        {/* Filter Tabs */}
-        <div className="flex items-center justify-center gap-2 mt-4">
+      {/* Top Segmented Mode Control */}
+      <div className="flex justify-center">
+        <div className="inline-flex p-1 rounded-2xl bg-purple-950/50 border border-purple-500/30">
           <button
             onClick={() => {
               playClickSound();
-              setSelectedFilter('all');
+              setSubTab('station');
             }}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-              selectedFilter === 'all'
-                ? 'bg-purple-600 text-white shadow'
-                : 'bg-purple-950/40 text-slate-400 hover:text-white'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              subTab === 'station'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            {isFa ? 'همه شبکه‌ها' : 'All Chains'}
+            <Fuel className="w-3.5 h-3.5 text-amber-300" />
+            <span>{isFa ? 'جایگاه سوخت گریفین (Paymaster تتر)' : 'Gas Station & Paymaster'}</span>
           </button>
           <button
             onClick={() => {
               playClickSound();
-              setSelectedFilter('l2');
+              setSubTab('radar');
             }}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-              selectedFilter === 'l2'
-                ? 'bg-purple-600 text-white shadow'
-                : 'bg-purple-950/40 text-slate-400 hover:text-white'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              subTab === 'radar'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            {isFa ? 'لایه‌های ۲ ارزان (L2)' : 'Cheap L2s'}
-          </button>
-          <button
-            onClick={() => {
-              playClickSound();
-              setSelectedFilter('l1');
-            }}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-              selectedFilter === 'l1'
-                ? 'bg-purple-600 text-white shadow'
-                : 'bg-purple-950/40 text-slate-400 hover:text-white'
-            }`}
-          >
-            {isFa ? 'لایه‌های اصلی (L1)' : 'Layer 1s'}
+            <Clock className="w-3.5 h-3.5 text-amber-300" />
+            <span>{isFa ? 'رادار لحظه‌ای کارمزد شبکه‌ها' : 'Multi-Chain Gas Radar'}</span>
           </button>
         </div>
       </div>
+
+      {subTab === 'station' ? (
+        <GasStationSection tomanRate={tomanRate} lang={lang} />
+      ) : (
+        <>
+          {/* Title */}
+          <div className="text-center max-w-xl mx-auto mb-8">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2">
+              <Fuel className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'رهگیری آنی کارمزد گس شبکه‌ها' : 'Real-Time Gas Tracker'}</span>
+            </div>
+            <h1 className="text-2xl md:text-4xl font-extrabold griffin-gradient-text">
+              {isFa ? 'هزینه تراکنش در بلاک‌چین‌ها' : 'Multi-Chain Gas Fees'}
+            </h1>
+            <p className="text-xs md:text-sm text-slate-400 mt-1">
+              {isFa
+                ? 'مقایسه هزینه تقریبی هر سواپ به دلار و تومان برای انتخاب بهینه‌ترین زمان و شبکه'
+                : 'Compare estimated swap costs across networks in USD and Toman.'}
+            </p>
+
+            {/* Filter Tabs */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setSelectedFilter('all');
+                }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  selectedFilter === 'all'
+                    ? 'bg-purple-600 text-white shadow'
+                    : 'bg-purple-950/40 text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'همه شبکه‌ها' : 'All Chains'}
+              </button>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setSelectedFilter('l2');
+                }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  selectedFilter === 'l2'
+                    ? 'bg-purple-600 text-white shadow'
+                    : 'bg-purple-950/40 text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'لایه‌های ۲ ارزان (L2)' : 'Cheap L2s'}
+              </button>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setSelectedFilter('l1');
+                }}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  selectedFilter === 'l1'
+                    ? 'bg-purple-600 text-white shadow'
+                    : 'bg-purple-950/40 text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'شبکه‌های اصلی (L1)' : 'Layer 1s'}
+              </button>
+            </div>
+          </div>
 
       {/* Grid of Gas Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -247,7 +287,8 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
             : 'For transfers under $500, always prefer Layer-2 networks (Arbitrum, Base). Fees are below $0.05 compared to $2+ on Ethereum Mainnet.'}
         </p>
       </div>
-
-    </div>
+    </>
+  )}
+</div>
   );
 };

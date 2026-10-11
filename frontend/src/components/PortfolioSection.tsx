@@ -9,10 +9,12 @@ import {
   Sparkles, 
   RefreshCw, 
   Search,
-  PieChart
+  PieChart,
+  FileText
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
+import { TaxExportModal } from './TaxExportModal';
 
 interface TokenItem {
   symbol: string;
@@ -52,6 +54,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
   const [activeTab, setActiveTab] = useState<'tokens' | 'transactions'>('tokens');
   const [isLoading, setIsLoading] = useState(false);
   const [searchAddress, setSearchAddress] = useState<string>('');
+  const [showTaxModal, setShowTaxModal] = useState<boolean>(false);
 
   const currentAddress = searchAddress || walletAddress || '0x71C8705a2B88e3083feC7B58273683243354438F';
   const isDemo = !walletAddress && !searchAddress;
@@ -187,6 +190,18 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
             title={isFa ? 'بروزرسانی اطلاعات' : 'Refresh'}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+
+          <button
+            onClick={() => {
+              playClickSound();
+              setShowTaxModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-xs shadow-md transition-transform active:scale-95"
+            title={isFa ? 'گزارش حسابداری و مالیاتی معاملات با معادل تومانی' : 'Tax & Accounting Statement'}
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <span>{isFa ? 'گزارش سود/زیان تومانی' : 'Tax Statement'}</span>
           </button>
 
           {!walletAddress && (
@@ -438,6 +453,15 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
           </div>
         </div>
       )}
+
+      {/* Tax & Portfolio PnL Accounting Modal */}
+      <TaxExportModal
+        isOpen={showTaxModal}
+        onClose={() => setShowTaxModal(false)}
+        tomanRate={tomanRate}
+        walletAddress={walletAddress}
+        lang={lang}
+      />
     </div>
   );
 };

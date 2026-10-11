@@ -108,6 +108,30 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       points: 30,
       completed: false,
       icon: '⚖️'
+    },
+    {
+      id: 'task-paymaster',
+      titleFa: 'دریافت سهمیه سوخت رایگان در جایگاه گریفین (Paymaster)',
+      titleEn: 'Claim daily free fuel in Griffi Gas Station',
+      points: 50,
+      completed: false,
+      icon: '⛽'
+    },
+    {
+      id: 'task-smart-router',
+      titleFa: 'شبیه‌سازی تفکیک استخرها در مسیریاب هوشمند چندمسیری',
+      titleEn: 'Simulate liquidity split in Smart Multi-Hop Router',
+      points: 45,
+      completed: false,
+      icon: '🔀'
+    },
+    {
+      id: 'task-tax-statement',
+      titleFa: 'بررسی و دانلود گزارش حسابداری و مالیاتی معاملات به تومان',
+      titleEn: 'Inspect Web3 Tax & PnL accounting statement in Tomans',
+      points: 35,
+      completed: false,
+      icon: '📑'
     }
   ]);
 

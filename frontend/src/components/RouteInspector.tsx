@@ -18,6 +18,7 @@ import {
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { LIFI_CONFIG } from '../services/lifiService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound } from '../services/soundService';
+import { SmartRouterVisualizer } from './SmartRouterVisualizer';
 
 interface RouteOption {
   id: string;
@@ -58,6 +59,7 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
   const [selectedRouteId, setSelectedRouteId] = useState<string>('across');
   const [selectedPairIndex, setSelectedPairIndex] = useState<number>(0);
   const [copied, setCopied] = useState<boolean>(false);
+  const [inspectorMode, setInspectorMode] = useState<'router' | 'bridges'>('router');
 
   // Simulation state
   const [simulating, setSimulating] = useState<boolean>(false);
@@ -277,8 +279,50 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
         </div>
       </div>
 
-      {/* Preset Pairs Selector Bar */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-purple-950/40 border border-purple-500/20 backdrop-blur-sm">
+      {/* View Switcher: Smart Multi-Hop Router vs Bridges Radar */}
+      <div className="flex justify-center mb-6">
+        <div className="inline-flex p-1 rounded-2xl bg-purple-950/50 border border-purple-500/30">
+          <button
+            onClick={() => {
+              playClickSound();
+              setInspectorMode('router');
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              inspectorMode === 'router'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <GitFork className="w-3.5 h-3.5 text-amber-300" />
+            <span>{isFa ? 'مسیریاب چنداستخری هوشمند گریفین' : 'Griffin Smart Router'}</span>
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setInspectorMode('bridges');
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              inspectorMode === 'bridges'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-amber-300" />
+            <span>{isFa ? 'دیدبان پل‌های بین‌زنجیره‌ای' : 'Cross-Chain Bridges Radar'}</span>
+          </button>
+        </div>
+      </div>
+
+      {inspectorMode === 'router' ? (
+        <SmartRouterVisualizer
+          tomanRate={tomanRate}
+          lang={lang}
+          isDarkMode={isDarkMode}
+        />
+      ) : (
+        <>
+          {/* Preset Pairs Selector Bar */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-purple-950/40 border border-purple-500/20 backdrop-blur-sm">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
           <Layers className="w-4 h-4 text-purple-400" />
           <span>{isFa ? 'انتخاب مسیر تبادل پرکاربرد:' : 'Select Route Pair:'}</span>
@@ -565,7 +609,8 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
           </p>
         </div>
       </div>
-
-    </div>
+    </>
+  )}
+</div>
   );
 };
