@@ -87,12 +87,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
     { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
     { id: 'routes', label: isFa ? 'دیدبان پل‌ها' : 'Bridges & Routes', icon: GitFork },
-    { id: 'dca', label: isFa ? 'خرید پله‌ای' : 'DCA & Limit', icon: Calendar },
+    { id: 'dca', label: isFa ? 'پله‌ای و لیمیت' : 'DCA & Limit', icon: Calendar },
     { id: 'portfolio', label: isFa ? 'پرتفولیو' : 'Portfolio', icon: Wallet },
     { id: 'earn', label: isFa ? 'کسب سود' : 'Earn', icon: Percent },
     { id: 'calculator', label: isFa ? 'ماشین‌حساب' : 'Calculator', icon: Calculator },
     { id: 'gas', label: isFa ? 'کارمزد شبکه' : 'Gas Tracker', icon: Fuel },
-    { id: 'security', label: isFa ? 'ضدتحریم' : 'Anti-Censorship', icon: ShieldCheck },
+    { id: 'security', label: isFa ? 'امنیت و هانی‌پات' : 'Security & Audit', icon: ShieldCheck },
     { id: 'loyalty', label: isFa ? 'پرهای گریفی' : 'Griffi Pass', icon: Gift },
   ];
 

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { 
   Calendar, 
-  TrendingUp, 
-  Zap, 
-  Check
+  TrendingUp 
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
+import { LimitOrderBook } from './LimitOrderBook';
 
 interface DcaSectionProps {
   tomanRate: number;
@@ -20,19 +19,13 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
 }) => {
   const isFa = lang === 'fa';
 
-  // Mode: 'dca' (خرید پله‌ای) or 'limit' (سفارش شرطی / لیمیت)
+  // Mode: 'dca' (خرید پله‌ای) or 'limit' (دفتر سفارشات لیمیت)
   const [activeMode, setActiveMode] = useState<'dca' | 'limit'>('dca');
 
   // DCA State
   const [monthlyToman, setMonthlyToman] = useState<number>(5000000); // 5 Million Tomans per month
   const [selectedAsset, setSelectedAsset] = useState<'USDT' | 'ETH' | 'BTC'>('ETH');
   const [durationMonths, setDurationMonths] = useState<number>(12); // 12 Months
-
-  // Limit Order State
-  const [limitPair, setLimitPair] = useState<'ETH/USDT' | 'BTC/USDT' | 'ARB/USDT'>('ETH/USDT');
-  const [targetPrice, setTargetPrice] = useState<string>('3200');
-  const [orderAmountUsdt, setOrderAmountUsdt] = useState<string>('500');
-  const [orderPlaced, setOrderPlaced] = useState<boolean>(false);
 
   // Asset historical/projected average returns
   const assetAnnualGrowth: Record<string, number> = {
@@ -46,11 +39,6 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
   const growthRate = assetAnnualGrowth[selectedAsset] * (durationMonths / 12);
   const projectedFutureToman = Math.round(totalInvestedToman * (1 + growthRate));
   const profitToman = projectedFutureToman - totalInvestedToman;
-
-  const handlePlaceLimitOrder = () => {
-    setOrderPlaced(true);
-    setTimeout(() => setOrderPlaced(false), 3500);
-  };
 
   return (
     <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all ${
@@ -208,73 +196,12 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
 
       {/* MODE 2: Limit Orders */}
       {activeMode === 'limit' && (
-        <div className="mt-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            {/* Pair */}
-            <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
-              <label className="text-xs font-bold text-slate-300 block mb-2">
-                {isFa ? 'جفت‌ارز معامله:' : 'Trading Pair:'}
-              </label>
-              <select 
-                value={limitPair}
-                onChange={(e) => setLimitPair(e.target.value as any)}
-                className="w-full bg-purple-900/40 border border-purple-500/30 rounded-xl px-3 py-2.5 text-white font-mono text-xs focus:outline-none focus:border-purple-400"
-              >
-                <option value="ETH/USDT">ETH / USDT (Ethereum)</option>
-                <option value="BTC/USDT">BTC / USDT (Bitcoin)</option>
-                <option value="ARB/USDT">ARB / USDT (Arbitrum)</option>
-              </select>
-            </div>
-
-            {/* Target Limit Price */}
-            <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
-              <label className="text-xs font-bold text-slate-300 block mb-2">
-                {isFa ? 'قیمت هدف برای اجرای سفارش ($):' : 'Trigger Price ($):'}
-              </label>
-              <input 
-                type="text"
-                value={targetPrice}
-                onChange={(e) => setTargetPrice(e.target.value)}
-                className="w-full bg-purple-900/40 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-purple-400"
-              />
-              <span className="text-[10px] text-purple-300 mt-1 block">
-                ≈ {isFa ? `${toPersianDigits(formatToman(Number(targetPrice) * tomanRate, false))} تومان` : `${Number(targetPrice) * tomanRate} T`}
-              </span>
-            </div>
-
-            {/* Amount */}
-            <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
-              <label className="text-xs font-bold text-slate-300 block mb-2">
-                {isFa ? 'حجم سفارش (USDT):' : 'Order Size (USDT):'}
-              </label>
-              <input 
-                type="text"
-                value={orderAmountUsdt}
-                onChange={(e) => setOrderAmountUsdt(e.target.value)}
-                className="w-full bg-purple-900/40 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-purple-400"
-              />
-              <span className="text-[10px] text-purple-300 mt-1 block">
-                {isFa ? 'بدون کارمزد نگهداری در قرارداد' : '0 Custodial Hold Fee'}
-              </span>
-            </div>
-          </div>
-
-          {/* Place Button */}
-          {orderPlaced ? (
-            <div className="w-full p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-white flex items-center justify-center gap-2 shadow-lg animate-fade-in font-bold text-sm">
-              <Check className="w-5 h-5 text-emerald-400" />
-              <span>{isFa ? 'سفارش لیمیت بدون تحریم شما با موفقیت ثبت شد!' : 'Limit order placed successfully!'}</span>
-            </div>
-          ) : (
-            <button
-              onClick={handlePlaceLimitOrder}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              <Zap className="w-4 h-4 text-amber-300" />
-              <span>{isFa ? `ثبت سفارش خرید در قیمت ${targetPrice} دلار` : `Submit Limit Order at $${targetPrice}`}</span>
-            </button>
-          )}
+        <div className="mt-6 animate-fade-in">
+          <LimitOrderBook
+            tomanRate={tomanRate}
+            lang={lang}
+            isDarkMode={isDarkMode}
+          />
         </div>
       )}
     </div>

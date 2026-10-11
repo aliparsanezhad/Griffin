@@ -5,10 +5,13 @@ import {
   Check, 
   AlertTriangle, 
   Globe2, 
-  HelpCircle
+  HelpCircle,
+  Search
 } from 'lucide-react';
 import { ANTI_CENSORSHIP_RPCS, IRANIAN_SECURITY_TIPS } from '../services/securityTips';
 import { RpcMonitor } from './RpcMonitor';
+import { SecurityScanner } from './SecurityScanner';
+import { playClickSound } from '../services/soundService';
 
 interface SecurityHubProps {
   lang: 'fa' | 'en';
@@ -17,6 +20,7 @@ interface SecurityHubProps {
 
 export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = true }) => {
   const isFa = lang === 'fa';
+  const [activeSecurityTab, setActiveSecurityTab] = useState<'scanner' | 'rpcs'>('scanner');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const handleCopy = (url: string) => {
@@ -65,8 +69,52 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
         </div>
       </div>
 
-      {/* Safety Tips Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Interactive Mode Switcher */}
+      <div className="flex items-center justify-center">
+        <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-black/50 border border-purple-500/30 shadow-lg">
+          <button
+            onClick={() => {
+              playClickSound();
+              setActiveSecurityTab('scanner');
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+              activeSecurityTab === 'scanner'
+                ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg shadow-emerald-950/40'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Search className="w-4 h-4 text-amber-300" />
+            <span>{isFa ? 'دیدبان هانی‌پات و امنیت ولت' : 'Honeypot & Token Auditor'}</span>
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setActiveSecurityTab('rpcs');
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+              activeSecurityTab === 'rpcs'
+                ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-lg shadow-purple-950/40'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Globe2 className="w-4 h-4 text-purple-300" />
+            <span>{isFa ? 'نودهای ضدتحریم و حریم خصوصی RPC' : 'Anti-Censorship RPCs'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* MODE 1: Honeypot Scanner & Wallet Approvals */}
+      {activeSecurityTab === 'scanner' && (
+        <div className="animate-fade-in">
+          <SecurityScanner lang={lang} isDarkMode={isDarkMode} />
+        </div>
+      )}
+
+      {/* MODE 2: Anti-Censorship RPCs & Tips */}
+      {activeSecurityTab === 'rpcs' && (
+        <div className="space-y-10 animate-fade-in">
+          {/* Safety Tips Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {IRANIAN_SECURITY_TIPS.map((tip) => (
           <div
             key={tip.id}
@@ -156,6 +204,8 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
           <li>{isFa ? 'روی دکمه Save کلیک کنید. اکنون بدون نیاز به تغییر آی‌پی یا فیلترشکن به شبکه متصل هستید.' : 'Click Save. Your wallet will now connect seamlessly.'}</li>
         </ol>
       </div>
+    </div>
+  )}
     </div>
   );
 };

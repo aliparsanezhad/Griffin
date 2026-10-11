@@ -153,6 +153,46 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
       tipEn: 'Intent bridges like Across finalize cross-chain swaps in under 15 seconds.'
     },
     {
+      titleFa: 'سفارشات لیمیت شرطی بدون کارمزد گس (Permit2) 📈',
+      titleEn: 'Gasless Limit Orders with Permit2 📈',
+      badgeFa: 'معاملات هوشمند',
+      badgeEn: 'Smart Limit Orders',
+      icon: Zap,
+      image: '/mascot/griffi-trader.jpg',
+      contentFa: [
+        'در بخش «پله‌ای و لیمیت»، می‌توانید بدون پرداخت هیچ‌گونه کارمزد گس، سفارش خرید یا فروش شرطی ثبت کنید.',
+        'با بهره‌گیری از امضای دیجیتال آف‌چین EIP-712 Permit2، دارایی‌ها تا زمان رسیدن بازار به قیمت هدف در ولت خودتان می‌مانند و ریسک ورشکستگی یا مسدودسازی صرافی متمرکز از بین می‌رود.',
+        'همچنین دفتر عمق بازار زنده به همراه تطبیق قیمت با تومان به شما امکان پیش‌بینی دقیق می‌دهد.'
+      ],
+      contentEn: [
+        'Under "DCA & Limit", submit non-custodial buy and sell orders with zero on-chain placement gas.',
+        'Utilizing EIP-712 Permit2 off-chain signatures, tokens remain securely in your wallet until the trigger price is met.',
+        'View the live visual depth book ladder with real-time Toman and USD rate conversion.'
+      ],
+      tipFa: 'ثبت و لغو سفارشات لیمیت کاملاً رایگان است و کارمزد جزئی فقط هنگام اجرای نهایی معامله محاسبه می‌شود.',
+      tipEn: 'Creating and cancelling limit orders is 100% gas-free; a minor execution fee applies only on fill.'
+    },
+    {
+      titleFa: 'رادار هوشمند اصالت توکن و تشخیص هانی‌پات 🔍🛡️',
+      titleEn: 'Honeypot Scanner & Wallet Approvals 🔍🛡️',
+      badgeFa: 'ضد کلاهبرداری',
+      badgeEn: 'Scam Protection',
+      icon: ShieldCheck,
+      image: '/mascot/griffi-inspector.jpg',
+      contentFa: [
+        'پیش از خرید هر توکن جدید یا میم‌کوین در تلگرام و شبکه‌های اجتماعی، آدرس قرارداد آن را در بخش «امنیت و هانی‌پات» بررسی کنید.',
+        'هوش مصنوعی گریفی مالیات خرید و فروش، سلب مالکیت، توابع مخفی ضرب توکن و کدهای فریز آدرس را تحلیل کرده و نمره سلامت ارائه می‌دهد.',
+        'علاوه بر این، ابزار Revoke به شما کمک می‌کند دسترسی‌های نامحدود قراردادهای قدیمی به ولت خود را پاکسازی کنید.'
+      ],
+      contentEn: [
+        'Before purchasing new tokens or meme coins promoted on Telegram, audit the contract in the Security tab.',
+        'Griffi AI analyzes buy/sell taxes, renounced ownership, infinite minting exploits, and blacklist functions to output a safety rating.',
+        'Use the built-in Approvals Manager to revoke unlimited allowances to legacy DEX routers.'
+      ],
+      tipFa: 'هرگز توکن‌هایی با مالیات فروش بالای ۱۰٪ یا قراردادهای دارای تابع Blacklist را معامله نکنید.',
+      tipEn: 'Never trade tokens with sell taxes over 10% or contracts with active blacklist functions.'
+    },
+    {
       titleFa: 'شفافیت ۱۰۰٪ کارمزدها و دریافت پرهای گریفی 🪶',
       titleEn: '100% Fee Transparency & Griffi Feathers 🪶',
       badgeFa: 'پایان تور و جایزه',
@@ -161,12 +201,12 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
       image: '/mascot/griffi-flower.jpg',
       contentFa: [
         'در گریفین‌سواپ هیچ کارمزد مخفی وجود ندارد. تمام کارمزدهای سواپ (۰.۵٪) شفاف هستند و به آدرس رسمی خزانه پروتکل منتقل می‌شوند.',
-        'با تکمیل این تور، ۵۰ پر گریفی (Griffi Feathers) در بخش باشگاه وفاداری کسب کردید!',
+        'با تکمیل این تور، ۸۰ پر گریفی (Griffi Feathers) در بخش باشگاه وفاداری کسب کردید!',
         'حالا آماده‌اید تا اولین سواپ بدون تحریم و ارزان خود را با همراهی گریفی تجربه کنید.'
       ],
       contentEn: [
         'Zero hidden spreads. All 0.5% protocol commissions route directly to the transparent treasury wallet.',
-        'By completing this guided tour, you earned 50 Griffi Feathers in the Loyalty Pass!',
+        'By completing this guided tour, you earned 80 Griffi Feathers in the Loyalty Pass!',
         'You are now fully equipped to perform fast, low-fee, censorship-free swaps with Griffi.'
       ],
       tipFa: 'آدرس رسمی خزانه کارمزدها: 0xD9C10B10945D85396f0838EA045587a25FD2A2D3',

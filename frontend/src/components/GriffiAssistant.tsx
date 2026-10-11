@@ -13,7 +13,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator' | 'analyst'>('wave');
+  const [selectedPose, setSelectedPose] = useState<'wave' | 'egg' | 'flower' | 'hero' | 'flying' | 'vault' | 'navigator' | 'analyst' | 'trader' | 'inspector'>('wave');
 
   const commissionWallet = LIFI_CONFIG.feeRecipient;
 
@@ -32,6 +32,8 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     vault: '/mascot/griffi-vault.jpg',
     navigator: '/mascot/griffi-navigator.jpg',
     analyst: '/mascot/griffi-analyst.jpg',
+    trader: '/mascot/griffi-trader.jpg',
+    inspector: '/mascot/griffi-inspector.jpg',
   };
 
   return (
@@ -203,6 +205,26 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 {isFa ? 'سود 🌼' : 'Earn 🌼'}
               </button>
               <button
+                onClick={() => setSelectedPose('trader')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'trader' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'معامله 📈' : 'Trade 📈'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('inspector')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'inspector' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'کارآگاه 🛡️' : 'Audit 🛡️'}
+              </button>
+              <button
                 onClick={() => setSelectedPose('egg')}
                 className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedPose === 'egg' 
@@ -212,6 +234,24 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               >
                 {isFa ? 'تولد 🥚' : 'Egg 🥚'}
               </button>
+            </div>
+
+            {/* Dynamic Griffi Speech Bubble */}
+            <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-purple-900/60 via-indigo-950/60 to-purple-950/60 border border-purple-400/30 text-xs text-purple-100 leading-relaxed shadow-lg">
+              <span className="font-bold text-amber-300 block mb-1">
+                {isFa ? 'پیام گریفی: 🦅✨' : 'Griffi Whispers: 🦅✨'}
+              </span>
+              <p>
+                {selectedPose === 'trader' && (isFa ? 'سفارشات لیمیت آف‌چین با استاندارد Permit2 ثبت می‌شوند و نیازی به پرداخت کارمزد گس در هنگام ثبت یا لغو ندارند! بدون نگرانی از مسدود شدن حساب در صرافی‌های متمرکز، معامله کنید.' : 'Trade with gasless Permit2 limit orders with zero custodial confiscation risk!')}
+                {selectedPose === 'inspector' && (isFa ? 'پیش از خرید هر میم‌کوین یا توکن، با رادار گریفی آن را اسکن کنید تا گرفتار هانی‌پات یا مالیات ۹۹٪ نشوید!' : 'Scan any token with Griffi Radar before buying to avoid honeypots and drainers!')}
+                {selectedPose === 'analyst' && (isFa ? 'ماشین‌حساب ضدتورم ما سود ارزی شما را همزمان با ارزش سکه بهار آزادی و تورم ریال مقایسه می‌کند.' : 'Our inflation shield tracks your returns against Rial inflation and gold purchasing power.')}
+                {selectedPose === 'navigator' && (isFa ? 'پل‌های Across و Stargate امن‌ترین و ارزان‌ترین مسیرهای انتقال دارایی میان شبکه‌ها هستند.' : 'Across and Stargate offer the fastest, lowest-fee cross-chain transfer paths.')}
+                {selectedPose === 'vault' && (isFa ? 'استخرهای غیرمتمرکز سود سالانه پایداری روی استیبل‌کوین‌ها برای حفظ ارزش پس‌انداز تولید می‌کنند.' : 'DeFi vaults yield steady returns on stablecoins to protect purchasing power.')}
+                {selectedPose === 'flying' && (isFa ? 'بال‌های گریفین با سرعت صوت تراکنش‌های شما را میان آربیتروم، بیس و پالیگان جابجا می‌کنند!' : 'Soar through Layer-2 networks with lightning-fast speeds and ultra-low gas!')}
+                {selectedPose === 'wave' && (isFa ? 'خوش آمدید! گریفین‌سواپ پلی امن، سریع و بدون تحریم میان ریال، تتر و ارزهای دیجیتال است.' : 'Welcome! GriffinSwap bridges Rial, USDT, and crypto seamlessly with zero censorship.')}
+                {selectedPose === 'flower' && (isFa ? 'امیدوارم معاملاتت پر از سود و برکت باشه! هر سوالی داری از من بپرس.' : 'Wishing you prosperous trades! Feel free to ask me anything.')}
+                {selectedPose === 'egg' && (isFa ? 'هر معامله موفق یک پر جادویی به وفاداری شما اضافه می‌کنه!' : 'Every successful swap awards magical feathers to your loyalty pass!')}
+              </p>
             </div>
 
             {/* Key Information & Commission Transparency */}
