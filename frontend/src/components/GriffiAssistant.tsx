@@ -24,7 +24,8 @@ type GriffiPose =
   | 'gold'
   | 'accountant'
   | 'router'
-  | 'escrow';
+  | 'escrow'
+  | 'futures';
 
 export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
@@ -55,6 +56,10 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
 
   const getAdviceText = (pose: GriffiPose): string => {
     switch (pose) {
+      case 'futures':
+        return isFa
+          ? 'با معاملات فیوچرز غیرمتمرکز، بدون نیاز به احراز هویت تا ۵۰ برابر اهرم بگیرید! همیشه حد ضرر بگذارید تا از نوسانات بازار در امان بمانید.'
+          : 'Trade decentralized perpetuals with up to 50x leverage and zero KYC! Remember to manage margin and set stop-loss.';
       case 'gas':
         return isFa 
           ? 'دیگر نگران نداشتن اتریوم نباشید! با سیستم پی‌مستر گریفین، کارمزد تراکنش را مستقیماً با تتر پرداخت کنید یا هر روز یک سهمیه سوخت رایگان از من هدیه بگیرید.'
@@ -131,6 +136,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     accountant: '/mascot/griffi-accountant.jpg',
     router: '/mascot/griffi-smart-router.jpg',
     escrow: '/mascot/griffi-escrow.jpg',
+    futures: '/mascot/griffi-futures.jpg',
   };
 
   return (
@@ -370,6 +376,16 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 }`}
               >
                 {isFa ? 'اسکرو 🛡️' : 'Escrow 🛡️'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('futures')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'futures' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'اهرم 🚀' : 'Perp 🚀'}
               </button>
             </div>
 
