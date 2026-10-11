@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   Percent, 
   Sparkles, 
-  ArrowUpRight
+  ArrowUpRight,
+  ShieldCheck
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 
@@ -17,6 +18,7 @@ interface VaultItem {
   riskEn: 'Very Low' | 'Low' | 'Medium';
   desc: string;
   badge?: string;
+  isHalal?: boolean;
 }
 
 interface EarnSectionProps {
@@ -31,10 +33,36 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
   onSelectVaultToDeposit,
 }) => {
   const isFa = lang === 'fa';
-  const [filterAsset, setFilterAsset] = useState<'all' | 'usdt' | 'usdc' | 'eth'>('all');
+  const [filterAsset, setFilterAsset] = useState<'all' | 'usdt' | 'usdc' | 'eth' | 'paxg' | 'halal'>('all');
   const [calculatorDeposit, setCalculatorDeposit] = useState<number>(1000);
 
   const vaults: VaultItem[] = [
+    {
+      id: "griffin-gold-paxg",
+      protocol: "Griffin Gold Treasury",
+      asset: "PAXG",
+      chain: "Arbitrum One",
+      apy: "6.85%",
+      tvl: "$34.5M",
+      risk: "خیلی کم",
+      riskEn: "Very Low",
+      desc: "سپرده‌گذاری طلای فیزیکی؛ سود پایدار بدون بهره و ۱۰۰٪ منطبق با مضاربه و شریعت اسلامی",
+      badge: "طلای حلال ☪️",
+      isHalal: true
+    },
+    {
+      id: "griffin-usdt-amm",
+      protocol: "Griffin AMM Fee Share",
+      asset: "USDT",
+      chain: "Arbitrum One",
+      apy: "11.40%",
+      tvl: "$58.2M",
+      risk: "خیلی کم",
+      riskEn: "Very Low",
+      desc: "تقسیم مستقیم کارمزد سواپ صرافی میان تامین‌کنندگان نقدینگی بر پایه مشارکت مدنی بدون ربا",
+      badge: "سود حلال ☪️",
+      isHalal: true
+    },
     {
       id: "morpho-usdc-base",
       protocol: "Morpho Blue",
@@ -85,6 +113,7 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
 
   const filteredVaults = vaults.filter((v) => {
     if (filterAsset === 'all') return true;
+    if (filterAsset === 'halal') return v.isHalal === true;
     return v.asset.toLowerCase().includes(filterAsset);
   });
 
@@ -180,9 +209,11 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
         {[
           { id: 'all', label: isFa ? 'همه صندوق‌ها' : 'All Vaults' },
+          { id: 'halal', label: isFa ? 'صندوق‌های حلال (بدون ربا) ☪️' : 'Halal Yields ☪️' },
+          { id: 'paxg', label: isFa ? 'طلای دیجیتال (PAXG)' : 'Gold (PAXG)' },
           { id: 'usdt', label: 'تتر (USDT)' },
           { id: 'usdc', label: 'یو‌اس‌دی‌سی (USDC)' },
           { id: 'eth', label: 'اتریوم (ETH)' },
@@ -190,9 +221,9 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
           <button
             key={tab.id}
             onClick={() => setFilterAsset(tab.id as any)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
               filterAsset === tab.id
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
                 : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/15'
             }`}
           >
@@ -206,19 +237,29 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
         {filteredVaults.map((vault) => (
           <div
             key={vault.id}
-            className="glass-panel p-6 rounded-3xl border border-purple-500/20 hover:border-purple-500/40 transition-all hover:shadow-2xl hover:shadow-purple-500/10 flex flex-col justify-between"
+            className={`glass-panel p-6 rounded-3xl border transition-all hover:shadow-2xl flex flex-col justify-between ${
+              vault.isHalal 
+                ? 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-950/10' 
+                : 'border-purple-500/20 hover:border-purple-500/40'
+            }`}
           >
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center font-bold text-purple-300 text-sm">
+                  <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center font-bold text-sm ${
+                    vault.isHalal ? 'bg-emerald-600/20 border-emerald-500/30 text-emerald-300' : 'bg-purple-600/20 border-purple-500/30 text-purple-300'
+                  }`}>
                     {vault.asset}
                   </div>
                   <div>
                     <h4 className="font-extrabold text-white text-base flex items-center gap-2">
                       <span>{vault.protocol}</span>
                       {vault.badge && (
-                        <span className="text-[10px] bg-amber-400/10 text-amber-300 border border-amber-400/20 px-2 py-0.5 rounded-full font-bold">
+                        <span className={`text-[10px] border px-2 py-0.5 rounded-full font-bold ${
+                          vault.isHalal 
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                            : 'bg-amber-400/10 text-amber-300 border-amber-400/20'
+                        }`}>
                           {vault.badge}
                         </span>
                       )}
@@ -262,6 +303,19 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Sharia & Halal DeFi Guidance Notice */}
+      <div className="mt-8 p-5 rounded-2xl glass-panel border border-emerald-500/30 bg-emerald-950/20 text-right space-y-2">
+        <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          {isFa ? 'راهنمای فقهی و انطباق شرعی در خزانه‌های گریفین سواپ:' : 'Sharia-Compliant DeFi Criteria:'}
+        </span>
+        <p className="text-xs text-slate-300 leading-relaxed">
+          {isFa
+            ? 'در فقه اسلامی، ربا (سود ثابت ناشی از قرض) جایز نیست. خزانه‌های طلای دیجیتال و سهم کارمزد گریفین، بر پایه عقد مضاربه و مشارکت مدنی هستند؛ سود پرداخت‌شده از محل کارمزدهای واقعی مبادلات سواپ استخراج شده و هیچ‌گونه بهره قرضی در آن وجود ندارد.'
+            : 'Islamic finance prohibits Riba (interest on debt). Griffin Halal Vaults operate under Mudarabah & Musharakah principles: yields derive from actual AMM trading fees and physical gold holding.'}
+        </p>
       </div>
     </div>
   );
