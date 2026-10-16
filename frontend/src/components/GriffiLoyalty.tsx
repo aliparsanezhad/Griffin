@@ -298,20 +298,26 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
               key={task.id}
               className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 text-right ${
                 task.completed 
-                  ? 'bg-purple-950/20 border-emerald-500/20 opacity-80' 
-                  : 'bg-purple-950/40 border-purple-500/25 hover:border-purple-500/40'
+                  ? isDarkMode ? 'bg-purple-950/30 border-emerald-500/30' : 'bg-emerald-50/70 border-emerald-200'
+                  : isDarkMode ? 'bg-purple-950/50 border-purple-500/25 hover:border-purple-500/40' : 'bg-white border-purple-200 shadow-sm'
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl p-2 rounded-xl bg-purple-900/40 border border-purple-500/20">
+                <span className={`text-xl p-2 rounded-xl border ${
+                  isDarkMode ? 'bg-purple-900/40 border-purple-500/20' : 'bg-purple-100 border-purple-200'
+                }`}>
                   {task.icon}
                 </span>
                 <div>
-                  <span className={`text-xs font-bold block ${task.completed ? 'text-slate-400 line-through' : 'text-slate-200'}`}>
+                  <span className={`text-xs font-bold block ${
+                    task.completed 
+                      ? isDarkMode ? 'text-emerald-400 line-through' : 'text-emerald-700 line-through'
+                      : isDarkMode ? 'text-slate-100' : 'text-slate-900'
+                  }`}>
                     {isFa ? task.titleFa : task.titleEn}
                   </span>
-                  <span className="text-[11px] font-mono text-amber-400 font-semibold">
-                    +{isFa ? toPersianDigits(task.points) : task.points} پر گریفی
+                  <span className="text-[11px] font-mono text-amber-500 dark:text-amber-400 font-semibold">
+                    +{isFa ? toPersianDigits(task.points) : task.points} {isFa ? 'پر گریفی' : 'Feathers'}
                   </span>
                 </div>
               </div>

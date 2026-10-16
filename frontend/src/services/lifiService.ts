@@ -17,14 +17,14 @@ export interface ChainOption {
 }
 
 export const POPULAR_CHAINS: ChainOption[] = [
-  { id: 1, name: "Ethereum", key: "eth", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ethereum.svg" },
-  { id: 42161, name: "Arbitrum", key: "arb", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg", isPopularInIran: true },
-  { id: 56, name: "BNB Chain (BSC)", key: "bsc", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg", isPopularInIran: true },
-  { id: 137, name: "Polygon", key: "pol", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg", isPopularInIran: true },
-  { id: 8453, name: "Base", key: "base", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/base.svg", isPopularInIran: true },
-  { id: 10, name: "Optimism", key: "opt", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/optimism.svg" },
-  { id: 43114, name: "Avalanche", key: "ava", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/avalanche.svg" },
-  { id: 1151111081099710, name: "Solana", key: "sol", logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/solana.svg", isPopularInIran: true },
+  { id: 1, name: "Ethereum", key: "eth", logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
+  { id: 42161, name: "Arbitrum", key: "arb", logo: "https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png", isPopularInIran: true },
+  { id: 56, name: "BNB Chain (BSC)", key: "bsc", logo: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png", isPopularInIran: true },
+  { id: 137, name: "Polygon", key: "pol", logo: "https://assets.coingecko.com/coins/images/4713/large/polygon.png", isPopularInIran: true },
+  { id: 8453, name: "Base", key: "base", logo: "https://assets.coingecko.com/coins/images/30397/large/base_logo.png", isPopularInIran: true },
+  { id: 10, name: "Optimism", key: "opt", logo: "https://assets.coingecko.com/coins/images/25244/large/Optimism.png" },
+  { id: 43114, name: "Avalanche", key: "ava", logo: "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png" },
+  { id: 1151111081099710, name: "Solana", key: "sol", logo: "https://assets.coingecko.com/coins/images/4128/large/solana.png", isPopularInIran: true },
 ];
 
 // Persian translation overrides for LI.FI Widget

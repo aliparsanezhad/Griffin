@@ -22,38 +22,38 @@ export interface TokenItem {
 
 export const EXTENDED_TOKENS: TokenItem[] = [
   // Stablecoins & Popular in Iran
-  { symbol: "USDT", name: "Tether USD", chain: "Arbitrum One", chainId: 42161, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg", category: "popular", isPopularInIran: true },
-  { symbol: "USDT", name: "Tether USD", chain: "BNB Chain", chainId: 56, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg", category: "popular", isPopularInIran: true },
-  { symbol: "USDT", name: "Tether USD", chain: "Polygon", chainId: 137, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg", category: "popular", isPopularInIran: true },
-  { symbol: "USDC", name: "USD Coin", chain: "Base", chainId: 8453, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdc.svg", category: "stable", isPopularInIran: true },
-  { symbol: "USDC", name: "USD Coin", chain: "Arbitrum One", chainId: 42161, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdc.svg", category: "stable", isPopularInIran: true },
-  { symbol: "DAI", name: "Dai Stablecoin", chain: "Ethereum", chainId: 1, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/dai.svg", category: "stable" },
-  { symbol: "USDe", name: "Ethena USDe", chain: "Ethereum", chainId: 1, priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdc.svg", category: "stable" },
+  { symbol: "USDT", name: "Tether USD", chain: "Arbitrum One", chainId: 42161, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/325/large/Tether.png", category: "popular", isPopularInIran: true },
+  { symbol: "USDT", name: "Tether USD", chain: "BNB Chain", chainId: 56, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/325/large/Tether.png", category: "popular", isPopularInIran: true },
+  { symbol: "USDT", name: "Tether USD", chain: "Polygon", chainId: 137, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/325/large/Tether.png", category: "popular", isPopularInIran: true },
+  { symbol: "USDC", name: "USD Coin", chain: "Base", chainId: 8453, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png", category: "stable", isPopularInIran: true },
+  { symbol: "USDC", name: "USD Coin", chain: "Arbitrum One", chainId: 42161, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png", category: "stable", isPopularInIran: true },
+  { symbol: "DAI", name: "Dai Stablecoin", chain: "Ethereum", chainId: 1, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png", category: "stable" },
+  { symbol: "USDe", name: "Ethena USDe", chain: "Ethereum", chainId: 1, priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/35348/large/ethena.png", category: "stable" },
 
   // Digital Gold (Crucial hedge for Iranian investors)
-  { symbol: "PAXG", name: "PAX Gold (۱ اونس طلا)", chain: "Ethereum", chainId: 1, priceUsd: 2650.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "gold", isPopularInIran: true },
-  { symbol: "XAUT", name: "Tether Gold", chain: "Ethereum", chainId: 1, priceUsd: 2648.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg", category: "gold", isPopularInIran: true },
+  { symbol: "PAXG", name: "PAX Gold (۱ اونس طلا)", chain: "Ethereum", chainId: 1, priceUsd: 2650.00, logo: "https://assets.coingecko.com/coins/images/9519/large/paxg.png", category: "gold", isPopularInIran: true },
+  { symbol: "XAUT", name: "Tether Gold", chain: "Ethereum", chainId: 1, priceUsd: 2648.00, logo: "https://assets.coingecko.com/coins/images/10481/large/Tether_Gold.png", category: "gold", isPopularInIran: true },
 
   // Bluechips & Layer 1/2
-  { symbol: "ETH", name: "Ethereum", chain: "Ethereum", chainId: 1, priceUsd: 3420.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "popular", isPopularInIran: true },
-  { symbol: "WETH", name: "Wrapped Ether", chain: "Arbitrum One", chainId: 42161, priceUsd: 3420.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "l2" },
-  { symbol: "BTC", name: "Bitcoin (WBTC)", chain: "Arbitrum One", chainId: 42161, priceUsd: 68450.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/wbtc.svg", category: "popular", isPopularInIran: true },
-  { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum One", chainId: 42161, priceUsd: 0.88, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg", category: "l2", isPopularInIran: true },
-  { symbol: "OP", name: "Optimism", chain: "Optimism", chainId: 10, priceUsd: 1.75, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/optimism.svg", category: "l2" },
-  { symbol: "POL", name: "Polygon Ecosystem", chain: "Polygon", chainId: 137, priceUsd: 0.45, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg", category: "l2", isPopularInIran: true },
-  { symbol: "BNB", name: "BNB Coin", chain: "BNB Chain", chainId: 56, priceUsd: 590.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg", category: "popular", isPopularInIran: true },
-  { symbol: "SOL", name: "Solana", chain: "Solana", chainId: 1151111081099710, priceUsd: 178.60, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/solana.svg", category: "popular", isPopularInIran: true },
-  { symbol: "AVAX", name: "Avalanche", chain: "Avalanche", chainId: 43114, priceUsd: 28.50, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/avalanche.svg", category: "popular" },
+  { symbol: "ETH", name: "Ethereum", chain: "Ethereum", chainId: 1, priceUsd: 3420.00, logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", category: "popular", isPopularInIran: true },
+  { symbol: "WETH", name: "Wrapped Ether", chain: "Arbitrum One", chainId: 42161, priceUsd: 3420.00, logo: "https://assets.coingecko.com/coins/images/2518/large/weth.png", category: "l2" },
+  { symbol: "BTC", name: "Bitcoin (WBTC)", chain: "Arbitrum One", chainId: 42161, priceUsd: 68450.00, logo: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", category: "popular", isPopularInIran: true },
+  { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum One", chainId: 42161, priceUsd: 0.88, logo: "https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png", category: "l2", isPopularInIran: true },
+  { symbol: "OP", name: "Optimism", chain: "Optimism", chainId: 10, priceUsd: 1.75, logo: "https://assets.coingecko.com/coins/images/25244/large/Optimism.png", category: "l2" },
+  { symbol: "POL", name: "Polygon Ecosystem", chain: "Polygon", chainId: 137, priceUsd: 0.45, logo: "https://assets.coingecko.com/coins/images/4713/large/polygon.png", category: "l2", isPopularInIran: true },
+  { symbol: "BNB", name: "BNB Coin", chain: "BNB Chain", chainId: 56, priceUsd: 590.00, logo: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png", category: "popular", isPopularInIran: true },
+  { symbol: "SOL", name: "Solana", chain: "Solana", chainId: 1151111081099710, priceUsd: 178.60, logo: "https://assets.coingecko.com/coins/images/4128/large/solana.png", category: "popular", isPopularInIran: true },
+  { symbol: "AVAX", name: "Avalanche", chain: "Avalanche", chainId: 43114, priceUsd: 28.50, logo: "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png", category: "popular" },
 
   // Telegram Ecosystem (Huge in Iran)
-  { symbol: "TON", name: "Toncoin", chain: "Ethereum (Bridge)", chainId: 1, priceUsd: 5.40, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/ethereum.svg", category: "popular", isPopularInIran: true },
-  { symbol: "NOT", name: "Notcoin", chain: "BNB Chain (W)", chainId: 56, priceUsd: 0.0082, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg", category: "popular", isPopularInIran: true },
-  { symbol: "DOGS", name: "DOGS Community", chain: "BNB Chain (W)", chainId: 56, priceUsd: 0.00075, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg", category: "popular", isPopularInIran: true },
+  { symbol: "TON", name: "Toncoin", chain: "Ethereum (Bridge)", chainId: 1, priceUsd: 5.40, logo: "https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png", category: "popular", isPopularInIran: true },
+  { symbol: "NOT", name: "Notcoin", chain: "BNB Chain (W)", chainId: 56, priceUsd: 0.0082, logo: "https://assets.coingecko.com/coins/images/36850/large/notcoin.png", category: "popular", isPopularInIran: true },
+  { symbol: "DOGS", name: "DOGS Community", chain: "BNB Chain (W)", chainId: 56, priceUsd: 0.00075, logo: "https://assets.coingecko.com/coins/images/39849/large/dogs.png", category: "popular", isPopularInIran: true },
 
   // DeFi Yield Tokens
-  { symbol: "AAVE", name: "Aave Token", chain: "Arbitrum One", chainId: 42161, priceUsd: 155.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "defi" },
-  { symbol: "UNI", name: "Uniswap", chain: "Ethereum", chainId: 1, priceUsd: 8.20, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "defi" },
-  { symbol: "PENDLE", name: "Pendle Finance", chain: "Arbitrum One", chainId: 42161, priceUsd: 4.65, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg", category: "defi" },
+  { symbol: "AAVE", name: "Aave Token", chain: "Arbitrum One", chainId: 42161, priceUsd: 155.00, logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png", category: "defi" },
+  { symbol: "UNI", name: "Uniswap", chain: "Ethereum", chainId: 1, priceUsd: 8.20, logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png", category: "defi" },
+  { symbol: "PENDLE", name: "Pendle Finance", chain: "Arbitrum One", chainId: 42161, priceUsd: 4.65, logo: "https://assets.coingecko.com/coins/images/15069/large/Pendle_Logo_Normal-03.png", category: "defi" },
 ];
 
 interface TokenSelectModalProps {

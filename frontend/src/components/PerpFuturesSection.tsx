@@ -251,7 +251,9 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
         }`}>
           
           {/* Long / Short Toggle */}
-          <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/40 border border-purple-500/20">
+          <div className={`grid grid-cols-2 gap-2 p-1.5 rounded-2xl border ${
+            isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200 shadow-inner'
+          }`}>
             <button
               onClick={() => {
                 playClickSound();
@@ -260,7 +262,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               className={`py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                 side === 'long'
                   ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/40'
-                  : 'text-slate-400 hover:text-white'
+                  : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <ArrowUpRight className="w-4 h-4 text-emerald-300" />
@@ -275,7 +277,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               className={`py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                 side === 'short'
                   ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/40'
-                  : 'text-slate-400 hover:text-white'
+                  : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <ArrowDownRight className="w-4 h-4 text-rose-300" />
@@ -286,11 +288,11 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
           {/* Leverage Selector & Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-purple-400" />
+              <span className={`font-bold flex items-center gap-1.5 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                <Sliders className="w-3.5 h-3.5 text-purple-500" />
                 {isFa ? 'اهرم معاملاتی (Leverage):' : 'Trading Leverage:'}
               </span>
-              <span className="font-mono font-black text-amber-400 text-sm">
+              <span className="font-mono font-black text-amber-500 dark:text-amber-400 text-sm">
                 {leverage}x
               </span>
             </div>
@@ -316,8 +318,10 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                   }}
                   className={`px-2 py-1 rounded-lg border transition-all ${
                     leverage === lev
-                      ? 'bg-amber-400/20 border-amber-400 text-amber-300 font-bold'
-                      : 'border-purple-500/20 text-slate-400 hover:text-white'
+                      ? 'bg-amber-400/20 border-amber-400 text-amber-500 dark:text-amber-300 font-bold'
+                      : isDarkMode
+                        ? 'border-purple-500/20 text-slate-400 hover:text-white'
+                        : 'border-purple-200 text-slate-600 hover:bg-purple-100'
                   }`}
                 >
                   {lev}x
@@ -326,8 +330,8 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
             </div>
 
             {leverage >= 20 && (
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-300 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
                 <span>{isFa ? 'هشدار ریسک: اهرم بالای ۲۰ نوسان شدید و احتمال لیکوئید شدن سریع دارد.' : 'High leverage risk warning.'}</span>
               </div>
             )}
@@ -335,7 +339,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
 
           {/* Margin Input */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300 block">
+            <label className={`text-xs font-bold block ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
               {isFa ? 'مارجین ودیعه (USDT):' : 'Margin Collateral (USDT):'}
             </label>
             <div className="relative">
@@ -344,13 +348,17 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                 value={marginInput}
                 onChange={(e) => setMarginInput(e.target.value)}
                 placeholder="200"
-                className="w-full p-3 rounded-xl bg-black/40 border border-purple-500/30 text-white font-mono text-sm focus:outline-none focus:border-purple-400"
+                className={`w-full p-3 rounded-xl border font-mono text-sm focus:outline-none focus:border-purple-400 ${
+                  isDarkMode 
+                    ? 'bg-black/40 border-purple-500/30 text-white' 
+                    : 'bg-white border-purple-200 text-slate-900'
+                }`}
               />
-              <span className="absolute left-3 top-3 text-xs text-purple-300 font-bold">
+              <span className="absolute left-3 top-3 text-xs text-purple-500 font-bold">
                 USDT
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
+            <div className={`text-[11px] font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               {isFa ? 'معادل تومانی ودیعه:' : 'Toman Equivalent:'} {isFa ? toPersianDigits(formatToman(marginToman)) : formatToman(marginToman)} {isFa ? 'تومان' : 'IRT'}
             </div>
           </div>
@@ -358,7 +366,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
           {/* TP & SL Inputs */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
-              <label className="text-slate-400 block font-semibold">
+              <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {isFa ? 'حد سود (TP):' : 'Take Profit:'}
               </label>
               <input 
@@ -366,11 +374,15 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                 placeholder={side === 'long' ? `${selectedPair.price * 1.1}` : `${selectedPair.price * 0.9}`}
                 value={takeProfitPrice}
                 onChange={(e) => setTakeProfitPrice(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-black/30 border border-emerald-500/30 text-emerald-300 font-mono text-xs"
+                className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
+                  isDarkMode 
+                    ? 'bg-black/30 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-white border-emerald-300 text-emerald-800'
+                }`}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-slate-400 block font-semibold">
+              <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {isFa ? 'حد ضرر (SL):' : 'Stop Loss:'}
               </label>
               <input 
@@ -378,28 +390,34 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                 placeholder={side === 'long' ? `${selectedPair.price * 0.95}` : `${selectedPair.price * 1.05}`}
                 value={stopLossPrice}
                 onChange={(e) => setStopLossPrice(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-black/30 border border-rose-500/30 text-rose-300 font-mono text-xs"
+                className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
+                  isDarkMode 
+                    ? 'bg-black/30 border-rose-500/30 text-rose-300' 
+                    : 'bg-white border-rose-300 text-rose-800'
+                }`}
               />
             </div>
           </div>
 
           {/* Order Summary Specs */}
-          <div className="p-3.5 rounded-xl bg-black/30 border border-purple-500/20 space-y-2 text-xs">
+          <div className={`p-3.5 rounded-xl border space-y-2 text-xs ${
+            isDarkMode ? 'bg-black/30 border-purple-500/20' : 'bg-white border-purple-200 shadow-sm'
+          }`}>
             <div className="flex justify-between">
-              <span className="text-slate-400">{isFa ? 'ارزش کل پوزیشن:' : 'Total Position Size:'}</span>
-              <span className="font-mono font-bold text-white">${positionSizeUsd.toLocaleString()} ({isFa ? toPersianDigits(formatToman(positionSizeToman)) : formatToman(positionSizeToman)} ت)</span>
+              <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>{isFa ? 'ارزش کل پوزیشن:' : 'Total Position Size:'}</span>
+              <span className={`font-mono font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>${positionSizeUsd.toLocaleString()} ({isFa ? toPersianDigits(formatToman(positionSizeToman)) : formatToman(positionSizeToman)} ت)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">{isFa ? 'قیمت ورود تخمینی:' : 'Est. Entry Price:'}</span>
-              <span className="font-mono font-bold text-white">${selectedPair.price.toLocaleString()}</span>
+              <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>{isFa ? 'قیمت ورود تخمینی:' : 'Est. Entry Price:'}</span>
+              <span className={`font-mono font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>${selectedPair.price.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">{isFa ? 'قیمت لیکوئید شدن:' : 'Liquidation Price:'}</span>
-              <span className="font-mono font-bold text-rose-400">${Math.round(liquidationPrice).toLocaleString()}</span>
+              <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>{isFa ? 'قیمت لیکوئید شدن:' : 'Liquidation Price:'}</span>
+              <span className="font-mono font-bold text-rose-500">${Math.round(liquidationPrice).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">{isFa ? 'کارمزد باز کردن (۰.۵٪):' : 'Trading Fee (0.5%):'}</span>
-              <span className="font-mono text-purple-300">${(positionSizeUsd * 0.005).toFixed(2)} USDT</span>
+              <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>{isFa ? 'کارمزد باز کردن (۰.۵٪):' : 'Trading Fee (0.5%):'}</span>
+              <span className="font-mono font-bold text-purple-600 dark:text-purple-300">${(positionSizeUsd * 0.005).toFixed(2)} USDT</span>
             </div>
           </div>
 
@@ -459,46 +477,50 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                   return (
                     <div 
                       key={pos.id}
-                      className="p-4 rounded-xl bg-black/40 border border-purple-500/20 text-right space-y-3 text-xs"
+                      className={`p-4 rounded-xl border text-right space-y-3 text-xs ${
+                        isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200 shadow-sm'
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                            pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 border border-rose-500/30'
                           }`}>
                             {pos.side.toUpperCase()} {pos.leverage}x
                           </span>
-                          <span className="font-bold text-white text-sm">{pos.symbol}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">({pos.openedAt})</span>
+                          <span className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{pos.symbol}</span>
+                          <span className={`text-[10px] font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>({pos.openedAt})</span>
                         </div>
 
-                        {/* PnL Display */}
+                        {/* PnL Display with BiDi LTR fix */}
                         <div className="text-left font-mono">
-                          <span className={`text-sm font-black ${pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          <span dir="ltr" className={`text-sm font-black inline-block ${pnlUsd >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {pnlUsd >= 0 ? `+${pnlUsd.toFixed(2)}` : pnlUsd.toFixed(2)} USD ({pnlPercent >= 0 ? `+${pnlPercent.toFixed(1)}%` : `${pnlPercent.toFixed(1)}%`})
                           </span>
-                          <span className="block text-[10px] text-slate-400">
+                          <span className={`block text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                             {isFa ? toPersianDigits(formatToman(pnlToman)) : formatToman(pnlToman)} ت
                           </span>
                         </div>
                       </div>
 
                       {/* Specs Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-slate-300">
-                        <div className="p-1.5 rounded-lg bg-white/5">
-                          <span className="text-slate-400 block text-[9px]">{isFa ? 'قیمت ورود' : 'Entry Price'}</span>
+                      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono ${
+                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
+                      }`}>
+                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'قیمت ورود' : 'Entry Price'}</span>
                           <span>${pos.entryPrice.toLocaleString()}</span>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-white/5">
-                          <span className="text-slate-400 block text-[9px]">{isFa ? 'مارجین' : 'Margin'}</span>
+                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'مارجین' : 'Margin'}</span>
                           <span>${pos.marginUsd}</span>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-white/5">
-                          <span className="text-slate-400 block text-[9px]">{isFa ? 'حجم کل' : 'Size'}</span>
+                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'حجم کل' : 'Size'}</span>
                           <span>${pos.sizeUsd.toLocaleString()}</span>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300">
-                          <span className="text-rose-400 block text-[9px]">{isFa ? 'قیمت لیکوئید' : 'Liq. Price'}</span>
+                        <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                          <span className="block text-[9px]">{isFa ? 'قیمت لیکوئید' : 'Liq. Price'}</span>
                           <span>${Math.round(pos.liquidationPrice).toLocaleString()}</span>
                         </div>
                       </div>
@@ -507,7 +529,11 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                       <div className="flex justify-end pt-1">
                         <button
                           onClick={() => handleClosePosition(pos.id)}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 font-bold text-xs transition-all"
+                          className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all ${
+                            isDarkMode 
+                              ? 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-500/30' 
+                              : 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                          }`}
                         >
                           {isFa ? 'بستن پوزیشن و تسویه سود' : 'Close Position'}
                         </button>

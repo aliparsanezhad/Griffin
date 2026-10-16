@@ -16,13 +16,15 @@ interface AntiPhishingModalProps {
   onClose: () => void;
   lang: 'fa' | 'en';
   isDarkMode?: boolean;
+  onSavePhrase?: (phrase: string, emoji: string) => void;
 }
 
 export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
   isOpen,
   onClose,
   lang,
-  isDarkMode = true
+  isDarkMode = true,
+  onSavePhrase
 }) => {
   const isFa = lang === 'fa';
 
@@ -49,6 +51,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
     setSecurityPhrase(clean);
     localStorage.setItem('griffi_antiphishing_phrase', clean);
     localStorage.setItem('griffi_antiphishing_emoji', selectedEmoji);
+    onSavePhrase?.(clean, selectedEmoji);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };

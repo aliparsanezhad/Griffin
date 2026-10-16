@@ -304,14 +304,15 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
 
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'صرفه‌جویی در اجرت طلافروشی:' : 'Bazaar Markup Saved:'}</span>
-              <span className="font-mono font-bold text-emerald-400">
-                +${bazaarMakerFeeUsdt.toFixed(1)} USDT ≈ {isFa ? `${toPersianDigits(formatToman(bazaarMakerFeeToman))} تومان` : `${formatToman(bazaarMakerFeeToman)} T`}
+              <span className="font-mono font-bold text-emerald-400 flex items-center gap-1">
+                <span dir="ltr">+{bazaarMakerFeeUsdt.toFixed(1)} USDT</span>
+                <span>≈ {isFa ? `${toPersianDigits(formatToman(bazaarMakerFeeToman))} تومان` : `${formatToman(bazaarMakerFeeToman)} T`}</span>
               </span>
             </div>
 
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'کارمزد پروتکل گریفین (۰.۵٪):' : 'Protocol Commission (0.5%):'}</span>
-              <span className="font-mono text-purple-300">
+              <span className="font-mono text-purple-300" dir="ltr">
                 ${(usdtAmount * 0.005).toFixed(2)} USDT
               </span>
             </div>

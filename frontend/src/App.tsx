@@ -5,6 +5,7 @@ import { PerpFuturesSection } from './components/PerpFuturesSection';
 import { Web3CardsSection } from './components/Web3CardsSection';
 import { GriffinDomainsSection } from './components/GriffinDomainsSection';
 import { PortfolioSection } from './components/PortfolioSection';
+import { LaunchpadSection } from './components/LaunchpadSection';
 import { EarnSection } from './components/EarnSection';
 import { TomanCalculator } from './components/TomanCalculator';
 import { GasTracker } from './components/GasTracker';
@@ -138,6 +139,16 @@ export function App() {
         {activeTab === 'futures' && (
           <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
             <PerpFuturesSection
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        )}
+
+        {activeTab === 'launchpad' && (
+          <div className="w-full max-w-6xl py-6 px-4 animate-fade-in">
+            <LaunchpadSection
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}

@@ -41,12 +41,12 @@ interface TokenChoice {
 }
 
 const AVAILABLE_TOKENS: TokenChoice[] = [
-  { symbol: "USDT", name: "Tether USD", chain: "Arbitrum One", priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg" },
-  { symbol: "ETH", name: "Ethereum", chain: "Ethereum", priceUsd: 3420.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg" },
-  { symbol: "USDC", name: "USD Coin", chain: "Base", priceUsd: 1.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdc.svg" },
-  { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum One", priceUsd: 0.88, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg" },
-  { symbol: "BNB", name: "BNB Coin", chain: "BNB Chain", priceUsd: 590.00, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg" },
-  { symbol: "POL", name: "Polygon", chain: "Polygon", priceUsd: 0.45, logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg" },
+  { symbol: "USDT", name: "Tether USD", chain: "Arbitrum One", priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/325/large/Tether.png" },
+  { symbol: "ETH", name: "Ethereum", chain: "Ethereum", priceUsd: 3420.00, logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" },
+  { symbol: "USDC", name: "USD Coin", chain: "Base", priceUsd: 1.00, logo: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png" },
+  { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum One", priceUsd: 0.88, logo: "https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png" },
+  { symbol: "BNB", name: "BNB Coin", chain: "BNB Chain", priceUsd: 590.00, logo: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png" },
+  { symbol: "POL", name: "Polygon", chain: "Polygon", priceUsd: 0.45, logo: "https://assets.coingecko.com/coins/images/4713/large/polygon.png" },
 ];
 
 export const SwapSection: React.FC<SwapSectionProps> = ({
@@ -180,13 +180,15 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
       </div>
 
       {/* Engine Switcher (Griffin Fast Swap vs LI.FI Aggregator) */}
-      <div className="mb-6 flex items-center gap-1.5 p-1 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs font-bold shadow-lg">
+      <div className={`mb-6 flex items-center gap-1.5 p-1 rounded-2xl border text-xs font-bold shadow-lg ${
+        isDarkMode ? 'bg-purple-950/40 border-purple-500/30' : 'bg-purple-100/70 border-purple-200'
+      }`}>
         <button
           onClick={() => setSwapEngine('native')}
           className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
             swapEngine === 'native'
               ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-              : 'text-slate-400 hover:text-white'
+              : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -198,7 +200,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
           className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
             swapEngine === 'lifi'
               ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-              : 'text-slate-400 hover:text-white'
+              : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Layers className="w-3.5 h-3.5 text-purple-400" />
@@ -382,11 +384,11 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
             {/* Smart Route & Gas details */}
             <div className={`p-3 rounded-2xl border text-xs space-y-1.5 mb-5 ${
-              isDarkMode ? 'bg-purple-950/20 border-purple-500/15 text-slate-300' : 'bg-purple-100/30 border-purple-200 text-slate-600'
+              isDarkMode ? 'bg-purple-950/20 border-purple-500/15 text-slate-300' : 'bg-purple-50 border-purple-200 text-slate-800'
             }`}>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">{isFa ? 'مسیر تجمیع نقدینگی:' : 'Routing:'}</span>
-                <span className="font-semibold text-purple-400 flex items-center gap-1.5">
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'مسیر تجمیع نقدینگی:' : 'Routing:'}</span>
+                <span className="font-semibold text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
                   <span>Across V3 + Stargate V2</span>
                   <button
                     type="button"
@@ -394,24 +396,24 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                       playClickSound();
                       setCompanionView('routes');
                     }}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 transition-all"
+                    className="text-[10px] text-amber-600 dark:text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 transition-all hover:bg-amber-400/25"
                   >
                     {isFa ? 'تحلیل پل‌ها 🔍' : 'Inspect 🔍'}
                   </button>
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">{isFa ? 'کارمزد شبکه (گس):' : 'Estimated Gas:'}</span>
-                <span className="font-mono text-emerald-400 font-bold">&lt; $0.05 (≈ ۴,۵۰۰ ت)</span>
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد شبکه (گس):' : 'Estimated Gas:'}</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">&lt; $0.05 (≈ ۴,۵۰۰ ت)</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
-                <span className="font-mono text-purple-300 font-bold">0.5% ({isFa ? 'تخفیف ویژه کاربران ایرانی' : 'Iran discount'})</span>
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
+                <span className="font-mono text-purple-700 dark:text-purple-300 font-bold">0.5% ({isFa ? 'تخفیف ویژه کاربران ایرانی' : 'Iran discount'})</span>
               </div>
-              <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-purple-500/15">
-                <span>{isFa ? 'آدرس خزانه کارمزدها:' : 'Commission Wallet:'}</span>
+              <div className="flex justify-between items-center text-[10px] pt-1 border-t border-purple-500/15">
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'آدرس خزانه کارمزدها:' : 'Commission Wallet:'}</span>
                 <span 
-                  className="font-mono text-amber-300 font-medium hover:underline cursor-pointer" 
+                  className="font-mono text-amber-600 dark:text-amber-300 font-semibold hover:underline cursor-pointer" 
                   title="0xD9C10B10945D85396f0838EA045587a25FD2A2D3"
                   onClick={() => navigator.clipboard.writeText("0xD9C10B10945D85396f0838EA045587a25FD2A2D3")}
                 >
@@ -471,7 +473,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {/* MODE 2: Full LI.FI Aggregator Widget */}
         {swapEngine === 'lifi' && (
-          <div className="w-full flex justify-center overflow-visible">
+          <div className="w-full flex justify-center overflow-visible" dir="ltr">
             <div className="w-full max-w-[480px] rounded-3xl shadow-2xl overflow-visible">
               <LiFiWidget 
                 integrator={LIFI_CONFIG.integrator}

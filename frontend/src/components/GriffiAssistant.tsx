@@ -26,6 +26,7 @@ type GriffiPose =
   | 'router'
   | 'escrow'
   | 'futures'
+  | 'launchpad'
   | 'cards'
   | 'domains';
 
@@ -62,6 +63,10 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
         return isFa
           ? 'با معاملات فیوچرز غیرمتمرکز، بدون نیاز به احراز هویت تا ۵۰ برابر اهرم بگیرید! همیشه حد ضرر بگذارید تا از نوسانات بازار در امان بمانید.'
           : 'Trade decentralized perpetuals with up to 50x leverage and zero KYC! Remember to manage margin and set stop-loss.';
+      case 'launchpad':
+        return isFa
+          ? 'توکن پروژه یا میم‌کوین خودتون رو با باندینگ کرو عادلانه و نقدینگی قفل‌شده راه‌اندازی کنید! ۱۰۰٪ ضد راگ‌پول و با کارمزد خزانه شفاف.'
+          : 'Deploy your token with 100% fair launch, anti-rug liquidity locking, and transparent 0.5% protocol treasury commission!';
       case 'cards':
         return isFa
           ? 'با کارت‌های اعتباری مجازی وب۳، اشتراک‌های هوش مصنوعی مثل ChatGPT Plus و تلگرام پریمیوم رو مستقیم با تتر بخرید بدون اینکه تحریم‌ها مانع بشن!'
@@ -147,27 +152,28 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
     router: '/mascot/griffi-smart-router.jpg',
     escrow: '/mascot/griffi-escrow.jpg',
     futures: '/mascot/griffi-futures.jpg',
+    launchpad: '/mascot/griffi-launchpad.jpg',
     cards: '/mascot/griffi-card.jpg',
     domains: '/mascot/griffi-domains.jpg',
   };
 
   return (
     <>
-      {/* Floating Mascot Trigger Button */}
+      {/* Floating Mascot Trigger Button (Mobile-Optimized Compact Avatar, Full Pill on Desktop) */}
       <aside 
         aria-label={isFa ? 'دستیار گریفی' : 'Griffi Assistant'}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-3 animate-bounce-subtle"
+        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2 animate-bounce-subtle"
       >
         <button
           onClick={() => {
             playClickSound();
             setIsOpen(!isOpen);
           }}
-          className="group relative flex items-center gap-2.5 px-3.5 py-2 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 border bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-amber-900/40 border-purple-400/40 backdrop-blur-md text-white"
+          className="group relative flex items-center gap-2.5 p-1 sm:px-3.5 sm:py-2 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 border bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-amber-900/40 border-purple-400/40 backdrop-blur-md text-white"
           title={isFa ? 'گفتگو با گریفی، دستیار صرافی گریفین' : 'Chat with Griffi, the GriffinSwap mascot'}
         >
           {/* Griffi Avatar with Golden Aura */}
-          <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-amber-400/80 shadow-md shadow-amber-500/30">
+          <div className="relative w-10 h-10 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-2 ring-amber-400/80 shadow-md shadow-amber-500/30 shrink-0">
             <img 
               src="/mascot/griffi-avatar.jpg" 
               alt="Griffi mascot" 
@@ -176,7 +182,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border border-slate-900 rounded-full" />
           </div>
 
-          <div className="flex flex-col text-right">
+          <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-black tracking-tight flex items-center gap-1 text-amber-300">
               <span>{isFa ? 'گریفی (Griffi)' : 'Griffi'}</span>
               <Sparkles className="w-3 h-3 text-amber-400" />
@@ -398,6 +404,16 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                 }`}
               >
                 {isFa ? 'اهرم 🚀' : 'Perp 🚀'}
+              </button>
+              <button
+                onClick={() => setSelectedPose('launchpad')}
+                className={`flex-1 min-w-[65px] py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedPose === 'launchpad' 
+                    ? 'bg-purple-600 text-white shadow' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'لانچ‌پد 🪙' : 'Launch 🪙'}
               </button>
               <button
                 onClick={() => setSelectedPose('cards')}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   ArrowLeftRight, 
   Wallet, 
@@ -11,8 +11,6 @@ import {
   Sun, 
   Moon, 
   Globe, 
-  CheckCircle2, 
-  ExternalLink, 
   TrendingUp, 
   Sparkles, 
   Calendar, 
@@ -25,7 +23,9 @@ import {
   Coins,
   Users,
   Flame,
-  CreditCard
+  CreditCard,
+  Rocket,
+  ChevronDown
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { isSoundMuted, setSoundMuted, playClickSound } from '../services/soundService';
@@ -34,6 +34,7 @@ import { AntiPhishingModal } from './AntiPhishingModal';
 export type NavTab = 
   | 'swap' 
   | 'futures'
+  | 'launchpad'
   | 'cards'
   | 'domains'
   | 'chart' 
@@ -81,10 +82,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [muted, setMuted] = useState<boolean>(() => isSoundMuted());
   const [showAntiPhishingModal, setShowAntiPhishingModal] = useState<boolean>(false);
   const [antiPhishingPhrase, setAntiPhishingPhrase] = useState<string>(() => localStorage.getItem('griffi_antiphishing_phrase') || 'شیردال زرین');
   const [antiPhishingEmoji, setAntiPhishingEmoji] = useState<string>(() => localStorage.getItem('griffi_antiphishing_emoji') || '🦅🛡️');
+
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleToggleSound = () => {
     const next = !muted;
@@ -97,91 +111,122 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const isFa = lang === 'fa';
 
-  const navItems = [
+  // Primary visible tabs in top bar (5 high-frequency actions)
+  const primaryTabs = [
     { id: 'swap', label: isFa ? 'سواپ و بریج' : 'Swap & Bridge', icon: ArrowLeftRight },
-    { id: 'futures', label: isFa ? 'فیوچرز و اهرم' : 'Perp Futures', icon: Flame },
-    { id: 'cards', label: isFa ? 'کارت و اشتراک وب۳' : 'Web3 Cards', icon: CreditCard },
-    { id: 'domains', label: isFa ? 'دامنه‌های .griffi' : 'Web3 Domains', icon: Globe },
-    { id: 'chart', label: isFa ? 'نمودار زنده' : 'Live Chart', icon: TrendingUp },
-    { id: 'arbitrage', label: isFa ? 'دیدبان آربیتراژ' : 'Arbitrage', icon: Sparkles },
-    { id: 'routes', label: isFa ? 'دیدبان پل‌ها' : 'Bridges & Routes', icon: GitFork },
-    { id: 'dca', label: isFa ? 'پله‌ای و لیمیت' : 'DCA & Limit', icon: Calendar },
-    { id: 'portfolio', label: isFa ? 'پرتفولیو' : 'Portfolio', icon: Wallet },
+    { id: 'futures', label: isFa ? 'فیوچرز' : 'Futures', icon: Flame, badge: '50x' },
+    { id: 'launchpad', label: isFa ? 'لانچ‌پد' : 'Launchpad', icon: Rocket, badge: 'NEW' },
+    { id: 'cards', label: isFa ? 'کارت‌های وب۳' : 'Web3 Cards', icon: CreditCard },
     { id: 'earn', label: isFa ? 'کسب سود' : 'Earn', icon: Percent },
-    { id: 'calculator', label: isFa ? 'ماشین‌حساب' : 'Calculator', icon: Calculator },
-    { id: 'gold', label: isFa ? 'طلا و سکه' : 'Gold & Seke', icon: Coins },
-    { id: 'p2p', label: isFa ? 'اسکرو P2P' : 'P2P Escrow', icon: Users },
-    { id: 'gas', label: isFa ? 'کارمزد شبکه' : 'Gas Tracker', icon: Fuel },
-    { id: 'security', label: isFa ? 'امنیت و هانی‌پات' : 'Security & Audit', icon: ShieldCheck },
-    { id: 'telegram', label: isFa ? 'تلگرام و TON' : 'Telegram & TON', icon: Send },
-    { id: 'loyalty', label: isFa ? 'پرهای گریفی' : 'Griffi Pass', icon: Gift },
+  ];
+
+  // Secondary tools categorized in "More" mega dropdown
+  const moreCategories = [
+    {
+      titleFa: '📊 بازار و تحلیل',
+      titleEn: '📊 Market & Tools',
+      items: [
+        { id: 'chart', labelFa: 'نمودار زنده و سنتیمنت', labelEn: 'Live Chart & Sentiment', icon: TrendingUp },
+        { id: 'arbitrage', labelFa: 'دیدبان آربیتراژ صرافی‌ها', labelEn: 'Arbitrage Scanner', icon: Sparkles },
+        { id: 'routes', labelFa: 'دیدبان پل‌ها و مسیرها', labelEn: 'Bridges & Routes', icon: GitFork },
+        { id: 'calculator', labelFa: 'ماشین‌حساب نرخ تومان', labelEn: 'Toman Calculator', icon: Calculator },
+        { id: 'gas', labelFa: 'رصد کارمزد شبکه (Gas)', labelEn: 'Gas Tracker', icon: Fuel },
+      ]
+    },
+    {
+      titleFa: '🪙 معاملات و دارایی',
+      titleEn: '🪙 Assets & Trading',
+      items: [
+        { id: 'dca', labelFa: 'سفارشات پله‌ای و لیمیت', labelEn: 'DCA & Limit Orders', icon: Calendar },
+        { id: 'gold', labelFa: 'صندوق طلا و حباب سکه', labelEn: 'Digital Gold & Seke', icon: Coins },
+        { id: 'p2p', labelFa: 'اسکرو همتا‌به‌همتا (P2P)', labelEn: 'P2P Escrow', icon: Users },
+        { id: 'portfolio', labelFa: 'تحلیل پورتفولیو و سود', labelEn: 'Portfolio Tracker', icon: Wallet },
+      ]
+    },
+    {
+      titleFa: '🛡️ اکوسیستم و امنیت',
+      titleEn: '🛡️ Ecosystem & Security',
+      items: [
+        { id: 'domains', labelFa: 'دامنه‌های وب۳ (.griffi)', labelEn: '.griffi Web3 Domains', icon: Globe },
+        { id: 'security', labelFa: 'امنیت و اسکن هانی‌پات', labelEn: 'Security & Honeypot', icon: ShieldCheck },
+        { id: 'telegram', labelFa: 'درگاه تلگرام و TON', labelEn: 'Telegram & TON', icon: Send },
+        { id: 'loyalty', labelFa: 'باشگاه پرهای گریفی (VIP)', labelEn: 'Griffi Pass & Rewards', icon: Gift },
+      ]
+    }
   ];
 
   const shortenAddress = (addr: string) => {
-    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
+
+  const isMoreActive = moreCategories.some(cat => cat.items.some(i => i.id === activeTab));
 
   return (
     <>
-      <header className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors duration-200 px-3 lg:px-8 py-2.5 ${
+      <header className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors duration-200 px-3 lg:px-6 py-2.5 ${
         isDarkMode 
-          ? 'bg-[#100b24]/85 border-purple-500/20' 
-          : 'bg-white/85 border-purple-200 shadow-sm'
+          ? 'bg-[#100b24]/90 border-purple-500/20' 
+          : 'bg-white/95 border-purple-200 shadow-sm'
       }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="max-w-[1550px] mx-auto flex items-center justify-between gap-3">
           
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <button 
+          {/* Logo & Toman Ticker Badge */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
               onClick={() => setActiveTab('swap')}
               className="flex items-center gap-2.5 text-right hover:opacity-90 transition-opacity"
             >
               <div className="relative w-9 h-9 lg:w-10 lg:h-10 rounded-xl p-0.5 bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-500/20 overflow-hidden ring-1 ring-amber-400/50">
-                <img src="/mascot/griffi-avatar.jpg" alt="Griffi Mascot" className="w-full h-full object-cover rounded-[10px]" />
+                <img 
+                  src="/mascot/griffi-avatar.jpg" 
+                  alt="Griffi Mascot" 
+                  className="w-full h-full object-cover rounded-[10px]"
+                />
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-base lg:text-lg tracking-tight griffin-gradient-text">
+                <span className="font-extrabold text-base lg:text-lg tracking-tight griffin-gradient-text leading-tight">
                   {isFa ? 'گریفین سواپ' : 'GriffinSwap'}
                 </span>
-                <span className={`text-[10px] font-medium tracking-wide ${isDarkMode ? 'text-purple-300/80' : 'text-purple-700'}`}>
-                  {isFa ? 'صرافی غیرمتمرکز کاربران ایرانی' : 'Cross-Chain DEX for Iran'}
+                <span className="text-[10px] font-medium tracking-wide text-purple-400 dark:text-purple-300/80">
+                  {isFa ? 'صرافی غیرمتمرکز کاربران ایرانی' : 'Cross-Chain DEX & Gateway'}
                 </span>
               </div>
             </button>
 
-            {/* Live Tether/Toman Ticker Pill */}
-            <div className={`hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-inner border ${
+            {/* Live Toman Rate Pill */}
+            <div className={`hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono border ${
               isDarkMode 
-                ? 'bg-purple-950/40 border-purple-500/30 text-slate-200' 
-                : 'bg-purple-50 border-purple-200 text-slate-700'
+                ? 'bg-purple-950/40 border-purple-500/30 text-purple-200' 
+                : 'bg-purple-50 border-purple-200 text-purple-900'
             }`}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              <span className="text-[11px] font-sans font-medium text-slate-400">
                 {isFa ? 'نرخ تتر:' : 'USDT:'}
               </span>
-              <span className="font-bold text-amber-500">
-                {isFa ? `${toPersianDigits(formatToman(tomanRate, false))} ت` : `${formatToman(tomanRate, false)} T`}
+              <span className="font-bold text-amber-500 dark:text-amber-300">
+                {toPersianDigits(formatToman(tomanRate))} {isFa ? 'ت' : 'T'}
               </span>
-              <span className="text-[10px] text-emerald-500 font-semibold px-1 rounded bg-emerald-500/10">
+              <span className={`text-[10px] font-bold ${
+                rateChange.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'
+              }`}>
                 {rateChange}
               </span>
             </div>
           </div>
 
-          {/* Desktop Navigation Tabs */}
-          <nav className={`hidden lg:flex items-center gap-1 p-1 rounded-2xl border ${
+          {/* Desktop Navigation Tabs (5 Primary + Mega Dropdown) */}
+          <nav className={`hidden lg:flex items-center gap-1 p-1 rounded-2xl border shrink-0 ${
             isDarkMode 
               ? 'bg-purple-950/30 border-purple-500/20' 
               : 'bg-purple-100/50 border-purple-200'
           }`}>
-            {navItems.map((item) => {
+            {primaryTabs.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as NavTab)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
                       : isDarkMode
@@ -191,13 +236,87 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-300' : isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
                   <span>{item.label}</span>
+                  {item.badge && (
+                    <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-full ${
+                      isActive 
+                        ? 'bg-amber-400 text-slate-950' 
+                        : 'bg-amber-400/20 text-amber-400 border border-amber-400/30'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
+
+            {/* Categorized "More Tools" Mega Dropdown */}
+            <div className="relative" ref={moreDropdownRef}>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setMoreMenuOpen(!moreMenuOpen);
+                }}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  isMoreActive
+                    ? 'bg-purple-700/60 text-white font-bold border border-purple-400/40'
+                    : isDarkMode
+                      ? 'text-slate-300 hover:text-white hover:bg-white/5'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
+              >
+                <span>{isFa ? 'سایر ابزارها' : 'More'}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Mega Dropdown Panel */}
+              {moreMenuOpen && (
+                <div className={`absolute top-full mt-2 left-0 right-auto md:right-0 md:left-auto w-[680px] p-4 rounded-3xl border shadow-2xl backdrop-blur-2xl z-50 animate-fade-in ${
+                  isDarkMode 
+                    ? 'bg-[#150e2e]/95 border-purple-500/40 shadow-purple-950/60 text-white' 
+                    : 'bg-white/95 border-purple-200 shadow-xl text-slate-900'
+                }`}>
+                  <div className="grid grid-cols-3 gap-4">
+                    {moreCategories.map((cat, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="text-[11px] font-black text-amber-400 border-b border-purple-500/20 pb-1">
+                          {isFa ? cat.titleFa : cat.titleEn}
+                        </div>
+                        <div className="space-y-1">
+                          {cat.items.map((it) => {
+                            const ItIcon = it.icon;
+                            const isSelected = activeTab === it.id;
+                            return (
+                              <button
+                                key={it.id}
+                                onClick={() => {
+                                  playClickSound();
+                                  setActiveTab(it.id as NavTab);
+                                  setMoreMenuOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-right transition-all ${
+                                  isSelected 
+                                    ? 'bg-purple-600 text-white font-bold shadow' 
+                                    : isDarkMode 
+                                      ? 'text-slate-300 hover:text-white hover:bg-purple-900/40' 
+                                      : 'text-slate-700 hover:text-purple-900 hover:bg-purple-50'
+                                }`}
+                              >
+                                <ItIcon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-amber-300' : 'text-purple-400'}`} />
+                                <span className="truncate">{isFa ? it.labelFa : it.labelEn}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
-          {/* Right Action Bar */}
-          <div className="flex items-center gap-2">
+          {/* Right Action Bar (Always visible on desktop!) */}
+          <div className="flex items-center gap-2 shrink-0">
             
             {/* Anti-Phishing Safety Code Button */}
             <button
@@ -270,31 +389,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300 hover:text-white' 
                   : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
               }`}
-              title={muted ? (isFa ? 'فعال‌سازی صدا' : 'Unmute') : (isFa ? 'بی‌صدا کردن' : 'Mute')}
+              title={muted ? 'روشن کردن صدا' : 'بی‌صدا کردن'}
             >
-              {muted ? <VolumeX className="w-3.5 h-3.5 text-slate-400" /> : <Volume2 className="w-3.5 h-3.5 text-amber-300" />}
+              {muted ? (
+                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+              )}
             </button>
 
-            {/* Wallet Button */}
+            {/* Connect / Connected Wallet Button */}
             {walletAddress ? (
               <button
                 onClick={() => setShowWalletModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/40 text-xs font-bold transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold font-mono transition-all border bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 shadow-sm"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>{shortenAddress(walletAddress)}</span>
               </button>
             ) : (
               <button
                 onClick={onConnectWallet}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-purple-600/30 transition-all hover:scale-[1.02]"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 shadow-md shadow-purple-600/30 hover:scale-105 active:scale-95 shrink-0"
               >
                 <Wallet className="w-3.5 h-3.5 text-amber-300" />
-                <span>{isFa ? 'اتصال کیف پول' : 'Connect'}</span>
+                <span>{isFa ? 'اتصال کیف پول' : 'Connect Wallet'}</span>
               </button>
             )}
 
-            {/* Mobile Hamburger Button */}
+            {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`lg:hidden p-2 rounded-xl border ${
@@ -302,147 +425,149 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-purple-950/40 border-purple-500/20 text-slate-300' 
                   : 'bg-purple-50 border-purple-200 text-slate-700'
               }`}
+              aria-label="Toggle Mobile Menu"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
+
           </div>
+
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer with Categorized Sections */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-3 pt-3 border-t border-purple-500/20 pb-2 space-y-1 animate-fade-in">
-            <div className={`flex md:hidden items-center justify-between px-3 py-2 mb-2 rounded-xl border text-xs ${
-              isDarkMode ? 'bg-purple-950/50 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-            }`}>
-              <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>
-                {isFa ? 'نرخ تتر (تومان):' : 'USDT/IRT:'}
-              </span>
-              <span className="font-bold text-amber-500">
-                {isFa ? `${toPersianDigits(formatToman(tomanRate, false))} ت` : `${formatToman(tomanRate, false)} T`}
-              </span>
+          <div className={`lg:hidden fixed inset-x-0 top-[65px] bottom-0 z-50 p-4 overflow-y-auto animate-fade-in ${
+            isDarkMode ? 'bg-[#0f0924]/95 backdrop-blur-2xl text-white' : 'bg-white/98 text-slate-900 shadow-2xl'
+          }`}>
+            <div className="max-w-md mx-auto space-y-5 pb-16">
+              
+              {/* Primary Mobile Tabs */}
+              <div className="space-y-1">
+                <span className="text-[11px] font-black text-amber-400 block px-2">
+                  {isFa ? '🚀 بخش‌های اصلی' : '🚀 Primary'}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {primaryTabs.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          playClickSound();
+                          setActiveTab(item.id as NavTab);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`flex items-center gap-2 p-2.5 rounded-2xl text-xs font-bold text-right transition-all border ${
+                          isActive
+                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-amber-400/50 shadow-md'
+                            : isDarkMode
+                              ? 'bg-purple-950/40 border-purple-500/20 text-slate-300'
+                              : 'bg-purple-50 border-purple-200 text-slate-700'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-purple-400'}`} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Categorized Mobile Menus */}
+              {moreCategories.map((cat, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <span className="text-[11px] font-black text-purple-400 dark:text-purple-300 block px-2">
+                    {isFa ? cat.titleFa : cat.titleEn}
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {cat.items.map((it) => {
+                      const ItIcon = it.icon;
+                      const isActive = activeTab === it.id;
+                      return (
+                        <button
+                          key={it.id}
+                          onClick={() => {
+                            playClickSound();
+                            setActiveTab(it.id as NavTab);
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`flex items-center gap-2 p-2.5 rounded-2xl text-xs text-right transition-all border ${
+                            isActive
+                              ? 'bg-purple-600 text-white border-amber-400/50 font-bold shadow'
+                              : isDarkMode
+                                ? 'bg-purple-950/30 border-purple-500/20 text-slate-300'
+                                : 'bg-slate-50 border-slate-200 text-slate-700'
+                          }`}
+                        >
+                          <ItIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-amber-300' : 'text-purple-400'}`} />
+                          <span className="truncate">{isFa ? it.labelFa : it.labelEn}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Mobile Wallet & Action Section */}
+              <div className="pt-3 border-t border-purple-500/20 space-y-2">
+                {walletAddress ? (
+                  <button
+                    onClick={() => {
+                      onDisconnectWallet();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 font-bold text-xs"
+                  >
+                    {isFa ? 'قطع اتصال کیف پول' : 'Disconnect Wallet'} ({shortenAddress(walletAddress)})
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      onConnectWallet();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs shadow-lg"
+                  >
+                    {isFa ? 'اتصال کیف پول' : 'Connect Wallet'}
+                  </button>
+                )}
+              </div>
+
             </div>
-
-            {/* Anti-Phishing mobile button */}
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setShowAntiPhishingModal(true);
-              }}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 mb-2"
-            >
-              <span className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>{isFa ? 'سپر ضد فیشینگ و کد امنیتی' : 'Anti-Phishing Security'}</span>
-              </span>
-              <span className="font-mono text-[11px] bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                {antiPhishingEmoji} {antiPhishingPhrase.length > 8 ? antiPhishingPhrase.slice(0, 8) + '...' : antiPhishingPhrase}
-              </span>
-            </button>
-
-            {onOpenTour && (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenTour();
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2"
-              >
-                <HelpCircle className="w-4 h-4 text-amber-400" />
-                <span>{isFa ? 'شروع تور راهنمای گریفی 🦅' : 'Guided Tour with Griffi 🦅'}</span>
-              </button>
-            )}
-
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id as NavTab);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-purple-600 text-white font-bold shadow-md'
-                      : isDarkMode
-                        ? 'text-slate-300 hover:bg-white/5 hover:text-white'
-                        : 'text-slate-700 hover:bg-purple-50'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-purple-500'}`} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
           </div>
         )}
       </header>
 
-      {/* Anti-Phishing Guard Modal */}
-      <AntiPhishingModal
-        isOpen={showAntiPhishingModal}
-        onClose={() => {
-          setShowAntiPhishingModal(false);
-          setAntiPhishingPhrase(localStorage.getItem('griffi_antiphishing_phrase') || 'شیردال زرین');
-          setAntiPhishingEmoji(localStorage.getItem('griffi_antiphishing_emoji') || '🦅🛡️');
-        }}
-        lang={lang}
-        isDarkMode={isDarkMode}
-      />
-
       {/* Wallet Details Modal */}
       {showWalletModal && walletAddress && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className={`w-full max-w-sm rounded-2xl p-6 border shadow-2xl relative ${
-            isDarkMode ? 'glass-panel border-purple-500/30' : 'glass-panel-light border-purple-200'
+          <div className={`w-full max-w-sm p-6 rounded-3xl border shadow-2xl space-y-4 ${
+            isDarkMode ? 'bg-[#150d2a] border-purple-500/30 text-white' : 'bg-white border-purple-200 text-slate-900'
           }`}>
-            <button 
-              onClick={() => setShowWalletModal(false)}
-              className="absolute top-4 left-4 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-600/30 flex items-center justify-center text-purple-300">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className={`font-bold text-base ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                  {isFa ? 'کیف پول متصل است' : 'Wallet Connected'}
-                </h3>
-                <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {isFa ? 'غیرحضانتی و امن' : 'Active & Protected'}
-                </span>
-              </div>
+            <div className="flex justify-between items-center pb-2 border-b border-purple-500/20">
+              <span className="font-extrabold text-sm">{isFa ? 'کیف پول متصل' : 'Connected Wallet'}</span>
+              <button onClick={() => setShowWalletModal(false)} className="text-slate-400 hover:text-white">✕</button>
             </div>
-
-            <div className={`p-3 rounded-xl border mb-4 break-all font-mono text-xs ${
-              isDarkMode ? 'bg-purple-950/50 border-purple-500/20 text-slate-200' : 'bg-purple-50 border-purple-200 text-slate-800'
-            }`}>
+            <div className="p-3 rounded-2xl bg-purple-950/40 border border-purple-500/20 text-center font-mono text-xs text-amber-300 select-all break-all">
               {walletAddress}
             </div>
-
             <div className="flex gap-2">
-              <a
-                href={`https://etherscan.io/address/${walletAddress}`}
-                target="_blank"
-                rel="noreferrer"
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  isDarkMode ? 'bg-white/5 hover:bg-white/10 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(walletAddress);
+                  setShowWalletModal(false);
+                }}
+                className="flex-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>{isFa ? 'اکسپلورر' : 'Explorer'}</span>
-              </a>
+                {isFa ? 'کپی آدرس' : 'Copy'}
+              </button>
               <button
                 onClick={() => {
                   onDisconnectWallet();
                   setShowWalletModal(false);
                 }}
-                className="flex-1 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition-colors"
+                className="flex-1 py-2 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 font-bold text-xs"
               >
                 {isFa ? 'قطع اتصال' : 'Disconnect'}
               </button>
@@ -450,6 +575,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       )}
+
+      {/* Anti-Phishing Modal */}
+      <AntiPhishingModal
+        isOpen={showAntiPhishingModal}
+        onClose={() => setShowAntiPhishingModal(false)}
+        lang={lang}
+        isDarkMode={isDarkMode}
+        onSavePhrase={(phrase: string, emoji: string) => {
+          setAntiPhishingPhrase(phrase);
+          setAntiPhishingEmoji(emoji);
+        }}
+      />
     </>
   );
 };
