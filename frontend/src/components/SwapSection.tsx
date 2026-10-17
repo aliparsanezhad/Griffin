@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LiFiWidget } from '@lifi/widget';
 import { 
   ShieldCheck, 
@@ -31,6 +31,9 @@ interface SwapSectionProps {
   isDarkMode: boolean;
   lang: 'fa' | 'en';
   walletAddress: string | null;
+  initialFromSymbol?: string;
+  initialToSymbol?: string;
+  initialAmount?: string;
 }
 
 interface TokenChoice {
@@ -80,6 +83,9 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   isDarkMode,
   lang,
   walletAddress,
+  initialFromSymbol,
+  initialToSymbol,
+  initialAmount,
 }) => {
   const isFa = lang === 'fa';
   
@@ -87,9 +93,36 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [swapEngine, setSwapEngine] = useState<'native' | 'lifi'>('native');
 
   // Native swap state
-  const [fromToken, setFromToken] = useState<TokenChoice>(AVAILABLE_TOKENS[0]); // USDT
-  const [toToken, setToToken] = useState<TokenChoice>(AVAILABLE_TOKENS[1]); // ETH
-  const [fromAmount, setFromAmount] = useState<string>('500');
+  const [fromToken, setFromToken] = useState<TokenChoice>(() => {
+    if (initialFromSymbol) {
+      const found = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === initialFromSymbol.toUpperCase());
+      if (found) return found;
+    }
+    return AVAILABLE_TOKENS[0];
+  });
+  const [toToken, setToToken] = useState<TokenChoice>(() => {
+    if (initialToSymbol) {
+      const found = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === initialToSymbol.toUpperCase());
+      if (found) return found;
+    }
+    return AVAILABLE_TOKENS[1];
+  });
+  const [fromAmount, setFromAmount] = useState<string>(() => initialAmount || '500');
+
+  useEffect(() => {
+    if (initialFromSymbol) {
+      const found = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === initialFromSymbol.toUpperCase());
+      if (found) setFromToken(found);
+    }
+    if (initialToSymbol) {
+      const found = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === initialToSymbol.toUpperCase());
+      if (found) setToToken(found);
+    }
+    if (initialAmount) {
+      setFromAmount(initialAmount);
+    }
+  }, [initialFromSymbol, initialToSymbol, initialAmount]);
+
   const [slippage, setSlippage] = useState<number>(0.5);
   const [isGasless, setIsGasless] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -752,6 +785,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         selectedTokenSymbol={selectingFor === 'from' ? fromToken.symbol : toToken.symbol}
         lang={lang}
         isDarkMode={isDarkMode}
+        userBalances={USER_BALANCES}
+        tomanRate={tomanRate}
       />
 
       {/* Pre-Flight Transaction Simulation & MEV Guard Modal */}

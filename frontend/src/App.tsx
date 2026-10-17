@@ -35,6 +35,7 @@ export function App() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [showTour, setShowTour] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [swapParams, setSwapParams] = useState<{ from?: string; to?: string; amount?: string } | null>(null);
 
   // Sync direction with language
   useEffect(() => {
@@ -137,6 +138,9 @@ export function App() {
             isDarkMode={isDarkMode}
             lang={lang}
             walletAddress={walletAddress}
+            initialFromSymbol={swapParams?.from}
+            initialToSymbol={swapParams?.to}
+            initialAmount={swapParams?.amount}
           />
         )}
 
@@ -211,7 +215,10 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
-              onInitiateSwap={() => setActiveTab('swap')}
+              onInitiateSwap={(fromToken, toToken, amount) => {
+                setSwapParams({ from: fromToken, to: toToken, amount });
+                setActiveTab('swap');
+              }}
             />
           </div>
         )}

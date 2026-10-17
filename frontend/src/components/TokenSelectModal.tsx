@@ -7,6 +7,7 @@ import {
   Coins
 } from 'lucide-react';
 import { playClickSound } from '../services/soundService';
+import { toPersianDigits, formatToman } from '../services/tomanService';
 
 export interface TokenItem {
   symbol: string;
@@ -54,6 +55,9 @@ export const EXTENDED_TOKENS: TokenItem[] = [
   { symbol: "AAVE", name: "Aave Token", chain: "Arbitrum One", chainId: 42161, priceUsd: 155.00, logo: "https://assets.coingecko.com/coins/images/12645/large/AAVE.png", category: "defi" },
   { symbol: "UNI", name: "Uniswap", chain: "Ethereum", chainId: 1, priceUsd: 8.20, logo: "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png", category: "defi" },
   { symbol: "PENDLE", name: "Pendle Finance", chain: "Arbitrum One", chainId: 42161, priceUsd: 4.65, logo: "https://assets.coingecko.com/coins/images/15069/large/Pendle_Logo_Normal-03.png", category: "defi" },
+
+  // Native Griffin Ecosystem
+  { symbol: "SHIRDAL", name: "Shirdal Mythic (توکن بومی گریفین)", chain: "Arbitrum One", chainId: 42161, priceUsd: 0.0000485, logo: "/mascot/griffi-avatar.jpg", category: "popular", isPopularInIran: true },
 ];
 
 interface TokenSelectModalProps {
@@ -63,6 +67,8 @@ interface TokenSelectModalProps {
   selectedTokenSymbol: string;
   lang: 'fa' | 'en';
   isDarkMode: boolean;
+  userBalances?: Record<string, number>;
+  tomanRate?: number;
 }
 
 export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
@@ -72,6 +78,8 @@ export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
   selectedTokenSymbol,
   lang,
   isDarkMode,
+  userBalances,
+  tomanRate,
 }) => {
   const isFa = lang === 'fa';
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,8 +221,21 @@ export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
 
                   <div className="text-left font-mono">
                     <span className="text-xs font-bold text-slate-200 block">
-                      ${token.priceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                      ${token.priceUsd < 0.01 
+                        ? token.priceUsd.toFixed(6) 
+                        : token.priceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })
+                      }
                     </span>
+                    {tomanRate && token.priceUsd >= 0.01 && (
+                      <span className="text-[10px] text-purple-300 block">
+                        ≈ {isFa ? toPersianDigits(formatToman(token.priceUsd * tomanRate)) : formatToman(token.priceUsd * tomanRate)} {isFa ? 'ت' : 'T'}
+                      </span>
+                    )}
+                    {userBalances && userBalances[token.symbol] !== undefined && (
+                      <span className="text-[10px] text-amber-300 font-bold block">
+                        {userBalances[token.symbol].toLocaleString()} {token.symbol}
+                      </span>
+                    )}
                     {isSelected && (
                       <Check className="w-4 h-4 text-emerald-400 ml-auto mt-0.5" />
                     )}
