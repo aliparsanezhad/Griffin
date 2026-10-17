@@ -150,6 +150,45 @@ export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
           />
         </div>
 
+        {/* Quick Popular Tokens Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 scrollbar-none">
+          {[
+            { symbol: 'USDT', logo: 'https://assets.coingecko.com/coins/images/325/large/Tether.png' },
+            { symbol: 'ETH', logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+            { symbol: 'PAXG', logo: 'https://assets.coingecko.com/coins/images/9519/large/paxg.png' },
+            { symbol: 'SHIRDAL', logo: '/mascot/griffi-avatar.jpg' },
+            { symbol: 'BTC', logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+            { symbol: 'ARB', logo: 'https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png' },
+            { symbol: 'SOL', logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' },
+            { symbol: 'TON', logo: 'https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png' },
+          ].map((quick) => {
+            const tokenObj = EXTENDED_TOKENS.find(t => t.symbol === quick.symbol);
+            if (!tokenObj) return null;
+            const isSelected = selectedTokenSymbol === quick.symbol;
+            return (
+              <button
+                key={quick.symbol}
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  onSelectToken(tokenObj);
+                  onClose();
+                }}
+                className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                  isSelected
+                    ? 'bg-purple-600 text-white border-purple-400 shadow-sm'
+                    : isDarkMode
+                      ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300'
+                      : 'bg-white hover:bg-purple-50 border-purple-200 text-slate-700'
+                }`}
+              >
+                <img src={quick.logo} alt={quick.symbol} className="w-4 h-4 rounded-full object-cover" />
+                <span className="font-mono text-[11px]">{quick.symbol}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Categories Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-2 scrollbar-none">
           {categories.map((c) => (

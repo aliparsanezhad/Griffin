@@ -97,7 +97,7 @@ export function App() {
     <div className={`min-h-screen flex flex-col justify-between relative overflow-hidden ${isDarkMode ? 'bg-[#0b0817]' : 'bg-slate-100'}`}>
       
       {/* Dynamic Mythical Griffin Background Aura / Glow */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-mesh-grid">
         <div className="absolute -top-40 right-1/4 w-[500px] h-[500px] rounded-full ambient-glow-1 blur-3xl opacity-40 animate-pulse" />
         <div className="absolute top-1/3 -left-20 w-[450px] h-[450px] rounded-full ambient-glow-2 blur-3xl opacity-30" />
         <div className="absolute -bottom-20 right-10 w-[600px] h-[600px] rounded-full ambient-glow-3 blur-3xl opacity-25" />
