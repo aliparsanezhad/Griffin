@@ -220,9 +220,11 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       {/* Interactive Yield Calculator Banner */}
       <div className={`p-6 md:p-8 rounded-3xl border shadow-2xl mb-8 relative overflow-hidden transition-all ${
         isDarkMode 
-          ? 'glass-panel border-purple-500/25' 
+          ? 'cyber-gradient-card border-purple-500/35 neon-glow-purple' 
           : 'glass-panel-light border-purple-200'
       }`}>
+        {/* Top Laser Accent Line */}
+        <div className="laser-line -mx-6 md:-mx-8 -mt-6 md:-mt-8 mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
           <div className="md:col-span-7 space-y-4">
