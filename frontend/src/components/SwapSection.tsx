@@ -716,7 +716,15 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {companionView === 'arbitrage' && (
           <div className="animate-fade-in">
-            <ArbitrageScanner tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+            <ArbitrageScanner 
+              tomanRate={tomanRate} 
+              lang={lang} 
+              isDarkMode={isDarkMode} 
+              onNavigateSwap={() => {
+                setCompanionView('none');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
           </div>
         )}
 

@@ -689,7 +689,7 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Treasury Fee:</span>
-                <span className="text-purple-300">0.05% (0xD9C1...A2D3)</span>
+                <span className="text-purple-300">0.5% (0xD9C1...A2D3)</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Gas Fee:</span>

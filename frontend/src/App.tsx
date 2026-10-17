@@ -263,6 +263,7 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
+              onNavigateSwap={() => setActiveTab('swap')}
             />
           </div>
         )}

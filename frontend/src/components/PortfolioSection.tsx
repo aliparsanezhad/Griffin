@@ -105,6 +105,24 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       priceUsd: 0.45,
       logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg",
       color: "bg-purple-500",
+    },
+    {
+      symbol: "PAXG",
+      name: "PAX Gold (طلای دیجیتال)",
+      chain: "Ethereum",
+      balance: 0.85,
+      priceUsd: 2685.50,
+      logo: "https://assets.coingecko.com/coins/images/9519/large/paxg.png",
+      color: "bg-amber-400",
+    },
+    {
+      symbol: "SHIRDAL",
+      name: "Shirdal Mythic (توکن بومی گریفین)",
+      chain: "Arbitrum One",
+      balance: 5000000,
+      priceUsd: 0.0000485,
+      logo: "/mascot/griffi-avatar.jpg",
+      color: "bg-pink-500",
     }
   ];
 

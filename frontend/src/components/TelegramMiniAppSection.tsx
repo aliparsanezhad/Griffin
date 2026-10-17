@@ -5,13 +5,17 @@ import {
   Bell, 
   Check, 
   ArrowLeftRight, 
-  Zap, 
   ExternalLink,
   Sparkles,
-  Bot
+  Bot,
+  DollarSign,
+  Copy,
+  Zap
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
+
+const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
 interface TelegramMiniAppSectionProps {
   tomanRate: number;
@@ -25,6 +29,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
   isDarkMode = true
 }) => {
   const isFa = lang === 'fa';
+  const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
 
   // State for simulated TON <-> EVM swap
   const [tonAmount, setTonAmount] = useState<string>('25');
@@ -55,6 +60,13 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
   const toggleAlert = (key: keyof typeof alerts) => {
     playClickSound();
     setAlerts(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleCopyWallet = () => {
+    navigator.clipboard.writeText(COMMISSION_WALLET);
+    setCopiedWallet(true);
+    playClickSound();
+    setTimeout(() => setCopiedWallet(false), 2000);
   };
 
   return (
@@ -333,6 +345,41 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
           </span>
         </div>
 
+      </div>
+
+      {/* Protocol Commission & Treasury Notice */}
+      <div className={`mt-6 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      }`}>
+        <div className="flex items-center gap-2 text-right">
+          <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
+            {isFa 
+              ? 'کارمزد پروتکل گریفین سواپ (۰.۵٪) برای تراکنش‌های مینی‌اپ و پل TON مستقیماً به خزانه‌داری رسمی واریز می‌شود:' 
+              : 'Platform commission (0.5%) for Telegram mini app and TON bridge routes directly to verified treasury:'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <code className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/40 text-purple-300 border border-purple-500/20">
+            {COMMISSION_WALLET.slice(0, 6)}...{COMMISSION_WALLET.slice(-4)}
+          </code>
+          <button
+            onClick={handleCopyWallet}
+            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors"
+            title="کپی آدرس خزانه"
+          >
+            {copiedWallet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          </button>
+          <a
+            href={`https://etherscan.io/address/${COMMISSION_WALLET}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
 
     </div>

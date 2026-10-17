@@ -82,17 +82,30 @@ const TRADING_PAIRS: PairInfo[] = [
     historySeed: [0.91, 0.905, 0.895, 0.90, 0.885, 0.875, 0.87, 0.88, 0.882, 0.884]
   },
   {
-    id: 'sol-usd',
-    name: 'SOL / USDT',
-    nameFa: 'سولانا / تتر',
-    baseSymbol: 'SOL',
+    id: 'paxg-usd',
+    name: 'PAXG / USDT',
+    nameFa: 'طلای دیجیتال / تتر',
+    baseSymbol: 'PAXG',
     quoteSymbol: 'USDT',
-    basePriceUsd: 178.60,
-    change24h: 5.40,
-    high24hUsd: 182.50,
-    low24hUsd: 169.00,
-    volume24hUsd: 890000000,
-    historySeed: [169, 171, 173.5, 172, 175, 177, 176, 179, 181, 178.6]
+    basePriceUsd: 2685.50,
+    change24h: 0.85,
+    high24hUsd: 2705.00,
+    low24hUsd: 2660.00,
+    volume24hUsd: 65000000,
+    historySeed: [2660, 2668, 2675, 2670, 2682, 2690, 2680, 2695, 2702, 2685.5]
+  },
+  {
+    id: 'shirdal-usd',
+    name: 'SHIRDAL / USDT',
+    nameFa: 'شیردال / تتر',
+    baseSymbol: 'SHIRDAL',
+    quoteSymbol: 'USDT',
+    basePriceUsd: 0.0000485,
+    change24h: 34.80,
+    high24hUsd: 0.0000520,
+    low24hUsd: 0.0000360,
+    volume24hUsd: 1850000,
+    historySeed: [0.000036, 0.000039, 0.000042, 0.000040, 0.000045, 0.000048, 0.000046, 0.000050, 0.000051, 0.0000485]
   }
 ];
 
