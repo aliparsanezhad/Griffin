@@ -64,6 +64,8 @@ interface NavbarProps {
   onConnectWallet: () => void;
   onDisconnectWallet: () => void;
   onOpenTour?: () => void;
+  mobileMenuOpen?: boolean;
+  setMobileMenuOpen?: (open: boolean) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -79,8 +81,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onConnectWallet,
   onDisconnectWallet,
   onOpenTour,
+  mobileMenuOpen: externalMobileMenuOpen,
+  setMobileMenuOpen: externalSetMobileMenuOpen,
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
+  const mobileMenuOpen = externalMobileMenuOpen !== undefined ? externalMobileMenuOpen : internalMobileMenuOpen;
+  const setMobileMenuOpen = externalSetMobileMenuOpen !== undefined ? externalSetMobileMenuOpen : setInternalMobileMenuOpen;
+
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [muted, setMuted] = useState<boolean>(() => isSoundMuted());

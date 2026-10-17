@@ -11,7 +11,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
-import { playClickSound, playSwapStartSound, playSwapSuccessSound } from '../services/soundService';
+import { playClickSound, playSwapStartSound, playSwapSuccessSound, playAnvilForgeSound } from '../services/soundService';
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
@@ -163,10 +163,35 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
 
   const handleTrade = (e: React.FormEvent) => {
     e.preventDefault();
+    if (numAmount <= 0) return;
+    playAnvilForgeSound();
     playSwapStartSound();
+
     setTimeout(() => {
       playSwapSuccessSound();
       setTradeSuccess(true);
+
+      // Dynamically calculate bonding curve growth
+      const addedMarketCap = tradeType === 'buy' ? numAmount : -Math.min(numAmount, selectedToken.marketCapUsd * 0.1);
+      const newMarketCap = Math.max(1000, selectedToken.marketCapUsd + addedMarketCap);
+      const newProgress = Math.min(100, parseFloat(((newMarketCap / selectedToken.bondingTargetUsd) * 100).toFixed(1)));
+      const priceMultiplier = 1 + (tradeType === 'buy' ? 0.025 : -0.015);
+      const newPrice = parseFloat((selectedToken.priceUsd * priceMultiplier).toFixed(8));
+      const isGraduated = newProgress >= 100;
+
+      const updatedToken: LaunchpadToken = {
+        ...selectedToken,
+        marketCapUsd: Math.round(newMarketCap),
+        progressPercent: newProgress,
+        priceUsd: newPrice,
+        holdersCount: tradeType === 'buy' ? selectedToken.holdersCount + 1 : selectedToken.holdersCount,
+        change24h: parseFloat((selectedToken.change24h + (tradeType === 'buy' ? 2.4 : -1.8)).toFixed(1)),
+        isGraduated,
+      };
+
+      setSelectedToken(updatedToken);
+      setTokens(tokens.map((t) => (t.id === updatedToken.id ? updatedToken : t)));
+
       setTimeout(() => setTradeSuccess(false), 3000);
     }, 900);
   };
@@ -175,6 +200,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
     e.preventDefault();
     if (!newSymbol || !newName) return;
     setIsCreating(true);
+    playAnvilForgeSound();
     playSwapStartSound();
 
     setTimeout(() => {
@@ -675,13 +701,27 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               </div>
 
               {/* Anti-Rug & Commission Note */}
-              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed">
-                <strong>{isFa ? 'ضمانت راستی‌آزمایی گریفی:' : 'Griffin Assurance:'}</strong>
-                <p className="mt-1">
+              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed space-y-1.5">
+                <div className="flex items-center justify-between font-bold">
+                  <span>{isFa ? 'ضمانت راستی‌آزمایی و خزانه‌داری:' : 'Griffin Assurance & Treasury:'}</span>
+                  <span className="font-mono text-emerald-400">{isFa ? 'گس تخمینی: < $0.05' : 'Gas: < $0.05'}</span>
+                </div>
+                <p>
                   {isFa 
-                    ? 'هزینه ساخت توکن ۱۰ تتر است که مستقیماً به آدرس خزانه‌داری رسمی واریز می‌شود. هیچ توکنی برای تیم پیش‌تولید نخواهد شد و ۱۰۰٪ توکن‌ها در استخر باندینگ کرو برای عموم عرضه می‌شود.'
-                    : 'Creation fee is $10 sent to official treasury. 100% of tokens are minted directly into the public bonding curve pool.'}
+                    ? 'هزینه ساخت توکن ۱۰ تتر است که مستقیماً به آدرس خزانه‌داری رسمی (0xD9C1...A2D3) واریز می‌شود. هیچ توکنی برای تیم پیش‌تولید نخواهد شد و ۱۰۰٪ توکن‌ها در استخر باندینگ کرو برای عموم عرضه می‌شود.'
+                    : 'Creation fee is $10 sent directly to official treasury (0xD9C1...A2D3). 100% of tokens are minted directly into the public bonding curve pool.'}
                 </p>
+                <div className="pt-1 border-t border-amber-400/20 flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-slate-400 truncate max-w-[280px]">0xD9C10B10945D85396f0838EA045587a25FD2A2D3</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyWallet}
+                    className="p-1 rounded hover:bg-white/10 text-amber-300 shrink-0"
+                    title={isFa ? 'کپی آدرس' : 'Copy'}
+                  >
+                    {copiedWallet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
 
               <button

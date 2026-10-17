@@ -14,7 +14,8 @@ import {
   Check,
   Flame,
   CreditCard,
-  Globe
+  Globe,
+  Rocket
 } from 'lucide-react';
 import { LIFI_CONFIG } from '../services/lifiService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -214,6 +215,26 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
       ],
       tipFa: 'همیشه حد ضرر (Stop Loss) را تنظیم کنید تا از نوسانات بازار در امان بمانید.',
       tipEn: 'Always set a Stop Loss (SL) to protect your collateral against volatility.'
+    },
+    {
+      titleFa: 'سکوی پرتاب و ساخت توکن‌های وب۳ با باندینگ کرو 🪙🚀',
+      titleEn: 'Fair Launchpad & Token Foundry with Bonding Curve 🪙🚀',
+      badgeFa: 'لانچ‌پد و ساخت توکن',
+      badgeEn: 'Token Launchpad',
+      icon: Rocket,
+      image: '/mascot/griffi-launchpad.jpg',
+      contentFa: [
+        'توکن کامیونیتی یا پروژه خود را بدون نیاز به سرمایه اولیه و در امنیت ۱۰۰٪ بسازید.',
+        'مکانیزم باندینگ کرو (Bonding Curve) با قفل و سوزاندن خودکار نقدینگی، مانع از راگ‌پول و کلاهبرداری می‌شود.',
+        'به محض تکمیل نقدینگی، توکن به طور خودکار به استخر رسمی صرافی منتقل می‌شود.'
+      ],
+      contentEn: [
+        'Deploy community and meme tokens with zero upfront liquidity.',
+        'Automatic bonding curve with LP burn protects investors against rug-pulls.',
+        'Seamless automatic migration to Uniswap & Griffin AMM upon reaching target cap.'
+      ],
+      tipFa: 'هزینه ساخت توکن تنها ۱۰ تتر است که مستقیماً به آدرس رسمی خزانه پروتکل واریز می‌شود.',
+      tipEn: 'Token creation fee is only $10 routed directly to official platform treasury.'
     },
     {
       titleFa: 'کارت‌های اعتباری وب۳ و گیفت‌کارت‌های جهانی 💳',

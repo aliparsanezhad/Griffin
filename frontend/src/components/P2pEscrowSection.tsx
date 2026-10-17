@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
   Lock, 
@@ -45,7 +45,20 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   const [escrowAmountUsdt, setEscrowAmountUsdt] = useState<number>(500);
   const [escrowStep, setEscrowStep] = useState<number>(1);
   const [copied, setCopied] = useState<boolean>(false);
+  const [copiedSheba, setCopiedSheba] = useState<boolean>(false);
+  const [bankTrackingId, setBankTrackingId] = useState<string>('');
+  const [countdownSeconds, setCountdownSeconds] = useState<number>(900);
   const [showEscrowModal, setShowEscrowModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    let timer: any;
+    if (showEscrowModal && escrowStep === 2 && countdownSeconds > 0) {
+      timer = setInterval(() => {
+        setCountdownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showEscrowModal, escrowStep, countdownSeconds]);
 
   const isFa = lang === 'fa';
 
@@ -110,6 +123,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
     playClickSound();
     setSelectedOffer(offer);
     setEscrowStep(1);
+    setBankTrackingId('');
+    setCountdownSeconds(900);
     setShowEscrowModal(true);
   };
 
@@ -118,9 +133,19 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
     if (escrowStep === 1) {
       setEscrowStep(2);
     } else if (escrowStep === 2) {
+      if (bankTrackingId.trim().length < 4) {
+        return;
+      }
       setEscrowStep(3);
       playSwapSuccessSound();
     }
+  };
+
+  const handleCopySheba = () => {
+    navigator.clipboard.writeText('IR720120000000001234567890');
+    setCopiedSheba(true);
+    playClickSound();
+    setTimeout(() => setCopiedSheba(false), 2000);
   };
 
   const handleCopyWallet = () => {
@@ -364,54 +389,109 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
             )}
 
             {escrowStep === 2 && (
-              <div className="space-y-4">
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300">
-                  <CheckCircle2 className="w-4 h-4 inline ml-1" />
-                  {isFa ? 'تترها با موفقیت در قرارداد قفل شدند! اکنون به شماره شبای زیر واریز فرمایید:' : 'USDT locked! Transfer Tomans to:'}
+              <div className="space-y-4 animate-fade-in">
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{isFa ? 'تترها در قرارداد هوشمند قفل شدند!' : 'USDT locked in escrow!'}</span>
+                  </div>
+                  {/* Countdown Timer */}
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/40 text-amber-300 font-mono text-[11px] border border-amber-500/20">
+                    <Clock className="w-3 h-3 text-amber-400" />
+                    <span>
+                      {Math.floor(countdownSeconds / 60)}:{String(countdownSeconds % 60).padStart(2, '0')}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-purple-500/20 font-mono text-xs space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">شماره شبا:</span>
-                    <span className="text-amber-400">IR72 0120 0000 0000 1234 5678 90</span>
+                {/* Bank Sheba Card */}
+                <div className="p-4 rounded-2xl bg-black/50 border border-purple-500/20 font-mono text-xs space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 font-sans text-[11px]">{isFa ? 'شماره شبا (بانک سامان):' : 'IBAN (Saman Bank):'}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-amber-300 font-bold tracking-wide">IR72 0120 0000 0000 1234 5678 90</span>
+                      <button
+                        type="button"
+                        onClick={handleCopySheba}
+                        className="p-1 rounded bg-purple-900/60 hover:bg-purple-800 text-purple-200 transition-colors"
+                        title={isFa ? 'کپی شبا' : 'Copy IBAN'}
+                      >
+                        {copiedSheba ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">نام صاحب حساب:</span>
-                    <span className="text-white">امیررضا رضایی (تایید هویت شده)</span>
+                    <span className="text-slate-400 font-sans text-[11px]">{isFa ? 'نام صاحب حساب:' : 'Account Holder:'}</span>
+                    <span className="text-white font-sans font-bold">{isFa ? 'امیررضا رضایی (تایید هویت شده)' : 'Amirreza Rezaei (Verified)'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">مبلغ واریزی:</span>
-                    <span className="text-emerald-400 font-bold">{toPersianDigits(formatToman(escrowAmountUsdt * selectedOffer.priceToman))} تومان</span>
+                  <div className="flex justify-between pt-1 border-t border-purple-500/15">
+                    <span className="text-slate-400 font-sans text-[11px]">{isFa ? 'مبلغ واریزی دقیق:' : 'Exact Transfer Amount:'}</span>
+                    <span className="text-emerald-400 font-bold text-sm">
+                      {isFa ? toPersianDigits(formatToman(escrowAmountUsdt * selectedOffer.priceToman)) : formatToman(escrowAmountUsdt * selectedOffer.priceToman)} {isFa ? 'تومان' : 'IRT'}
+                    </span>
                   </div>
+                </div>
+
+                {/* Iranian Bank Tracking Code Input */}
+                <div className="space-y-1.5 text-right">
+                  <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                    <span>{isFa ? 'کد پیگیری تراکنش بانکی (پایا / ساتنا / کارت):' : 'Bank Reference / Tx ID:'}</span>
+                    <span className="text-[10px] text-amber-400 font-normal">{isFa ? 'الزامی جهت آزادسازی' : 'Required'}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankTrackingId}
+                    onChange={(e) => setBankTrackingId(e.target.value)}
+                    placeholder={isFa ? 'مثال: ۹۸۲۳۴۵۸۱' : 'e.g. 98234581'}
+                    className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-500/30 text-white font-mono text-xs focus:outline-none focus:border-amber-400 text-left"
+                    dir="ltr"
+                  />
                 </div>
 
                 <button
                   onClick={handleNextStep}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-purple-950 font-bold text-xs shadow-md shadow-amber-500/30"
+                  disabled={bankTrackingId.trim().length < 4}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-purple-950 font-black text-xs shadow-md shadow-amber-500/30 hover:opacity-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  {isFa ? 'پرداخت انجام شد، کد رهگیری بانکی را ثبت کردم' : 'Payment Sent with Bank Tx ID'}
+                  {isFa ? 'تایید واریز و آزادسازی تتر توسط اسکرو' : 'Submit Bank Tx ID & Release Escrow'}
                 </button>
               </div>
             )}
 
             {escrowStep === 3 && (
-              <div className="space-y-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mx-auto text-emerald-400">
-                  <CheckCircle2 className="w-8 h-8" />
+              <div className="space-y-4 text-center animate-fade-in">
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-emerald-400/80 shadow-xl shadow-emerald-500/30 mx-auto">
+                  <img
+                    src="/mascot/griffi-escrow.jpg"
+                    alt="Griffi Escrow Guardian"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <h4 className="font-black text-white text-base">
-                  {isFa ? 'تراکنش اسکرو با موفقیت تکمیل شد!' : 'Escrow Completed Successfully!'}
+                  {isFa ? 'تراکنش اسکرو با موفقیت تکمیل شد! 🎉' : 'Escrow Completed Successfully! 🎉'}
                 </h4>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
                   {isFa 
-                    ? `تعداد ${escrowAmountUsdt} تتر با تایید نودهای اسکرو گریفین به کیف پول شما واریز گردید.`
-                    : `${escrowAmountUsdt} USDT has been safely released to your wallet.`}
+                    ? `تعداد ${escrowAmountUsdt} تتر با ضمانت قرارداد هوشمند گریفین سواپ به کیف پول شما واریز گردید.`
+                    : `${escrowAmountUsdt} USDT has been safely released to your wallet via smart contract.`}
                 </p>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 text-[11px] font-mono text-emerald-300 space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">{isFa ? 'کد رهگیری ثبت‌شده:' : 'Bank Ref:'}</span>
+                    <span className="text-white font-bold">{bankTrackingId || '۹۸۲۳۴۵۸۱'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">{isFa ? 'کارمزد خزانه‌داری گریفین (۰.۵٪):' : 'Treasury Fee (0.5%):'}</span>
+                    <span className="text-amber-300">0xD9C1...A2D3 ✓</span>
+                  </div>
+                </div>
+
                 <button
                   onClick={() => setShowEscrowModal(false)}
-                  className="px-6 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500"
+                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all"
                 >
-                  {isFa ? 'بستن پنجره' : 'Close'}
+                  {isFa ? 'بستن پنجره و مشاهده پورتفولیو' : 'Close'}
                 </button>
               </div>
             )}

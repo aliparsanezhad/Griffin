@@ -1,5 +1,5 @@
 // GriffinSwap PWA Service Worker - Anti-Censorship & Offline Resilience
-const CACHE_NAME = 'griffinswap-v13';
+const CACHE_NAME = 'griffinswap-v15';
 
 const STATIC_ASSETS = [
   '/',
@@ -31,6 +31,7 @@ const STATIC_ASSETS = [
   '/mascot/griffi-futures.jpg',
   '/mascot/griffi-card.jpg',
   '/mascot/griffi-domains.jpg',
+  '/mascot/griffi-launchpad.jpg',
 ];
 
 // Install: Cache critical static assets

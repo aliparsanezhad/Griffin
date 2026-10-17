@@ -5,11 +5,10 @@ import {
   ArrowDown, 
   X, 
   Zap, 
-  Fuel, 
-  Check 
+  Fuel 
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
-import { playClickSound, playSwapSuccessSound } from '../services/soundService';
+import { playClickSound } from '../services/soundService';
 
 interface TxPreFlightModalProps {
   isOpen: boolean;
@@ -49,13 +48,11 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
   const isFa = lang === 'fa';
 
   const [isSimulating, setIsSimulating] = useState<boolean>(true);
-  const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
 
   // Simulation timer on open
   useEffect(() => {
     if (isOpen) {
       setIsSimulating(true);
-      setIsConfirmed(false);
       const timer = setTimeout(() => {
         setIsSimulating(false);
       }, 750);
@@ -79,12 +76,9 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
   const gasToman = 2400; // < $0.03 on L2
 
   const handleConfirmAndSend = () => {
-    playSwapSuccessSound();
-    setIsConfirmed(true);
-    setTimeout(() => {
-      onConfirmSuccess();
-      onClose();
-    }, 3800);
+    playClickSound();
+    onClose();
+    onConfirmSuccess();
   };
 
   return (
@@ -96,21 +90,19 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
       }`}>
         
         {/* Close Button */}
-        {!isConfirmed && (
-          <button 
-            onClick={() => {
-              playClickSound();
-              onClose();
-            }}
-            className="absolute top-5 left-5 p-1 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+        <button 
+          onClick={() => {
+            playClickSound();
+            onClose();
+          }}
+          className="absolute top-5 left-5 p-1 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+          title={isFa ? 'بستن' : 'Close'}
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-        {/* SCREEN 1: PRE-FLIGHT INSPECTION & SIMULATION */}
-        {!isConfirmed && (
-          <div className="space-y-5 animate-fade-in">
+        {/* PRE-FLIGHT INSPECTION & SIMULATION */}
+        <div className="space-y-5 animate-fade-in">
             
             {/* Header */}
             <div>
@@ -252,42 +244,6 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
             </div>
 
           </div>
-        )}
-
-        {/* SCREEN 2: CELEBRATION & SUCCESS */}
-        {isConfirmed && (
-          <div className="py-4 flex flex-col items-center text-center space-y-4 animate-fade-in">
-            
-            {/* 3D Celebration Mascot */}
-            <div className="w-32 h-32 rounded-3xl overflow-hidden ring-4 ring-amber-400/80 shadow-2xl bg-black/40 animate-bounce-subtle">
-              <img 
-                src="/mascot/griffi-celebration.jpg" 
-                alt="Griffi Celebrating" 
-                className="w-full h-full object-cover" 
-              />
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-950 border border-emerald-500/50 text-emerald-300 text-xs font-bold">
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span>{isFa ? 'تراکنش با موفقیت در بلاک‌چین ثبت شد!' : 'Transaction Successfully Broadcast!'}</span>
-            </div>
-
-            <h3 className="text-xl font-black text-white">
-              {isFa ? 'تبریک! مبادله شما انجام شد 🎉' : 'Congratulations! Swap Filled 🎉'}
-            </h3>
-
-            <p className="text-xs text-slate-300 max-w-sm leading-relaxed">
-              {isFa
-                ? `مقدار ${toToken.estimatedAmount} ${toToken.symbol} به صورت مستقیم و غیرحضانتی به کیف‌پول شما واریز گردید و ۵۰ پر گریفی به وفاداری شما اضافه شد!`
-                : `Transferred ${toToken.estimatedAmount} ${toToken.symbol} to your self-custodial wallet! 50 Griffi feathers rewarded.`}
-            </p>
-
-            <div className="p-3 rounded-xl bg-purple-950/60 border border-purple-500/30 font-mono text-[11px] text-purple-200">
-              TxHash: 0x7b88...3e41 • {isFa ? 'کارمزد خزانه: ۰.۵٪' : 'Treasury: 0.5%'}
-            </div>
-
-          </div>
-        )}
 
       </div>
     </div>

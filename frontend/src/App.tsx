@@ -23,6 +23,7 @@ import { GriffiAssistant } from './components/GriffiAssistant';
 import { GriffiTour } from './components/GriffiTour';
 import { MarketTicker } from './components/MarketTicker';
 import { Footer } from './components/Footer';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { fetchLiveTomanRate, FALLBACK_RATE } from './services/tomanService';
 
 export function App() {
@@ -33,6 +34,7 @@ export function App() {
   const [rateChange, setRateChange] = useState<string>(FALLBACK_RATE.change_24h);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [showTour, setShowTour] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Sync direction with language
   useEffect(() => {
@@ -114,6 +116,8 @@ export function App() {
         onConnectWallet={handleConnectWallet}
         onDisconnectWallet={handleDisconnectWallet}
         onOpenTour={() => setShowTour(true)}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
 
       {/* Real-Time Iranian & Global Market Ticker Ribbon */}
@@ -126,7 +130,7 @@ export function App() {
       />
 
       {/* Dynamic Main Body Content */}
-      <main className="flex-1 w-full flex flex-col items-center">
+      <main className="flex-1 w-full flex flex-col items-center pb-24 lg:pb-0">
         {activeTab === 'swap' && (
           <SwapSection
             tomanRate={tomanRate}
@@ -322,6 +326,15 @@ export function App() {
 
       {/* Modern Persian Footer */}
       <Footer lang={lang} />
+
+      {/* Floating Glassmorphic Mobile Bottom Dock Navigation */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        lang={lang}
+        isDarkMode={isDarkMode}
+        onOpenMoreMenu={() => setMobileMenuOpen(true)}
+      />
     </div>
   );
 }

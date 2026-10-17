@@ -22,6 +22,7 @@ import { RouteInspector } from './RouteInspector';
 import { CexVsDexComparison } from './CexVsDexComparison';
 import { MarketSentimentGauge } from './MarketSentimentGauge';
 import { TxPreFlightModal } from './TxPreFlightModal';
+import { CrossChainTrackerModal } from './CrossChainTrackerModal';
 import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
 import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
 
@@ -47,6 +48,31 @@ const AVAILABLE_TOKENS: TokenChoice[] = [
   { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum One", priceUsd: 0.88, logo: "https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png" },
   { symbol: "BNB", name: "BNB Coin", chain: "BNB Chain", priceUsd: 590.00, logo: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png" },
   { symbol: "POL", name: "Polygon", chain: "Polygon", priceUsd: 0.45, logo: "https://assets.coingecko.com/coins/images/4713/large/polygon.png" },
+  { symbol: "PAXG", name: "PAX Gold", chain: "Ethereum", priceUsd: 2640.00, logo: "https://assets.coingecko.com/coins/images/9519/large/paxg.png" },
+  { symbol: "TON", name: "Toncoin", chain: "TON", priceUsd: 5.20, logo: "https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png" },
+  { symbol: "SOL", name: "Solana", chain: "Solana", priceUsd: 178.50, logo: "https://assets.coingecko.com/coins/images/4128/large/solana.png" },
+  { symbol: "SHIRDAL", name: "Shirdal Mythic", chain: "Arbitrum One", priceUsd: 0.0000485, logo: "/mascot/griffi-avatar.jpg" },
+];
+
+const USER_BALANCES: Record<string, number> = {
+  USDT: 2450.00,
+  ETH: 1.45,
+  USDC: 820.00,
+  ARB: 650.00,
+  BNB: 2.10,
+  POL: 1200.00,
+  PAXG: 0.85,
+  TON: 45.00,
+  SOL: 12.80,
+  SHIRDAL: 5000000,
+};
+
+const QUICK_PAIRS = [
+  { label: 'USDT ➔ ETH', from: AVAILABLE_TOKENS[0], to: AVAILABLE_TOKENS[1] },
+  { label: 'USDT ➔ ARB', from: AVAILABLE_TOKENS[0], to: AVAILABLE_TOKENS[3] },
+  { label: 'USDT ➔ PAXG', from: AVAILABLE_TOKENS[0], to: AVAILABLE_TOKENS[6] },
+  { label: 'USDT ➔ TON', from: AVAILABLE_TOKENS[0], to: AVAILABLE_TOKENS[7] },
+  { label: 'USDT ➔ SHIRDAL', from: AVAILABLE_TOKENS[0], to: AVAILABLE_TOKENS[9] },
 ];
 
 export const SwapSection: React.FC<SwapSectionProps> = ({
@@ -65,13 +91,17 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [toToken, setToToken] = useState<TokenChoice>(AVAILABLE_TOKENS[1]); // ETH
   const [fromAmount, setFromAmount] = useState<string>('500');
   const [slippage, setSlippage] = useState<number>(0.5);
+  const [isGasless, setIsGasless] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showPreFlightModal, setShowPreFlightModal] = useState<boolean>(false);
+  const [showTrackerModal, setShowTrackerModal] = useState<boolean>(false);
   const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare' | 'sentiment'>('chart');
   const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
+
+  const currentTokenBalance = USER_BALANCES[fromToken.symbol] ?? 100.00;
 
   const handleSelectToken = (token: TokenItem) => {
     if (selectingFor === 'from') {
@@ -111,106 +141,103 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   };
 
   const handleExecuteNativeSwap = () => {
-    playSwapStartSound();
     setIsSwapping(true);
-    setTimeout(() => {
-      setIsSwapping(false);
-      setSwapSuccess(true);
-      playSwapSuccessSound();
-      setTimeout(() => setSwapSuccess(false), 4000);
-    }, 1500);
+    playSwapStartSound();
+    setShowTrackerModal(true);
+    setTimeout(() => setIsSwapping(false), 1000);
   };
 
   return (
-    <div className="w-full py-6 px-4 max-w-5xl mx-auto animate-fade-in flex flex-col items-center">
+    <div className="w-full py-4 px-3 md:px-4 max-w-5xl mx-auto animate-fade-in flex flex-col items-center">
       
-      {/* Hero Header */}
-      <div className="text-center max-w-2xl mx-auto mb-6">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-3 shadow-inner">
+      {/* Sleek Compact Above-the-Fold Hero Header */}
+      <div className="text-center max-w-2xl mx-auto mb-5">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2 shadow-inner">
           <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
           <span>{isFa ? 'صرافی و پل بین‌زنجیره‌ای بدون تحریم' : 'Censorship-Resistant Cross-Chain DEX'}</span>
         </div>
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2">
+        <h1 className="text-2xl md:text-4xl font-black tracking-tight mb-2">
           <span className="griffin-gradient-text">
-            {isFa ? 'مبادله هوشمند رمزارزها' : 'Smart Cross-Chain Swap'}
+            {isFa ? 'مبادله هوشمند و بدون کارمزد گس' : 'Smart Gasless Cross-Chain Swap'}
           </span>
         </h1>
-        <p className={`text-xs md:text-sm font-medium leading-relaxed max-w-lg mx-auto ${
-          isDarkMode ? 'text-slate-300' : 'text-slate-600'
-        }`}>
-          {isFa 
-            ? 'تبادل آنی میان بیش از ۵۸ شبکه بلاک‌چین با تجمیع نقدینگی ۳۵ پل ارتباطی و کمترین کارمزد' 
-            : 'Instant swaps and bridges across 58+ chains with aggregated liquidity and lowest fees.'}
-        </p>
-
-        {/* Griffi Flying 3D Hero Banner Showcase */}
-        <div className="mt-6 w-full max-w-3xl rounded-3xl overflow-hidden border border-purple-500/30 relative shadow-2xl group">
-          <div className="relative h-48 sm:h-56 w-full overflow-hidden">
-            <img 
-              src="/mascot/griffi-hero-banner.jpg" 
-              alt="Griffi Cross-Chain Web3 Hero" 
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0b0817] via-[#0b0817]/40 to-transparent" />
-            
-            <div className="absolute bottom-4 right-4 left-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-right">
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-[11px] font-bold text-amber-300 mb-1 backdrop-blur-md">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
-                  <span>{isFa ? 'سواپ بدون تحریم با گریفی 🦅' : 'Censorship-Free Swaps with Griffi'}</span>
-                </span>
-                <h2 className="text-base sm:text-lg font-black text-white drop-shadow">
-                  {isFa ? 'پرواز آزاد دارایی‌ها میان ۵۸ بلاک‌چین' : 'Frictionless Cross-Chain Liquidity'}
-                </h2>
-                <p className="text-[11px] text-slate-300 max-w-md hidden sm:block">
-                  {isFa 
-                    ? 'پروتکل گریفین‌سواپ با تجمیع ۳۵ پل ارتباطی، کمترین کارمزد و بدون احراز هویت را برای کاربران ایرانی فراهم می‌سازد.' 
-                    : 'Instant multi-chain routing with zero geoblocking and automated gas saver.'}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 self-end">
-                <span className="text-[10px] text-purple-200 bg-purple-950/80 border border-purple-500/30 px-2.5 py-1 rounded-xl backdrop-blur-md font-mono">
-                  {isFa ? 'کارمزد خزانه: ۰.۵٪' : 'Treasury Fee: 0.5%'}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium text-slate-400">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300">
+            {isFa ? '۵۸+ شبکه بلاک‌چین' : '58+ Chains'}
+          </span>
+          <span>•</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300">
+            {isFa ? '۳۵ پل نقدینگی' : '35 Bridge Routes'}
+          </span>
+          <span>•</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-mono">
+            {isFa ? 'کارمزد پروتکل: ۰.۵٪' : 'Protocol Fee: 0.5%'}
+          </span>
         </div>
       </div>
 
-      {/* Engine Switcher (Griffin Fast Swap vs LI.FI Aggregator) */}
-      <div className={`mb-6 flex items-center gap-1.5 p-1 rounded-2xl border text-xs font-bold shadow-lg ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/30' : 'bg-purple-100/70 border-purple-200'
-      }`}>
-        <button
-          onClick={() => setSwapEngine('native')}
-          className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
-            swapEngine === 'native'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-              : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          <Zap className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isFa ? 'سواپ سریع گریفین (پیشنهادی)' : 'Griffin Fast Swap'}</span>
-        </button>
-
-        <button
-          onClick={() => setSwapEngine('lifi')}
-          className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
-            swapEngine === 'lifi'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-              : isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          <Layers className="w-3.5 h-3.5 text-purple-400" />
-          <span>{isFa ? 'ویجت چندزنجیره‌ای LI.FI' : 'LI.FI Aggregator'}</span>
-        </button>
-      </div>
-
       {/* Main Swap Card Container */}
-      <div className="w-full flex justify-center">
+      <div className="w-full flex flex-col items-center">
         
+        {/* Persistent Engine Switcher & Auxiliary Controls */}
+        <div className="w-full max-w-[480px] flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center p-0.5 rounded-xl bg-purple-950/80 border border-purple-500/25 text-xs backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => setSwapEngine('native')}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold ${
+                swapEngine === 'native'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-300" />
+              <span>{isFa ? 'سواپ سریع' : 'Fast Swap'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSwapEngine('lifi')}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold ${
+                swapEngine === 'lifi'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-purple-300" />
+              <span>{isFa ? 'بریج LI.FI' : 'LI.FI Bridge'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {swapEngine === 'native' && (
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className={`p-2 rounded-xl border transition-colors ${
+                  showSettings 
+                    ? 'bg-purple-600 text-white border-purple-400' 
+                    : isDarkMode 
+                      ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300' 
+                      : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
+                }`}
+                title={isFa ? 'تنظیمات اسلیپیج' : 'Slippage settings'}
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setShowHelpModal(true)}
+              className={`p-2 rounded-xl border transition-colors ${
+                isDarkMode 
+                  ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300' 
+                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
+              }`}
+              title={isFa ? 'راهنما' : 'Help'}
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
         {/* MODE 1: Griffin Native Fast Swap Engine */}
         {swapEngine === 'native' && (
           <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all ${
@@ -218,39 +245,6 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               ? 'glass-panel border-purple-500/30 shadow-purple-950/50' 
               : 'glass-panel-light border-purple-200 shadow-purple-100'
           }`}>
-            
-            {/* Header / Slippage settings */}
-            <div className="flex items-center justify-between mb-4">
-              <span className={`text-sm font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                <ArrowDownUp className="w-4 h-4 text-purple-400" />
-                {isFa ? 'مبادله نقدینگی' : 'Swap Tokens'}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className={`p-2 rounded-xl border transition-colors ${
-                    isDarkMode 
-                      ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300' 
-                      : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
-                  }`}
-                  title={isFa ? 'تنظیمات اسلیپیج' : 'Slippage settings'}
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setShowHelpModal(true)}
-                  className={`p-2 rounded-xl border transition-colors ${
-                    isDarkMode 
-                      ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300' 
-                      : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
-                  }`}
-                  title={isFa ? 'راهنما' : 'Help'}
-                >
-                  <HelpCircle className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
 
             {/* Slippage Settings Drawer */}
             {showSettings && (
@@ -277,7 +271,36 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
             )}
 
-            {/* FROM TOKEN BOX */}
+            {/* Quick Hot Pairs Selector with Dual Token Logos */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 mb-3 text-[11px] font-semibold">
+              <span className="text-slate-400 text-[10px] shrink-0 font-bold">{isFa ? 'جفت‌های داغ:' : 'Hot Pairs:'}</span>
+              {QUICK_PAIRS.map((pair) => (
+                <button
+                  key={pair.label}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setFromToken(pair.from);
+                    setToToken(pair.to);
+                  }}
+                  className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-mono transition-all shrink-0 flex items-center gap-1.5 ${
+                    fromToken.symbol === pair.from.symbol && toToken.symbol === pair.to.symbol
+                      ? 'bg-purple-600 text-white border-purple-400 shadow-sm'
+                      : isDarkMode
+                        ? 'bg-purple-950/40 hover:bg-purple-900/60 border-purple-500/20 text-slate-300'
+                        : 'bg-white hover:bg-purple-100 border-purple-200 text-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center -space-x-1.5 rtl:space-x-reverse">
+                    <img src={pair.from.logo} alt={pair.from.symbol} className="w-3.5 h-3.5 rounded-full object-cover ring-1 ring-black/40" />
+                    <img src={pair.to.logo} alt={pair.to.symbol} className="w-3.5 h-3.5 rounded-full object-cover ring-1 ring-black/40" />
+                  </div>
+                  <span>{pair.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* FROM TOKEN BOX with Dynamic Balance & Touch-Friendly Presets */}
             <div className={`p-4 rounded-2xl border space-y-2 mb-2 ${
               isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
             }`}>
@@ -285,9 +308,36 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 font-medium'}>
                   {isFa ? 'پرداخت می‌کنید (مبدأ)' : 'You Pay'}
                 </span>
-                <span className="text-[11px] text-purple-400 font-semibold">
-                  {fromToken.chain}
-                </span>
+                
+                {/* Dynamic Token Balance & Quick Presets */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {isFa ? 'موجودی:' : 'Bal:'} {currentTokenBalance.toLocaleString()} {fromToken.symbol}
+                  </span>
+                  <div className="flex items-center gap-1 font-mono text-[10px]">
+                    {[
+                      { label: '25%', multiplier: 0.25 },
+                      { label: '50%', multiplier: 0.50 },
+                      { label: '75%', multiplier: 0.75 },
+                      { label: 'MAX', multiplier: 1.00 },
+                    ].map((btn) => (
+                      <button
+                        key={btn.label}
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          const val = currentTokenBalance * btn.multiplier;
+                          if (val >= 1000) setFromAmount(val.toString());
+                          else if (val >= 1) setFromAmount(val.toFixed(2));
+                          else setFromAmount(val.toFixed(4));
+                        }}
+                        className="px-2 py-1 min-h-[28px] rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 font-bold transition-colors flex items-center justify-center active:scale-95"
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center justify-between gap-3">
@@ -338,7 +388,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             </div>
 
             {/* TO TOKEN BOX */}
-            <div className={`p-4 rounded-2xl border space-y-2 mt-0 mb-4 ${
+            <div className={`p-4 rounded-2xl border space-y-2 mt-0 mb-3 ${
               isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
             }`}>
               <div className="flex justify-between items-center text-xs">
@@ -382,6 +432,50 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
             </div>
 
+            {/* High-Tech Electric Cyan / Emerald Gasless Permit2 Toggle */}
+            <div className={`p-3 rounded-2xl border mb-3 flex items-center justify-between transition-all ${
+              isGasless
+                ? 'bg-gradient-to-r from-emerald-950/40 via-teal-950/40 to-cyan-950/40 border-cyan-500/40 text-cyan-200 shadow-md shadow-cyan-950/30 ring-1 ring-cyan-500/20'
+                : isDarkMode
+                  ? 'bg-purple-950/20 border-purple-500/20 text-slate-300 hover:border-purple-500/30'
+                  : 'bg-purple-50/80 border-purple-200 text-slate-700'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`p-1.5 rounded-xl ${isGasless ? 'bg-cyan-500/20 text-cyan-300' : 'bg-purple-500/20 text-purple-300'}`}>
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold block text-white">
+                      {isFa ? 'سواپ بدون نیاز به اتریوم گس (Gasless Permit2)' : 'Gasless Permit2 Meta-Tx'}
+                    </span>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold ${
+                      isGasless ? 'bg-cyan-500/20 border border-cyan-400/40 text-cyan-300' : 'bg-purple-500/20 text-purple-300'
+                    }`}>
+                      ⚡ 0 ETH GAS
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 block">
+                    {isFa ? 'کارمزد شبکه از خود تتر کسر می‌شود و نیازی به موجودی ETH ندارید.' : 'Relayer pays native gas; fee deducted from swapped token.'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setIsGasless(!isGasless);
+                }}
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+                  isGasless ? 'bg-cyan-400 justify-end' : 'bg-purple-950/80 border border-purple-500/30 justify-start'
+                }`}
+                title={isFa ? 'فعال/غیرفعال‌سازی حالت بدون گس' : 'Toggle gasless'}
+              >
+                <span className={`w-4 h-4 rounded-full transition-transform ${isGasless ? 'bg-slate-950' : 'bg-slate-400'}`} />
+              </button>
+            </div>
+
             {/* Smart Route & Gas details */}
             <div className={`p-3 rounded-2xl border text-xs space-y-1.5 mb-5 ${
               isDarkMode ? 'bg-purple-950/20 border-purple-500/15 text-slate-300' : 'bg-purple-50 border-purple-200 text-slate-800'
@@ -404,7 +498,9 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
               <div className="flex justify-between items-center">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد شبکه (گس):' : 'Estimated Gas:'}</span>
-                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">&lt; $0.05 (≈ ۴,۵۰۰ ت)</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                  {isGasless ? (isFa ? 'رایگان (پرداخت با Permit2)' : 'Sponsored (Permit2)') : '< $0.05 (≈ ۴,۵۰۰ ت)'}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
@@ -510,12 +606,12 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
       </div>
 
       {/* Interactive Companion Panels (Price Chart & Arbitrage Radar & Route Inspector) */}
-      <div className="mt-10 w-full max-w-5xl">
+      <div className="mt-8 w-full max-w-5xl">
         <div className="flex items-center justify-between mb-4 border-b border-purple-500/20 pb-3">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 w-full flex-nowrap">
             <button
               onClick={() => setCompanionView(companionView === 'chart' ? 'none' : 'chart')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 companionView === 'chart'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
@@ -527,7 +623,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
             <button
               onClick={() => setCompanionView(companionView === 'arbitrage' ? 'none' : 'arbitrage')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 companionView === 'arbitrage'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
@@ -539,7 +635,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
             <button
               onClick={() => setCompanionView(companionView === 'routes' ? 'none' : 'routes')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 companionView === 'routes'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
@@ -551,7 +647,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
             <button
               onClick={() => setCompanionView(companionView === 'cexCompare' ? 'none' : 'cexCompare')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 companionView === 'cexCompare'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
@@ -563,14 +659,14 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
             <button
               onClick={() => setCompanionView(companionView === 'sentiment' ? 'none' : 'sentiment')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 companionView === 'sentiment'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
               }`}
             >
               <Compass className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'سنتیمنت و طمع/ترس' : 'Market Sentiment'}</span>
+              <span>{isFa ? 'سنتیمنت و ترس و طمع' : 'Sentiment Gauge'}</span>
             </button>
           </div>
 
@@ -678,6 +774,35 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
           chain: toToken.chain,
         }}
         slippage={slippage}
+        tomanRate={tomanRate}
+        lang={lang}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Live Cross-Chain Multi-Hop Transaction Tracker */}
+      <CrossChainTrackerModal
+        isOpen={showTrackerModal}
+        onClose={() => {
+          setShowTrackerModal(false);
+          setSwapSuccess(true);
+          playSwapSuccessSound();
+          setTimeout(() => setSwapSuccess(false), 5000);
+        }}
+        fromToken={{
+          symbol: fromToken.symbol,
+          amount: fromAmount,
+          priceUsd: fromToken.priceUsd,
+          logo: fromToken.logo,
+          chain: fromToken.chain,
+        }}
+        toToken={{
+          symbol: toToken.symbol,
+          estimatedAmount: calculatedOutput.toFixed(4),
+          priceUsd: toToken.priceUsd,
+          logo: toToken.logo,
+          chain: toToken.chain,
+        }}
+        isGasless={isGasless}
         tomanRate={tomanRate}
         lang={lang}
         isDarkMode={isDarkMode}

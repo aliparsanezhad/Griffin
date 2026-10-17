@@ -117,6 +117,11 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
 }) => {
   const isFa = lang === 'fa';
 
+  type CardSkin = 'obsidian' | 'royal' | 'cyan' | 'rose';
+  const [cardSkin, setCardSkin] = useState<CardSkin>('obsidian');
+  const [walletPassAdded, setWalletPassAdded] = useState<'apple' | 'google' | null>(null);
+  const [cardTilt, setCardTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const [selectedVoucher, setSelectedVoucher] = useState<VoucherItem>(VOUCHERS[0]);
   const [activeCategory, setActiveCategory] = useState<'all' | 'card' | 'subscription' | 'giftcard'>('all');
   const [showCardNumber, setShowCardNumber] = useState<boolean>(false);
@@ -130,6 +135,17 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
   const filteredVouchers = activeCategory === 'all'
     ? VOUCHERS
     : VOUCHERS.filter(v => v.category === activeCategory);
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -14;
+    setCardTilt({ x, y });
+  };
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ x: 0, y: 0 });
+  };
 
   const handleMintCard = () => {
     playSwapStartSound();
@@ -221,8 +237,89 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
         {/* Left Column: Holographic 3D Virtual Card Visual (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Card Realistic Mockup Container */}
-          <div className="relative w-full aspect-[1.58/1] rounded-3xl p-6 bg-gradient-to-tr from-[#1b0a2a] via-[#321147] to-[#160c38] border border-purple-400/40 shadow-2xl shadow-purple-900/50 flex flex-col justify-between overflow-hidden group">
+          {/* Luxury Card Metal Finish Switcher */}
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-bold text-[11px]">
+              {isFa ? 'پوسته متالیک کارت:' : 'Card Metal Finish:'}
+            </span>
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-purple-950/60 border border-purple-500/20">
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setCardSkin('obsidian');
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  cardSkin === 'obsidian'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'ابزیدین' : 'Obsidian'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setCardSkin('royal');
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  cardSkin === 'royal'
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'رویال' : 'Royal'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setCardSkin('cyan');
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  cardSkin === 'cyan'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'فیروزه' : 'Cyan'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setCardSkin('rose');
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                  cardSkin === 'rose'
+                    ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? 'رزگلد' : 'Rose'}
+              </button>
+            </div>
+          </div>
+
+          {/* Card Realistic 3D Tilt Mockup Container */}
+          <div 
+            onMouseMove={handleCardMouseMove}
+            onMouseLeave={handleCardMouseLeave}
+            style={{
+              transform: `perspective(1000px) rotateX(${cardTilt.y}deg) rotateY(${cardTilt.x}deg)`,
+              transition: cardTilt.x === 0 && cardTilt.y === 0 ? 'transform 0.5s ease-out' : 'transform 0.1s ease-out',
+            }}
+            className={`relative w-full aspect-[1.58/1] rounded-3xl p-6 border shadow-2xl flex flex-col justify-between overflow-hidden group cursor-pointer transition-shadow ${
+              cardSkin === 'obsidian'
+                ? 'bg-gradient-to-tr from-[#0b0814] via-[#1a1426] to-[#261c10] border-amber-500/40 shadow-amber-950/40'
+                : cardSkin === 'royal'
+                  ? 'bg-gradient-to-tr from-[#1b0a2a] via-[#321147] to-[#160c38] border-purple-400/40 shadow-purple-900/50'
+                  : cardSkin === 'cyan'
+                    ? 'bg-gradient-to-tr from-[#031c20] via-[#063342] to-[#0c1e30] border-cyan-400/40 shadow-cyan-950/50'
+                    : 'bg-gradient-to-tr from-[#2d0a1e] via-[#481837] to-[#1c0822] border-pink-400/40 shadow-pink-950/50'
+            }`}
+          >
             {/* Holographic light reflection sheen */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
             
@@ -234,7 +331,12 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                 </div>
                 <span className="font-extrabold text-sm tracking-widest text-white">GRIFFIN PAY</span>
               </div>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30">
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
+                cardSkin === 'obsidian' ? 'bg-amber-500/20 text-amber-300 border-amber-400/30' :
+                cardSkin === 'cyan' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30' :
+                cardSkin === 'rose' ? 'bg-pink-500/20 text-pink-300 border-pink-400/30' :
+                'bg-purple-500/20 text-purple-300 border-purple-400/30'
+              }`}>
                 DEBIT
               </span>
             </div>
@@ -244,17 +346,20 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
               <div className="w-10 h-7 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 shadow-inner flex items-center justify-center">
                 <div className="w-7 h-5 border border-amber-800/40 rounded-sm" />
               </div>
-              <div className="text-slate-400 text-xs font-mono">
+              <div className="text-slate-300 text-xs font-mono">
                 {selectedVoucher.name}
               </div>
             </div>
 
             {/* Card Number & Details */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between font-mono text-base md:text-lg font-black tracking-wider text-purple-100">
+              <div className="flex items-center justify-between font-mono text-base md:text-lg font-black tracking-wider text-white">
                 <span>{showCardNumber ? '5412 8892 4102 9940' : '•••• •••• •••• 9940'}</span>
                 <button
-                  onClick={() => setShowCardNumber(!showCardNumber)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowCardNumber(!showCardNumber);
+                  }}
                   className="p-1 text-slate-400 hover:text-white"
                   title="نمایش شماره کارت"
                 >
@@ -277,6 +382,32 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Add to Apple / Google Wallet Buttons */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              onClick={() => {
+                playClickSound();
+                setWalletPassAdded('apple');
+                setTimeout(() => setWalletPassAdded(null), 3000);
+              }}
+              className="py-2 px-3 rounded-xl bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold"
+            >
+              <span></span>
+              <span>{walletPassAdded === 'apple' ? (isFa ? 'به اپل ولت اضافه شد ✓' : 'Added to Apple Wallet ✓') : (isFa ? 'افزودن به Apple Wallet' : 'Add to Apple Wallet')}</span>
+            </button>
+            <button
+              onClick={() => {
+                playClickSound();
+                setWalletPassAdded('google');
+                setTimeout(() => setWalletPassAdded(null), 3000);
+              }}
+              className="py-2 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold"
+            >
+              <span>G</span>
+              <span>{walletPassAdded === 'google' ? (isFa ? 'به گوگل ولت اضافه شد ✓' : 'Added to Google Wallet ✓') : (isFa ? 'افزودن به Google Pay' : 'Add to Google Pay')}</span>
+            </button>
           </div>
 
           {/* Pricing & Checkout Summary */}

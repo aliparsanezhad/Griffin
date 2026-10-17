@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/vazirmatn": "^5.3.0",
     "@lifi/sdk": "^4.11.0",
     "@lifi/widget": "^4.10.0",
     "@tailwindcss/vite": "^4.3.3",

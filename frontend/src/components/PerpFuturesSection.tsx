@@ -14,7 +14,7 @@ import {
   ArrowDownRight
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
-import { playClickSound, playSwapStartSound, playSwapSuccessSound } from '../services/soundService';
+import { playClickSound, playSwapStartSound, playSwapSuccessSound, playFuturesLeverageTick } from '../services/soundService';
 
 interface PerpFuturesProps {
   tomanRate: number;
@@ -153,10 +153,14 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
     playSwapSuccessSound();
   };
 
-  const handleClosePosition = (id: string) => {
+  const [closedPositionToast, setClosedPositionToast] = useState<{ symbol: string; pnlUsd: number } | null>(null);
+
+  const handleClosePosition = (id: string, symbol: string, pnlUsd: number) => {
     playClickSound();
-    setPositions(positions.filter(p => p.id !== id));
+    setPositions(positions.filter((p) => p.id !== id));
     playSwapSuccessSound();
+    setClosedPositionToast({ symbol, pnlUsd });
+    setTimeout(() => setClosedPositionToast(null), 4000);
   };
 
   return (
@@ -303,7 +307,10 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               min="1"
               max={selectedPair.maxLeverage}
               value={leverage}
-              onChange={(e) => setLeverage(Number(e.target.value))}
+              onChange={(e) => {
+                setLeverage(Number(e.target.value));
+                playFuturesLeverageTick();
+              }}
               className="w-full accent-amber-400 cursor-pointer"
             />
 
@@ -459,6 +466,23 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               </span>
             </div>
 
+            {/* Closed Position Settlement Confirmation Toast */}
+            {closedPositionToast && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between animate-fade-in shadow-lg">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {isFa 
+                      ? `پوزیشن ${closedPositionToast.symbol} با موفقیت بسته شد. سود و اصل مارجین به کیف‌پول شما تسویه گردید.` 
+                      : `Position ${closedPositionToast.symbol} closed. P&L settled to self-custody wallet.`}
+                  </span>
+                </div>
+                <span dir="ltr" className={`font-mono font-bold shrink-0 ${closedPositionToast.pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {closedPositionToast.pnlUsd >= 0 ? `+${closedPositionToast.pnlUsd.toFixed(2)}` : closedPositionToast.pnlUsd.toFixed(2)} USD
+                </span>
+              </div>
+            )}
+
             {positions.length === 0 ? (
               <div className="text-center py-8 text-slate-400 text-xs">
                 {isFa ? 'در حال حاضر هیچ پوزیشن فعالی ندارید.' : 'No active positions.'}
@@ -528,7 +552,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                       {/* Action Button */}
                       <div className="flex justify-end pt-1">
                         <button
-                          onClick={() => handleClosePosition(pos.id)}
+                          onClick={() => handleClosePosition(pos.id, pos.symbol, pnlUsd)}
                           className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all ${
                             isDarkMode 
                               ? 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-500/30' 
