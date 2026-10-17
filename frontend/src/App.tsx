@@ -206,6 +206,7 @@ export function App() {
             tomanRate={tomanRate}
             rateChange={rateChange}
             lang={lang}
+            isDarkMode={isDarkMode}
           />
         )}
 
