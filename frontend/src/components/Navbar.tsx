@@ -361,49 +361,60 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Language Switch */}
-            <button
-              onClick={() => setLang(isFa ? 'en' : 'fa')}
-              className={`p-2 rounded-xl border text-xs font-bold transition-colors flex items-center gap-1 ${
-                isDarkMode 
-                  ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300 hover:text-white' 
-                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
-              }`}
-              title="تغییر زبان / Switch Language"
-            >
-              <Globe className="w-3.5 h-3.5 text-purple-500" />
-              <span>{isFa ? 'EN' : 'فا'}</span>
-            </button>
+            {/* Unified Utility Capsule (Language, Theme, Sound FX) */}
+            <div className={`flex items-center p-0.5 rounded-xl border ${
+              isDarkMode 
+                ? 'bg-purple-950/40 border-purple-500/20' 
+                : 'bg-purple-50 border-purple-200'
+            }`}>
+              {/* Language Switch */}
+              <button
+                onClick={() => setLang(isFa ? 'en' : 'fa')}
+                className={`p-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  isDarkMode 
+                    ? 'text-slate-300 hover:text-white hover:bg-white/10' 
+                    : 'text-slate-700 hover:text-purple-950 hover:bg-white'
+                }`}
+                title={isFa ? 'تغییر زبان به انگلیسی' : 'Switch Language to Persian'}
+              >
+                <Globe className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-[11px] font-mono font-bold">{isFa ? 'EN' : 'فا'}</span>
+              </button>
 
-            {/* Dark / Light Toggle */}
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-2 rounded-xl border transition-colors ${
-                isDarkMode 
-                  ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300 hover:text-white' 
-                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
-              }`}
-              title={isDarkMode ? 'حالت روشن' : 'حالت تاریک'}
-            >
-              {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5 text-purple-600" />}
-            </button>
+              <div className="w-[1px] h-3.5 bg-purple-500/20 my-auto" />
 
-            {/* Sound FX Toggle */}
-            <button
-              onClick={handleToggleSound}
-              className={`p-2 rounded-xl border transition-colors ${
-                isDarkMode 
-                  ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300 hover:text-white' 
-                  : 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-slate-700'
-              }`}
-              title={muted ? 'روشن کردن صدا' : 'بی‌صدا کردن'}
-            >
-              {muted ? (
-                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <Volume2 className="w-3.5 h-3.5 text-amber-300" />
-              )}
-            </button>
+              {/* Dark / Light Toggle */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className={`p-1.5 px-2 rounded-lg transition-all cursor-pointer ${
+                  isDarkMode 
+                    ? 'text-slate-300 hover:text-white hover:bg-white/10' 
+                    : 'text-slate-700 hover:text-purple-950 hover:bg-white'
+                }`}
+                title={isDarkMode ? 'حالت روشن' : 'حالت تاریک'}
+              >
+                {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5 text-purple-600" />}
+              </button>
+
+              <div className="w-[1px] h-3.5 bg-purple-500/20 my-auto" />
+
+              {/* Sound FX Toggle */}
+              <button
+                onClick={handleToggleSound}
+                className={`p-1.5 px-2 rounded-lg transition-all cursor-pointer ${
+                  isDarkMode 
+                    ? 'text-slate-300 hover:text-white hover:bg-white/10' 
+                    : 'text-slate-700 hover:text-purple-950 hover:bg-white'
+                }`}
+                title={muted ? 'روشن کردن صدا' : 'بی‌صدا کردن'}
+              >
+                {muted ? (
+                  <VolumeX className="w-3.5 h-3.5 text-slate-500" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                )}
+              </button>
+            </div>
 
             {/* Connect / Connected Wallet Button */}
             {walletAddress ? (
