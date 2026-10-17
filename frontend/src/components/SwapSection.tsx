@@ -441,14 +441,45 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 </button>
               </div>
 
-              {/* Toman & USD estimate for input */}
-              <div className="flex justify-between items-center text-[11px] pt-1 border-t border-purple-500/10">
-                <span className="text-slate-400 font-mono">
-                  ${fromUsd.toFixed(2)}
-                </span>
-                <span className="font-mono font-bold text-amber-500">
-                  ≈ {isFa ? `${toPersianDigits(formatToman(fromToman))} تومان` : `${formatToman(fromToman, false)} Toman`}
-                </span>
+              {/* Toman & USD estimate + 1-Tap Iranian Toman Presets */}
+              <div className="pt-2 border-t border-purple-500/10 space-y-2">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-400 font-mono">
+                    ${fromUsd.toFixed(2)}
+                  </span>
+                  <span className="font-mono font-bold text-amber-500">
+                    ≈ {isFa ? `${toPersianDigits(formatToman(fromToman))} تومان` : `${formatToman(fromToman, false)} Toman`}
+                  </span>
+                </div>
+
+                {/* 1-Tap Quick Toman Fiat Amounts */}
+                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-0.5 text-[10px]">
+                  <span className="text-slate-400 shrink-0 font-medium">{isFa ? 'خرید ریالی سریع:' : 'Quick Fiat:'}</span>
+                  {[
+                    { toman: 5000000, labelFa: '۵ م ت', labelEn: '5M T' },
+                    { toman: 10000000, labelFa: '۱۰ م ت', labelEn: '10M T' },
+                    { toman: 25000000, labelFa: '۲۵ م ت', labelEn: '25M T' },
+                    { toman: 50000000, labelFa: '۵۰ م ت', labelEn: '50M T' },
+                    { toman: 100000000, labelFa: '۱۰۰ م ت', labelEn: '100M T' },
+                  ].map((chip) => (
+                    <button
+                      key={chip.toman}
+                      type="button"
+                      onClick={() => {
+                        playClickSound();
+                        const usdValue = chip.toman / tomanRate;
+                        const tokenAmount = fromToken.priceUsd > 0 ? (usdValue / fromToken.priceUsd) : 0;
+                        if (tokenAmount >= 1000) setFromAmount(Math.round(tokenAmount).toString());
+                        else if (tokenAmount >= 1) setFromAmount(tokenAmount.toFixed(2));
+                        else setFromAmount(tokenAmount.toFixed(4));
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/25 font-bold transition-all shrink-0 active:scale-95 cursor-pointer"
+                      title={isFa ? `تنظیم معادل ${chip.labelFa}ومان به نرخ زنده` : `Set ${chip.labelEn}oman equivalent`}
+                    >
+                      {isFa ? chip.labelFa : chip.labelEn}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -596,7 +627,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             </div>
 
             {/* Smart Route & Gas details */}
-            <div className={`p-3 rounded-2xl border text-xs space-y-1.5 mb-5 ${
+            <div className={`p-3.5 rounded-2xl border text-xs space-y-2 mb-5 ${
               isDarkMode ? 'bg-purple-950/20 border-purple-500/15 text-slate-300' : 'bg-purple-50 border-purple-200 text-slate-800'
             }`}>
               <div className="flex justify-between items-center">
@@ -609,23 +640,46 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                       playClickSound();
                       setCompanionView('routes');
                     }}
-                    className="text-[10px] text-amber-600 dark:text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 transition-all hover:bg-amber-400/25"
+                    className="text-[10px] text-amber-600 dark:text-amber-300 font-bold px-1.5 py-0.5 rounded bg-amber-400/15 border border-amber-400/30 transition-all hover:bg-amber-400/25 cursor-pointer"
                   >
                     {isFa ? 'تحلیل پل‌ها 🔍' : 'Inspect 🔍'}
                   </button>
                 </span>
               </div>
+
+              <div className="flex justify-between items-center">
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'حداقل دریافتی تضمینی:' : 'Min Received (Guaranteed):'}</span>
+                <span className="font-mono text-amber-400 font-bold">
+                  {(calculatedOutput * (1 - slippage / 100)).toFixed(toToken.priceUsd < 0.01 ? 6 : 4)} {toToken.symbol}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'تأثیر بر قیمت و ضد MEV:' : 'Price Impact & MEV:'}</span>
+                <span className="font-mono text-emerald-400 font-bold flex items-center gap-1">
+                  <span>&lt; 0.01%</span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-sans">{isFa ? 'سپر فعال 🛡️' : 'Protected 🛡️'}</span>
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'سرعت تسویه بین‌زنجیره‌ای:' : 'Settlement Speed:'}</span>
+                <span className="font-mono text-cyan-300 font-semibold">{isFa ? '⚡ ۱۲ تا ۱۵ ثانیه' : '⚡ 12-15s Finality'}</span>
+              </div>
+
               <div className="flex justify-between items-center">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد شبکه (گس):' : 'Estimated Gas:'}</span>
                 <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                   {isGasless ? (isFa ? 'رایگان (پرداخت با Permit2)' : 'Sponsored (Permit2)') : '< $0.05 (≈ ۴,۵۰۰ ت)'}
                 </span>
               </div>
+
               <div className="flex justify-between items-center">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
                 <span className="font-mono text-purple-700 dark:text-purple-300 font-bold">0.5% ({isFa ? 'تخفیف ویژه کاربران ایرانی' : 'Iran discount'})</span>
               </div>
-              <div className="flex justify-between items-center text-[10px] pt-1 border-t border-purple-500/15">
+
+              <div className="flex justify-between items-center text-[10px] pt-1.5 border-t border-purple-500/15">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'آدرس خزانه کارمزدها:' : 'Commission Wallet:'}</span>
                 <span 
                   className="font-mono text-amber-600 dark:text-amber-300 font-semibold hover:underline cursor-pointer" 

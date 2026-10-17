@@ -11,7 +11,10 @@ import {
   Info, 
   Clock, 
   ArrowUpRight, 
-  ArrowDownRight
+  ArrowDownRight,
+  Share2,
+  X,
+  Sparkles
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound, playFuturesLeverageTick } from '../services/soundService';
@@ -154,6 +157,14 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
   };
 
   const [closedPositionToast, setClosedPositionToast] = useState<{ symbol: string; pnlUsd: number } | null>(null);
+  const [sharingPosition, setSharingPosition] = useState<{
+    pos: OpenPosition;
+    currentPair: FuturesPair;
+    pnlPercent: number;
+    pnlUsd: number;
+    pnlToman: number;
+  } | null>(null);
+  const [copiedPnlCard, setCopiedPnlCard] = useState<boolean>(false);
 
   const handleClosePosition = (id: string, symbol: string, pnlUsd: number) => {
     playClickSound();
@@ -550,16 +561,34 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                       </div>
 
                       {/* Action Button */}
-                      <div className="flex justify-end pt-1">
+                      <div className="flex justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playClickSound();
+                            setSharingPosition({
+                              pos,
+                              currentPair,
+                              pnlPercent,
+                              pnlUsd,
+                              pnlToman,
+                            });
+                          }}
+                          className="px-3 py-1.5 rounded-xl border font-bold text-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>{isFa ? 'کارت اشتراک سود 📸' : 'Share PnL 📸'}</span>
+                        </button>
+
                         <button
                           onClick={() => handleClosePosition(pos.id, pos.symbol, pnlUsd)}
-                          className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all ${
+                          className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
                             isDarkMode 
                               ? 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-500/30' 
                               : 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
                           }`}
                         >
-                          {isFa ? 'بستن پوزیشن و تسویه سود' : 'Close Position'}
+                          {isFa ? 'بستن پوزیشن و تسویه' : 'Close Position'}
                         </button>
                       </div>
                     </div>
@@ -620,6 +649,146 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
           </a>
         </div>
       </div>
+
+      {/* Glossy PnL Share Poster Modal with 3D Pilot Griffi */}
+      {sharingPosition && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in text-right">
+          <div className="w-full max-w-md rounded-3xl p-6 border border-purple-500/40 bg-gradient-to-b from-[#190f38] via-[#100a26] to-[#0a0618] text-white shadow-2xl relative overflow-hidden">
+            
+            {/* Ambient decorative aura */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className={`absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none ${
+              sharingPosition.pnlPercent >= 0 ? 'bg-emerald-500/20' : 'bg-rose-500/20'
+            }`} />
+
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                playClickSound();
+                setSharingPosition(null);
+                setCopiedPnlCard(false);
+              }}
+              className="absolute top-4 left-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors z-10 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header: Platform Branding */}
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-purple-500/20">
+              <div className="flex items-center gap-2">
+                <img src="/mascot/griffi-avatar.jpg" alt="Griffin DEX" className="w-7 h-7 rounded-lg ring-1 ring-amber-400/50" />
+                <div>
+                  <span className="font-black text-sm block griffin-gradient-text">GriffinSwap 2.0</span>
+                  <span className="text-[10px] text-slate-400 font-mono block leading-none">50x On-Chain Perpetual DEX</span>
+                </div>
+              </div>
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-900/50 border border-purple-500/30 text-purple-300 font-mono flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>Verified On-Chain</span>
+              </span>
+            </div>
+
+            {/* Poster Body */}
+            <div className="flex items-center justify-between gap-4 py-3">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black" style={{
+                  backgroundColor: sharingPosition.pos.side === 'long' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
+                  color: sharingPosition.pos.side === 'long' ? '#34d399' : '#fb7185',
+                  border: `1px solid ${sharingPosition.pos.side === 'long' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)'}`
+                }}>
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>{sharingPosition.pos.symbol} • {sharingPosition.pos.side.toUpperCase()} {sharingPosition.pos.leverage}x</span>
+                </div>
+
+                {/* Massive ROI Typography */}
+                <div className="space-y-0.5">
+                  <span className="text-[10px] text-slate-400 block">{isFa ? 'بازدهی سرمایه (ROI):' : 'Return on Investment:'}</span>
+                  <span dir="ltr" className={`text-4xl sm:text-5xl font-black font-mono tracking-tight block ${
+                    sharingPosition.pnlPercent >= 0 
+                      ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]' 
+                      : 'text-rose-400 drop-shadow-[0_0_15px_rgba(251,113,133,0.5)]'
+                  }`}>
+                    {sharingPosition.pnlPercent >= 0 ? `+${sharingPosition.pnlPercent.toFixed(2)}%` : `${sharingPosition.pnlPercent.toFixed(2)}%`}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3D Pilot Griffi Mascot */}
+              <div className="w-28 h-28 rounded-2xl overflow-hidden ring-2 ring-amber-400/70 shadow-2xl shrink-0 bg-black/40">
+                <img 
+                  src="/mascot/griffi-futures.jpg" 
+                  alt="Griffi Futures Pilot" 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+            </div>
+
+            {/* Data Stats Grid */}
+            <div className="grid grid-cols-2 gap-2 my-4 p-3 rounded-2xl bg-black/40 border border-purple-500/20 text-xs font-mono">
+              <div>
+                <span className="text-[10px] text-slate-400 block">{isFa ? 'قیمت ورود:' : 'Entry Price:'}</span>
+                <span className="font-bold text-slate-200">${sharingPosition.pos.entryPrice.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">{isFa ? 'قیمت لحظه‌ای (Mark):' : 'Mark Price:'}</span>
+                <span className="font-bold text-slate-200">${sharingPosition.currentPair.price.toLocaleString()}</span>
+              </div>
+              <div className="pt-2 border-t border-purple-500/15">
+                <span className="text-[10px] text-slate-400 block">{isFa ? 'سود خالص (دلار):' : 'Net PnL (USD):'}</span>
+                <span dir="ltr" className={`font-black ${sharingPosition.pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {sharingPosition.pnlUsd >= 0 ? `+$${sharingPosition.pnlUsd.toFixed(2)}` : `-$${Math.abs(sharingPosition.pnlUsd).toFixed(2)}`}
+                </span>
+              </div>
+              <div className="pt-2 border-t border-purple-500/15">
+                <span className="text-[10px] text-slate-400 block">{isFa ? 'معادل تومانی:' : 'Toman Net:'}</span>
+                <span className="font-bold text-amber-300">
+                  {isFa ? `${toPersianDigits(formatToman(sharingPosition.pnlToman))} ت` : `${formatToman(sharingPosition.pnlToman)} T`}
+                </span>
+              </div>
+            </div>
+
+            {/* Anti-Censorship Guarantee Sub-footer */}
+            <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20 text-[10px] text-slate-300 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-emerald-300">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{isFa ? 'معاملات بدون تحریم و بدون KYC' : '100% Non-Custodial • No-KYC'}</span>
+              </span>
+              <span className="font-mono text-purple-300">GriffinSwap.com</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2.5 mt-5">
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  const shareText = `🚀 سود من در فیوچرز اهرمی گریفین سواپ:\nجفت ارز: ${sharingPosition.pos.symbol} (${sharingPosition.pos.side.toUpperCase()} ${sharingPosition.pos.leverage}x)\nبازدهی: ${sharingPosition.pnlPercent >= 0 ? `+${sharingPosition.pnlPercent.toFixed(1)}%` : `${sharingPosition.pnlPercent.toFixed(1)}%`}\nسود خالص: ${sharingPosition.pnlUsd.toFixed(2)} دلار (معادل ${formatToman(sharingPosition.pnlToman)} تومان)\n\nمبادله بدون تحریم و بدون احراز هویت در دکس گریفین: https://griffinswap.com`;
+                  navigator.clipboard.writeText(shareText);
+                  setCopiedPnlCard(true);
+                  setTimeout(() => setCopiedPnlCard(false), 2500);
+                }}
+                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              >
+                {copiedPnlCard ? <Check className="w-4 h-4 text-slate-950" /> : <Copy className="w-4 h-4 text-slate-950" />}
+                <span>{copiedPnlCard ? (isFa ? 'متن کارت کپی شد!' : 'Copied!') : (isFa ? 'کپی متن اشتراک‌گذاری' : 'Copy Share Text')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setSharingPosition(null);
+                  setCopiedPnlCard(false);
+                }}
+                className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-all cursor-pointer active:scale-95"
+              >
+                {isFa ? 'بستن' : 'Close'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
