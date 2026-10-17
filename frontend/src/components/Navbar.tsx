@@ -551,11 +551,135 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 )}
               </div>
-
             </div>
           </div>
         )}
       </header>
+
+      {/* Persistent Native-Like Mobile Bottom Navigation Bar */}
+      <nav 
+        aria-label="Mobile Navigation"
+        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 border-t backdrop-blur-2xl transition-all shadow-[0_-8px_30px_rgba(0,0,0,0.3)] ${
+          isDarkMode 
+            ? 'bg-[#0f0924]/90 border-purple-500/25 text-slate-300' 
+            : 'bg-white/95 border-purple-200 text-slate-700 shadow-2xl'
+        }`}
+      >
+        <div className="grid grid-cols-5 h-16 max-w-md mx-auto items-center px-1">
+          {/* 1. Swap */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setActiveTab('swap');
+              setMobileMenuOpen(false);
+            }}
+            className={`h-full flex flex-col items-center justify-center gap-1 transition-all relative cursor-pointer ${
+              activeTab === 'swap' && !mobileMenuOpen
+                ? 'text-amber-400 font-extrabold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <ArrowLeftRight className={`w-5 h-5 transition-transform ${activeTab === 'swap' && !mobileMenuOpen ? 'scale-110 text-amber-400' : ''}`} />
+            <span className="text-[10px] leading-none">{isFa ? 'سواپ' : 'Swap'}</span>
+            {activeTab === 'swap' && !mobileMenuOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1.5 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            )}
+          </button>
+
+          {/* 2. Futures */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setActiveTab('futures');
+              setMobileMenuOpen(false);
+            }}
+            className={`h-full flex flex-col items-center justify-center gap-1 transition-all relative cursor-pointer ${
+              activeTab === 'futures' && !mobileMenuOpen
+                ? 'text-amber-400 font-extrabold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <div className="relative">
+              <Flame className={`w-5 h-5 transition-transform ${activeTab === 'futures' && !mobileMenuOpen ? 'scale-110 text-amber-400' : ''}`} />
+              <span className="absolute -top-1.5 -right-2 px-1 py-0.2 rounded-full text-[8px] font-mono font-black bg-rose-500 text-white">
+                50x
+              </span>
+            </div>
+            <span className="text-[10px] leading-none">{isFa ? 'فیوچرز' : 'Futures'}</span>
+            {activeTab === 'futures' && !mobileMenuOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1.5 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            )}
+          </button>
+
+          {/* 3. Launchpad */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setActiveTab('launchpad');
+              setMobileMenuOpen(false);
+            }}
+            className={`h-full flex flex-col items-center justify-center gap-1 transition-all relative cursor-pointer ${
+              activeTab === 'launchpad' && !mobileMenuOpen
+                ? 'text-amber-400 font-extrabold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Rocket className={`w-5 h-5 transition-transform ${activeTab === 'launchpad' && !mobileMenuOpen ? 'scale-110 text-amber-400' : ''}`} />
+            <span className="text-[10px] leading-none">{isFa ? 'لانچ‌پد' : 'Launchpad'}</span>
+            {activeTab === 'launchpad' && !mobileMenuOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1.5 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            )}
+          </button>
+
+          {/* 4. Portfolio */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setActiveTab('portfolio');
+              setMobileMenuOpen(false);
+            }}
+            className={`h-full flex flex-col items-center justify-center gap-1 transition-all relative cursor-pointer ${
+              activeTab === 'portfolio' && !mobileMenuOpen
+                ? 'text-amber-400 font-extrabold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Wallet className={`w-5 h-5 transition-transform ${activeTab === 'portfolio' && !mobileMenuOpen ? 'scale-110 text-amber-400' : ''}`} />
+            <span className="text-[10px] leading-none">{isFa ? 'دارایی‌ها' : 'Assets'}</span>
+            {activeTab === 'portfolio' && !mobileMenuOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1.5 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            )}
+          </button>
+
+          {/* 5. More Tools */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setMobileMenuOpen(!mobileMenuOpen);
+            }}
+            className={`h-full flex flex-col items-center justify-center gap-1 transition-all relative cursor-pointer ${
+              mobileMenuOpen || (!['swap', 'futures', 'launchpad', 'portfolio'].includes(activeTab))
+                ? 'text-purple-400 font-extrabold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-purple-300" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+            <span className="text-[10px] leading-none">{isFa ? 'ابزارها' : 'More'}</span>
+            {(!['swap', 'futures', 'launchpad', 'portfolio'].includes(activeTab)) && (
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute bottom-1.5 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            )}
+          </button>
+        </div>
+      </nav>
 
       {/* Wallet Details Modal */}
       {showWalletModal && walletAddress && (
