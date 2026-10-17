@@ -162,7 +162,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
       {/* Floating Mascot Trigger Button (Mobile-Optimized Compact Avatar, Full Pill on Desktop) */}
       <aside 
         aria-label={isFa ? 'دستیار گریفی' : 'Griffi Assistant'}
-        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2 animate-bounce-subtle"
+        className="fixed bottom-20 left-3.5 lg:bottom-6 lg:left-6 z-40 flex items-center gap-2 animate-bounce-subtle"
       >
         <button
           onClick={() => {
