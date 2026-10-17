@@ -3,11 +3,19 @@ import {
   Percent, 
   Sparkles, 
   ArrowUpRight,
-  ShieldCheck
+  ShieldCheck,
+  DollarSign,
+  Copy,
+  Check,
+  ExternalLink,
+  Coins
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
+import { playClickSound } from '../services/soundService';
 
-interface VaultItem {
+const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
+
+export interface VaultItem {
   id: string;
   protocol: string;
   asset: string;
@@ -24,17 +32,27 @@ interface VaultItem {
 interface EarnSectionProps {
   tomanRate: number;
   lang: 'fa' | 'en';
+  isDarkMode?: boolean;
   onSelectVaultToDeposit: (vault: VaultItem) => void;
 }
 
 export const EarnSection: React.FC<EarnSectionProps> = ({
   tomanRate,
   lang,
+  isDarkMode = true,
   onSelectVaultToDeposit,
 }) => {
   const isFa = lang === 'fa';
   const [filterAsset, setFilterAsset] = useState<'all' | 'usdt' | 'usdc' | 'eth' | 'paxg' | 'halal'>('all');
   const [calculatorDeposit, setCalculatorDeposit] = useState<number>(1000);
+  const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+
+  const handleCopyWallet = () => {
+    navigator.clipboard.writeText(COMMISSION_WALLET);
+    setCopiedWallet(true);
+    playClickSound();
+    setTimeout(() => setCopiedWallet(false), 2000);
+  };
 
   const vaults: VaultItem[] = [
     {
@@ -46,8 +64,10 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$34.5M",
       risk: "خیلی کم",
       riskEn: "Very Low",
-      desc: "سپرده‌گذاری طلای فیزیکی؛ سود پایدار بدون بهره و ۱۰۰٪ منطبق با مضاربه و شریعت اسلامی",
-      badge: "طلای حلال ☪️",
+      desc: isFa 
+        ? "سپرده‌گذاری طلای فیزیکی؛ سود پایدار بدون بهره و ۱۰۰٪ منطبق با مضاربه و شریعت اسلامی" 
+        : "Physical gold vault; stable yield without interest, 100% Sharia compliant (Zero Riba)",
+      badge: isFa ? "طلای حلال ☪️" : "Halal Gold ☪️",
       isHalal: true
     },
     {
@@ -59,8 +79,10 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$58.2M",
       risk: "خیلی کم",
       riskEn: "Very Low",
-      desc: "تقسیم مستقیم کارمزد سواپ صرافی میان تامین‌کنندگان نقدینگی بر پایه مشارکت مدنی بدون ربا",
-      badge: "سود حلال ☪️",
+      desc: isFa 
+        ? "تقسیم مستقیم کارمزد سواپ صرافی میان تامین‌کنندگان نقدینگی بر پایه مشارکت مدنی بدون ربا" 
+        : "Direct share of DEX swap commissions distributed to liquidity providers without interest",
+      badge: isFa ? "سود حلال ☪️" : "Halal Yield ☪️",
       isHalal: true
     },
     {
@@ -72,8 +94,10 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$142M",
       risk: "کم",
       riskEn: "Low",
-      desc: "صندوق نقدینگی استیبل‌کوین روی شبکه ارزان بیس با بازدهی بالا و قراردادهای اثبات‌شده",
-      badge: "پیشنهاد ویژه"
+      desc: isFa 
+        ? "صندوق نقدینگی استیبل‌کوین روی شبکه ارزان بیس با بازدهی بالا و قراردادهای اثبات‌شده" 
+        : "Curated stablecoin yield vault on Base L2 with high security and low transaction gas",
+      badge: isFa ? "پیشنهاد ویژه" : "Featured"
     },
     {
       id: "aave-usdt-arb",
@@ -84,8 +108,10 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$380M",
       risk: "خیلی کم",
       riskEn: "Very Low",
-      desc: "استخر وام‌دهی آوه روی آربیتروم با بیشترین نقدینگی و بالاترین درجه امنیت در دیفای",
-      badge: "امن‌ترین"
+      desc: isFa 
+        ? "استخر نقدینگی آوه روی آربیتروم با بیشترین نقدینگی و بالاترین درجه امنیت در دیفای" 
+        : "Aave v3 deep liquidity market on Arbitrum with the highest battle-tested security",
+      badge: isFa ? "امن‌ترین" : "Safest"
     },
     {
       id: "pendle-ezeth-arb",
@@ -96,7 +122,9 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$95M",
       risk: "متوسط",
       riskEn: "Medium",
-      desc: "خرید سود ثابت از بازسهام‌گذاری اتریوم (Restaking) با بالاترین نرخ بازدهی"
+      desc: isFa 
+        ? "خرید سود ثابت از بازسهام‌گذاری اتریوم (Restaking) با بالاترین نرخ بازدهی" 
+        : "Fixed-yield tokenized market from liquid restaking with peak DeFi yields"
     },
     {
       id: "compound-usdc-poly",
@@ -107,7 +135,9 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       tvl: "$65M",
       risk: "کم",
       riskEn: "Low",
-      desc: "وام‌دهی در پروتکل غیرمتمرکز کامپاند روی پالیگان با تراکنش‌های آنی و ارزان"
+      desc: isFa 
+        ? "تامین نقدینگی در پروتکل کامپاند روی پالیگان با تراکنش‌های آنی و کارمزد کمتر از ۱ سنت" 
+        : "Compound v3 liquidity supply on Polygon with sub-cent gas and instant settlement"
     }
   ];
 
@@ -117,99 +147,182 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
     return v.asset.toLowerCase().includes(filterAsset);
   });
 
-  // Calculate annual return for the calculator widget
+  // Calculate annual & monthly return
   const avgApy = 0.0842;
   const yearlyUsdReturn = calculatorDeposit * avgApy;
   const yearlyTomanReturn = usdToToman(yearlyUsdReturn, tomanRate);
+  const monthlyUsdReturn = yearlyUsdReturn / 12;
+  const monthlyTomanReturn = yearlyTomanReturn / 12;
+
+  const quickPresets = [250, 500, 1000, 2500, 5000, 10000];
 
   return (
-    <div className="w-full py-6 px-4 max-w-6xl mx-auto animate-fade-in">
+    <div className="w-full py-6 px-4 max-w-6xl mx-auto animate-fade-in text-right">
       
-      {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isFa ? 'الهام‌گرفته از Jumper Earn و LI.FI Composer' : 'Powered by LI.FI Composer'}</span>
-        </div>
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
-          <span className="griffin-gradient-text">
-            {isFa ? 'کسب درآمد دلاری غیرمتمرکز (Earn)' : 'DeFi Yield & Staking Vaults'}
-          </span>
-        </h1>
-        <p className="text-sm md:text-base text-slate-300 font-medium">
-          {isFa
-            ? 'سود سالانه پایدار روی تتر و استیبل‌کوین‌ها در معتبرترین پروتکل‌های دیفای، بدون دخالت بانک و بدون تحریم'
-            : 'Deposit stablecoins and blue-chip tokens into audited yield vaults with 1-click execution.'}
-        </p>
+      {/* 3D Mascot Hero Banner: Griffi Yield Guardian */}
+      <div className={`relative overflow-hidden rounded-3xl border p-6 md:p-8 mb-8 transition-all ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-[#1c1236] via-[#140c2a] to-[#0c081a] border-purple-500/30 shadow-2xl' 
+          : 'bg-gradient-to-br from-purple-100 via-indigo-50 to-amber-50 border-purple-200 shadow-xl'
+      }`}>
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+          
+          {/* Pitch & Guidance */}
+          <div className="space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'سود دلاری پایدار بدون ربا (Islamic DeFi)' : 'Zero-Riba Halal DeFi Vaults'}</span>
+            </div>
 
-        {/* Griffi Earn 3D Vault Banner */}
-        <div className="mt-5 p-4 rounded-3xl bg-gradient-to-r from-purple-950/80 via-indigo-950/60 to-amber-950/40 border border-purple-500/30 flex flex-col sm:flex-row items-center gap-5 text-right shadow-2xl max-w-2xl mx-auto">
-          <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-amber-400/80 shrink-0 shadow-lg bg-black/40">
-            <img src="/mascot/griffi-vault.jpg" alt="Griffi DeFi Vault" className="w-full h-full object-cover" />
-          </div>
-          <div className="flex-1">
-            <span className="font-black text-amber-300 text-sm flex items-center gap-1.5 mb-1">
-              <span>{isFa ? 'خزانه‌های سود پایدار با گریفی 🌼💎' : 'Stable Yield Vaults with Griffi 🌼💎'}</span>
-            </span>
-            <p className="text-xs text-slate-300 leading-relaxed mb-2">
-              {isFa 
-                ? 'استخرهای دیفای ممیزی‌شده با بازدهی سالانه تا ۱۴.۸٪ روی تتر و استیبل‌کوین‌ها بدون خطر قفل سرمایه یا توقیف.' 
-                : 'Curated high-yield non-custodial vaults with up to 14.8% APY on stablecoins.'}
+            <h1 className="text-2xl md:text-4xl font-black griffin-gradient-text">
+              {isFa ? 'خزانه‌های سود دیفای و استیکینگ گریفی' : 'Griffin DeFi Staking & Yield Vaults'}
+            </h1>
+
+            <p className={`text-xs md:text-sm leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+              {isFa
+                ? 'دارایی‌های تتر، طلا (PAXG) و اتریوم خود را در معتبرترین استخرهای دیفای با قراردادهای ممیزی‌شده سپرده‌گذاری کنید. سود پرداختی از محل کارمزدهای واقعی سواپ صرافی (AMM Fee Share) تامین شده و ۱۰۰٪ منطبق بر موازین عدم ربا و مشارکت مدنی است.'
+                : 'Deposit stablecoins, digital gold, and bluechips into audited non-custodial vaults with 1-click execution. Yields originate strictly from real AMM swap volume.'}
             </p>
-            <div className="inline-flex items-center gap-1.5 text-[10px] text-purple-200 bg-purple-900/50 px-2.5 py-1 rounded-xl font-mono">
-              <span>{isFa ? 'خزانه رسمی کارمزدها: 0xD9C1...A2D3' : 'Official Treasury: 0xD9C1...A2D3'}</span>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <div className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
+                isDarkMode ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' : 'bg-emerald-100 border-emerald-300 text-emerald-800'
+              }`}>
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>{isFa ? 'استخرهای بدون تحریم و بدون KYC' : '100% Non-Custodial & KYC-Free'}</span>
+              </div>
+
+              <div className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 ${
+                isDarkMode ? 'bg-purple-950/40 border-purple-500/30 text-purple-200' : 'bg-white border-purple-200 text-purple-700'
+              }`}>
+                <Coins className="w-4 h-4 text-amber-400" />
+                <span>{isFa ? 'میانگین سود سالانه: ۸.۴٪ تا ۱۴.۸٪' : 'Average APY: 8.4% - 14.8%'}</span>
+              </div>
             </div>
           </div>
+
+          {/* 3D Mascot Image: Griffi DeFi Vault Guardian */}
+          <div className="relative shrink-0 w-44 h-44 md:w-56 md:h-56 rounded-3xl overflow-hidden ring-2 ring-amber-400/50 shadow-2xl shadow-purple-600/30">
+            <img 
+              src="/mascot/griffi-vault.jpg" 
+              alt="Griffi DeFi Vault Guardian" 
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-2 inset-x-2 text-center text-[10px] font-bold text-amber-300 bg-purple-950/80 backdrop-blur-md py-1 rounded-xl border border-amber-400/30">
+              {isFa ? 'گریفی نگهبان خزانه‌های سودآور 💎✨' : 'Griffi the Yield Steward 💎✨'}
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Yield Calculator Banner */}
-      <div className="glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl mb-10 relative overflow-hidden">
+      {/* Interactive Yield Calculator Banner */}
+      <div className={`p-6 md:p-8 rounded-3xl border shadow-2xl mb-8 relative overflow-hidden transition-all ${
+        isDarkMode 
+          ? 'glass-panel border-purple-500/25' 
+          : 'glass-panel-light border-purple-200'
+      }`}>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          <div className="md:col-span-7 space-y-3">
-            <h3 className="font-bold text-lg text-white flex items-center gap-2">
-              <Percent className="w-5 h-5 text-amber-400" />
-              <span>{isFa ? 'محاسبه‌گر سود دلاری و تومانی سپرده‌گذاری' : 'Yield Profit Calculator'}</span>
-            </h3>
-            <p className="text-xs text-slate-400">
-              {isFa
-                ? 'با سرمایه‌گذاری تتر خود در صندوق‌های امن دیفای، هم ارزش دارایی شما در برابر تورم حفظ می‌شود و هم سود سالانه دلاری دریافت می‌کنید.'
-                : 'Protect your capital from inflation and earn competitive annual yields on USD stablecoins.'}
-            </p>
+          
+          <div className="md:col-span-7 space-y-4">
+            <div>
+              <h3 className={`font-black text-lg md:text-xl flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                <Percent className="w-5 h-5 text-amber-400" />
+                <span>{isFa ? 'ماشین‌حساب زنده سود دلاری و تومانی سپرده‌گذاری' : 'Live Yield & Toman Profit Calculator'}</span>
+              </h3>
+              <p className={`text-xs mt-1 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                {isFa
+                  ? 'سرمایه مورد نظر خود را وارد کنید تا درآمد ماهیانه و سالانه شما بر اساس میانگین سود واقعی خزانه‌ها محاسبه شود.'
+                  : 'Enter deposit amount to simulate expected monthly and annual earnings in USD and Toman.'}
+              </p>
+            </div>
 
-            <div className="flex items-center gap-3 pt-2">
-              <div className="relative max-w-xs w-full">
+            {/* Amount input & Toman preview */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
                 <input
                   type="number"
-                  value={calculatorDeposit}
-                  onChange={(e) => setCalculatorDeposit(Number(e.target.value) || 0)}
-                  className="w-full bg-purple-950/50 border border-purple-500/30 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-purple-400"
+                  value={calculatorDeposit || ''}
+                  onChange={(e) => setCalculatorDeposit(Math.max(0, Number(e.target.value)))}
+                  className={`w-full rounded-2xl px-4 py-3 text-base font-black font-mono border focus:outline-none transition-all ${
+                    isDarkMode 
+                      ? 'bg-purple-950/60 border-purple-500/30 text-white focus:border-amber-400' 
+                      : 'bg-white border-purple-200 text-slate-900 focus:border-purple-500'
+                  }`}
                   placeholder="1000"
                 />
-                <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">USDT</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-400 font-mono">
+                  USDT
+                </span>
               </div>
-              <span className="text-xs text-slate-400 font-mono">
-                ≈ {isFa ? `${toPersianDigits(formatToman(usdToToman(calculatorDeposit, tomanRate)))} تومان` : `${formatToman(usdToToman(calculatorDeposit, tomanRate), false)} Toman`}
+
+              <div className={`px-4 py-3 rounded-2xl border text-xs font-mono font-bold flex items-center justify-between sm:justify-start gap-2 ${
+                isDarkMode ? 'bg-purple-950/40 border-purple-500/20 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-800'
+              }`}>
+                <span className="text-[11px] text-slate-400">{isFa ? 'ارزش معادل:' : 'Value:'}</span>
+                <span className="text-amber-400 font-bold">
+                  ≈ {isFa ? `${toPersianDigits(formatToman(usdToToman(calculatorDeposit, tomanRate)))} تومان` : `${formatToman(usdToToman(calculatorDeposit, tomanRate), false)} Toman`}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-400 font-medium ml-1">{isFa ? 'مقادیر سریع:' : 'Presets:'}</span>
+              {quickPresets.map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setCalculatorDeposit(amt);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold border transition-all active:scale-95 ${
+                    calculatorDeposit === amt
+                      ? 'bg-purple-600 text-white border-purple-400 shadow-sm'
+                      : isDarkMode
+                        ? 'bg-purple-950/40 hover:bg-purple-900/50 border-purple-500/20 text-slate-300'
+                        : 'bg-white hover:bg-purple-50 border-purple-200 text-slate-700'
+                  }`}
+                >
+                  ${amt.toLocaleString()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Profit Output Highlight Card */}
+          <div className={`md:col-span-5 p-6 rounded-3xl border text-center space-y-3 shadow-inner ${
+            isDarkMode 
+              ? 'bg-gradient-to-br from-purple-950/80 via-indigo-950/70 to-purple-950/90 border-purple-500/30' 
+              : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'
+          }`}>
+            <div>
+              <span className="text-xs text-purple-300 font-bold block mb-1">
+                {isFa ? 'تخمین سود سالانه (میانگین ۸.۴٪ APY):' : 'Estimated Annual Profit:'}
+              </span>
+              <div className="text-3xl lg:text-4xl font-black text-emerald-400 font-mono tracking-tight">
+                +${yearlyUsdReturn.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-sm font-bold text-amber-400 font-mono mt-0.5">
+                + {isFa ? `${toPersianDigits(formatToman(yearlyTomanReturn))} تومان سود خالص` : `${formatToman(yearlyTomanReturn, false)} Toman`}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-purple-500/20 flex justify-between items-center text-xs font-mono">
+              <span className="text-slate-400">{isFa ? 'سود تخمینی ماهیانه:' : 'Monthly Yield:'}</span>
+              <span className="font-bold text-purple-200">
+                +${monthlyUsdReturn.toFixed(1)} (≈ {isFa ? `${toPersianDigits(formatToman(monthlyTomanReturn))} ت` : `${formatToman(monthlyTomanReturn, false)} T`})
               </span>
             </div>
           </div>
 
-          <div className="md:col-span-5 p-5 rounded-2xl bg-gradient-to-br from-purple-950/80 to-indigo-950/80 border border-purple-500/30 text-center space-y-2 shadow-inner">
-            <span className="text-xs text-purple-300 font-bold block">
-              {isFa ? 'تخمین سود سالانه (میانگین ۸.۴٪ APY):' : 'Estimated Annual Profit:'}
-            </span>
-            <div className="text-2xl md:text-3xl font-black text-emerald-400 font-mono">
-              +${yearlyUsdReturn.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
-            </div>
-            <div className="text-sm font-bold text-amber-300 font-mono">
-              + {isFa ? `${toPersianDigits(formatToman(yearlyTomanReturn))} تومان سود خالص` : `${formatToman(yearlyTomanReturn, false)} Toman`}
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
         {[
           { id: 'all', label: isFa ? 'همه صندوق‌ها' : 'All Vaults' },
           { id: 'halal', label: isFa ? 'صندوق‌های حلال (بدون ربا) ☪️' : 'Halal Yields ☪️' },
@@ -220,11 +333,16 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setFilterAsset(tab.id as any)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            onClick={() => {
+              playClickSound();
+              setFilterAsset(tab.id as any);
+            }}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
               filterAsset === tab.id
                 ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
-                : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/15'
+                : isDarkMode
+                  ? 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+                  : 'bg-white text-slate-600 hover:text-slate-900 border border-purple-200'
             }`}
           >
             {tab.label}
@@ -233,26 +351,28 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       </div>
 
       {/* Vaults Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {filteredVaults.map((vault) => (
           <div
             key={vault.id}
-            className={`glass-panel p-6 rounded-3xl border transition-all hover:shadow-2xl flex flex-col justify-between ${
+            className={`p-6 rounded-3xl border transition-all hover:shadow-2xl flex flex-col justify-between ${
               vault.isHalal 
-                ? 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-950/10' 
-                : 'border-purple-500/20 hover:border-purple-500/40'
+                ? isDarkMode ? 'border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-950/15' : 'border-emerald-300 hover:border-emerald-400 bg-emerald-50/50'
+                : isDarkMode ? 'border-purple-500/20 hover:border-purple-500/40 bg-purple-950/30' : 'border-purple-200 hover:border-purple-300 bg-white'
             }`}
           >
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center font-bold text-sm ${
-                    vault.isHalal ? 'bg-emerald-600/20 border-emerald-500/30 text-emerald-300' : 'bg-purple-600/20 border-purple-500/30 text-purple-300'
+                    vault.isHalal 
+                      ? 'bg-emerald-600/20 border-emerald-500/30 text-emerald-300' 
+                      : 'bg-purple-600/20 border-purple-500/30 text-purple-300'
                   }`}>
                     {vault.asset}
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-white text-base flex items-center gap-2">
+                    <h4 className={`font-extrabold text-base flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                       <span>{vault.protocol}</span>
                       {vault.badge && (
                         <span className={`text-[10px] border px-2 py-0.5 rounded-full font-bold ${
@@ -264,12 +384,12 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
                         </span>
                       )}
                     </h4>
-                    <span className="text-xs text-purple-300 font-medium">{vault.chain}</span>
+                    <span className="text-xs text-purple-400 font-medium">{vault.chain}</span>
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <span className="text-2xl font-black text-emerald-400 font-mono block">
+                <div className="text-left font-mono">
+                  <span className="text-2xl font-black text-emerald-400 block">
                     {vault.apy}
                   </span>
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
@@ -278,14 +398,16 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
                 </div>
               </div>
 
-              <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+              <p className={`text-xs mb-4 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 {vault.desc}
               </p>
 
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-purple-950/40 border border-purple-500/15 text-xs mb-4">
+              <div className={`grid grid-cols-2 gap-3 p-3.5 rounded-2xl border text-xs mb-4 ${
+                isDarkMode ? 'bg-purple-950/40 border-purple-500/15' : 'bg-purple-50 border-purple-100'
+              }`}>
                 <div>
                   <span className="text-slate-400 block text-[11px] mb-0.5">{isFa ? 'کل سرمایه (TVL):' : 'Total TVL:'}</span>
-                  <span className="font-mono font-bold text-white">{vault.tvl}</span>
+                  <span className={`font-mono font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{vault.tvl}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px] mb-0.5">{isFa ? 'سطح ریسک قرارداد:' : 'Risk Rating:'}</span>
@@ -295,8 +417,11 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectVaultToDeposit(vault)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-transform active:scale-95"
+              onClick={() => {
+                playClickSound();
+                onSelectVaultToDeposit(vault);
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-transform active:scale-95 cursor-pointer"
             >
               <span>{isFa ? 'سرمایه‌گذاری ۱ کلیکه با کامپوزر' : '1-Click Deposit via Composer'}</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -306,17 +431,58 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       </div>
 
       {/* Sharia & Halal DeFi Guidance Notice */}
-      <div className="mt-8 p-5 rounded-2xl glass-panel border border-emerald-500/30 bg-emerald-950/20 text-right space-y-2">
-        <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+      <div className={`p-5 rounded-3xl border mb-6 text-right space-y-2 transition-all ${
+        isDarkMode 
+          ? 'glass-panel border-emerald-500/30 bg-emerald-950/20' 
+          : 'bg-emerald-50 border-emerald-200 text-slate-800'
+      }`}>
+        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           {isFa ? 'راهنمای فقهی و انطباق شرعی در خزانه‌های گریفین سواپ:' : 'Sharia-Compliant DeFi Criteria:'}
         </span>
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
           {isFa
             ? 'در فقه اسلامی، ربا (سود ثابت ناشی از قرض) جایز نیست. خزانه‌های طلای دیجیتال و سهم کارمزد گریفین، بر پایه عقد مضاربه و مشارکت مدنی هستند؛ سود پرداخت‌شده از محل کارمزدهای واقعی مبادلات سواپ استخراج شده و هیچ‌گونه بهره قرضی در آن وجود ندارد.'
             : 'Islamic finance prohibits Riba (interest on debt). Griffin Halal Vaults operate under Mudarabah & Musharakah principles: yields derive from actual AMM trading fees and physical gold holding.'}
         </p>
       </div>
+
+      {/* Verified Protocol Treasury Commission Transparency Card */}
+      <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all ${
+        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      }`}>
+        <div className="flex items-center gap-2.5">
+          <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
+            {isFa
+              ? 'کارمزد پروتکل گریفین سواپ (۰.۵٪) برای سپرده‌گذاری و مدیریت صندوق‌ها مستقیماً به خزانه‌داری رسمی واریز می‌شود:'
+              : 'Platform commission (0.5%) for vault management routes directly to verified treasury:'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <code className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-black/40 text-purple-300 border border-purple-500/20">
+            {COMMISSION_WALLET.slice(0, 6)}...{COMMISSION_WALLET.slice(-4)}
+          </code>
+          <button
+            onClick={handleCopyWallet}
+            className="p-1.5 rounded-xl hover:bg-white/10 text-purple-300 transition-colors"
+            title={isFa ? 'کپی آدرس خزانه رسمی' : 'Copy Treasury Address'}
+          >
+            {copiedWallet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <a
+            href={`https://etherscan.io/address/${COMMISSION_WALLET}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title={isFa ? 'مشاهده در اترسکن' : 'View on Etherscan'}
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+
     </div>
   );
 };

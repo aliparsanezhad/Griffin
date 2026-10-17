@@ -24,9 +24,14 @@ interface GasInfo {
 interface GasTrackerProps {
   tomanRate: number;
   lang: 'fa' | 'en';
+  isDarkMode?: boolean;
 }
 
-export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
+export const GasTracker: React.FC<GasTrackerProps> = ({ 
+  tomanRate, 
+  lang, 
+  isDarkMode = true 
+}) => {
   const isFa = lang === 'fa';
   const [subTab, setSubTab] = useState<'station' | 'radar'>('station');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'l2' | 'l1'>('all');
@@ -136,7 +141,7 @@ export const GasTracker: React.FC<GasTrackerProps> = ({ tomanRate, lang }) => {
       </div>
 
       {subTab === 'station' ? (
-        <GasStationSection tomanRate={tomanRate} lang={lang} />
+        <GasStationSection tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
       ) : (
         <>
           {/* Title */}

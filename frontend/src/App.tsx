@@ -197,6 +197,7 @@ export function App() {
           <EarnSection
             tomanRate={tomanRate}
             lang={lang}
+            isDarkMode={isDarkMode}
             onSelectVaultToDeposit={handleSelectVaultToDeposit}
           />
         )}
@@ -238,6 +239,7 @@ export function App() {
           <GasTracker
             tomanRate={tomanRate}
             lang={lang}
+            isDarkMode={isDarkMode}
           />
         )}
 
