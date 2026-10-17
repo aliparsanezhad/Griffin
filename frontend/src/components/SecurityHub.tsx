@@ -6,13 +6,17 @@ import {
   AlertTriangle, 
   Globe2, 
   HelpCircle,
-  Search
+  Search,
+  DollarSign,
+  ExternalLink
 } from 'lucide-react';
 import { ANTI_CENSORSHIP_RPCS, IRANIAN_SECURITY_TIPS } from '../services/securityTips';
 import { RpcMonitor } from './RpcMonitor';
 import { SecurityScanner } from './SecurityScanner';
 import { RpcNodeManager } from './RpcNodeManager';
 import { playClickSound } from '../services/soundService';
+
+const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
 interface SecurityHubProps {
   lang: 'fa' | 'en';
@@ -23,11 +27,19 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
   const isFa = lang === 'fa';
   const [activeSecurityTab, setActiveSecurityTab] = useState<'scanner' | 'rpcs'>('scanner');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
 
   const handleCopy = (url: string) => {
     navigator.clipboard.writeText(url);
     setCopiedUrl(url);
     setTimeout(() => setCopiedUrl(null), 2000);
+  };
+
+  const handleCopyWallet = () => {
+    navigator.clipboard.writeText(COMMISSION_WALLET);
+    setCopiedWallet(true);
+    playClickSound();
+    setTimeout(() => setCopiedWallet(false), 2000);
   };
 
   return (
@@ -210,6 +222,43 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
       </div>
     </div>
   )}
+
+      {/* Verified Protocol Treasury Commission Transparency Card */}
+      <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all ${
+        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      }`}>
+        <div className="flex items-center gap-2.5">
+          <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
+            {isFa
+              ? 'کارمزدهای پروتکل گریفین سواپ (۰.۵٪) برای حفظ امنیت و توسعه زیرساخت‌های ضدتحریم به خزانه‌داری رسمی واریز می‌شود:'
+              : 'Platform commission (0.5%) for anti-censorship node operations routes directly to verified treasury:'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <code className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-black/40 text-purple-300 border border-purple-500/20">
+            {COMMISSION_WALLET.slice(0, 6)}...{COMMISSION_WALLET.slice(-4)}
+          </code>
+          <button
+            onClick={handleCopyWallet}
+            className="p-1.5 rounded-xl hover:bg-white/10 text-purple-300 transition-colors"
+            title={isFa ? 'کپی آدرس خزانه رسمی' : 'Copy Treasury Address'}
+          >
+            {copiedWallet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <a
+            href={`https://etherscan.io/address/${COMMISSION_WALLET}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title={isFa ? 'مشاهده در اترسکن' : 'View on Etherscan'}
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+
     </div>
   );
 };
