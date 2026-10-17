@@ -464,9 +464,11 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
         {/* Right Column: Live Trading & Bonding Curve Action Panel */}
         <div className="lg:col-span-5 space-y-4">
           
-          <div className={`p-5 rounded-3xl border sticky top-20 ${
-            isDarkMode ? 'bg-[#130d29]/90 border-purple-500/30 backdrop-blur-xl' : 'bg-white border-purple-200 shadow-xl'
+          <div className={`p-5 rounded-3xl border sticky top-20 overflow-hidden relative ${
+            isDarkMode ? 'cyber-gradient-card border-purple-500/35 backdrop-blur-xl neon-glow-purple shadow-2xl' : 'bg-white border-purple-200 shadow-xl'
           }`}>
+            {/* Top Laser Accent Line */}
+            <div className="laser-line -mx-5 -mt-5 mb-4" />
             
             {/* Header of selected token */}
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-purple-500/20">

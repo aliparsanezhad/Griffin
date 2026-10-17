@@ -307,11 +307,13 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {/* MODE 1: Griffin Native Fast Swap Engine */}
         {swapEngine === 'native' && (
-          <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all ${
+          <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all overflow-hidden ${
             isDarkMode 
-              ? 'glass-panel border-purple-500/30 shadow-purple-950/50' 
+              ? 'cyber-gradient-card border-purple-500/35 shadow-purple-950/60 neon-glow-purple backdrop-blur-2xl' 
               : 'glass-panel-light border-purple-200 shadow-purple-100'
           }`}>
+            {/* Top Laser Accent Line */}
+            <div className="laser-line -mx-5 md:-mx-6 -mt-5 md:-mt-6 mb-4" />
 
             {/* Slippage Settings Drawer */}
             {showSettings && (
