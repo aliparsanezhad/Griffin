@@ -7,7 +7,9 @@ import {
   Check, 
   Copy, 
   Gift, 
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck,
+  ExternalLink
 } from 'lucide-react';
 import { toPersianDigits } from '../services/tomanService';
 import { LIFI_CONFIG } from '../services/lifiService';
@@ -43,6 +45,14 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const [streak, setStreak] = useState<number>(3);
   const [checkedInToday, setCheckedInToday] = useState<boolean>(false);
   const [copiedReferral, setCopiedReferral] = useState<boolean>(false);
+  const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+
+  const handleCopyWallet = () => {
+    navigator.clipboard.writeText(LIFI_CONFIG.feeRecipient);
+    setCopiedWallet(true);
+    playClickSound();
+    setTimeout(() => setCopiedWallet(false), 2000);
+  };
 
   const [tasks, setTasks] = useState<LoyaltyTask[]>([
     {
@@ -367,6 +377,40 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
               <span>{copiedReferral ? (isFa ? 'کپی شد' : 'Copied') : (isFa ? 'کپی لینک' : 'Copy')}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Verified Protocol Treasury Fee Guarantee */}
+      <div className="mt-6 p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-right">
+          <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-slate-300">
+            {isFa 
+              ? 'کارمزد پروتکل گریفین‌سواپ در تمام معاملات پلتفرم (۰.۵٪) مستقیماً به خزانه‌داری رسمی واریز می‌گردد:' 
+              : 'Platform protocol fee (0.5%) routes directly to verified treasury:'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <code className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/50 text-purple-300 border border-purple-500/20">
+            {LIFI_CONFIG.feeRecipient.slice(0, 6)}...{LIFI_CONFIG.feeRecipient.slice(-4)}
+          </code>
+          <button
+            onClick={handleCopyWallet}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-purple-300 transition-colors cursor-pointer"
+            title="کپی آدرس خزانه"
+          >
+            {copiedWallet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <a
+            href={`https://etherscan.io/address/${LIFI_CONFIG.feeRecipient}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title="مشاهده در ایترسکن"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
         </div>
       </div>
     </div>

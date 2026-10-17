@@ -10,11 +10,16 @@ import {
   RefreshCw, 
   Search,
   PieChart,
-  FileText
+  FileText,
+  ShieldCheck,
+  Check,
+  Copy
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
 import { TaxExportModal } from './TaxExportModal';
+
+const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
 interface TokenItem {
   symbol: string;
@@ -55,6 +60,14 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [searchAddress, setSearchAddress] = useState<string>('');
   const [showTaxModal, setShowTaxModal] = useState<boolean>(false);
+  const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+
+  const handleCopyWallet = () => {
+    navigator.clipboard.writeText(COMMISSION_WALLET);
+    setCopiedWallet(true);
+    playClickSound();
+    setTimeout(() => setCopiedWallet(false), 2000);
+  };
 
   const currentAddress = searchAddress || walletAddress || '0x71C8705a2B88e3083feC7B58273683243354438F';
   const isDemo = !walletAddress && !searchAddress;
@@ -471,6 +484,40 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
           </div>
         </div>
       )}
+
+      {/* Verified Protocol Treasury Fee Guarantee */}
+      <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-right">
+          <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-slate-300">
+            {isFa 
+              ? 'کارمزد پروتکل گریفین‌سواپ در تمام معاملات پورتفولیو (۰.۵٪) مستقیماً به خزانه‌داری رسمی واریز می‌گردد:' 
+              : 'Platform protocol fee (0.5%) routes directly to verified treasury:'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <code className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/50 text-purple-300 border border-purple-500/20">
+            {COMMISSION_WALLET.slice(0, 6)}...{COMMISSION_WALLET.slice(-4)}
+          </code>
+          <button
+            onClick={handleCopyWallet}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-purple-300 transition-colors cursor-pointer"
+            title="کپی آدرس خزانه"
+          >
+            {copiedWallet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          </button>
+          <a
+            href={`https://etherscan.io/address/${COMMISSION_WALLET}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title="مشاهده در ایترسکن"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
 
       {/* Tax & Portfolio PnL Accounting Modal */}
       <TaxExportModal

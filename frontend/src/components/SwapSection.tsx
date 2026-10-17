@@ -12,7 +12,8 @@ import {
   TrendingUp,
   ChevronDown,
   GitFork,
-  Compass
+  Compass,
+  Clock
 } from 'lucide-react';
 import { LIFI_CONFIG, POPULAR_CHAINS } from '../services/lifiService';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
@@ -24,6 +25,7 @@ import { MarketSentimentGauge } from './MarketSentimentGauge';
 import { TxPreFlightModal } from './TxPreFlightModal';
 import { CrossChainTrackerModal } from './CrossChainTrackerModal';
 import { TokenSelectModal, type TokenItem } from './TokenSelectModal';
+import { LimitOrderBook } from './LimitOrderBook';
 import { playSwapStartSound, playSwapSuccessSound, playClickSound } from '../services/soundService';
 
 interface SwapSectionProps {
@@ -89,8 +91,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 }) => {
   const isFa = lang === 'fa';
   
-  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'lifi' (LI.FI Advanced Multi-chain Widget)
-  const [swapEngine, setSwapEngine] = useState<'native' | 'lifi'>('native');
+  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'limit' (Gasless Limit Book) vs 'lifi' (LI.FI Advanced Multi-chain Widget)
+  const [swapEngine, setSwapEngine] = useState<'native' | 'limit' | 'lifi'>('native');
 
   // Native swap state
   const [fromToken, setFromToken] = useState<TokenChoice>(() => {
@@ -213,12 +215,17 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
       <div className="w-full flex flex-col items-center">
         
         {/* Persistent Engine Switcher & Auxiliary Controls */}
-        <div className="w-full max-w-[480px] flex items-center justify-between mb-3 px-1">
+        <div className={`w-full flex items-center justify-between mb-3 px-1 transition-all ${
+          swapEngine === 'limit' ? 'max-w-4xl' : 'max-w-[480px]'
+        }`}>
           <div className="flex items-center p-0.5 rounded-xl bg-purple-950/80 border border-purple-500/25 text-xs backdrop-blur-md">
             <button
               type="button"
-              onClick={() => setSwapEngine('native')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold ${
+              onClick={() => {
+                playClickSound();
+                setSwapEngine('native');
+              }}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold cursor-pointer ${
                 swapEngine === 'native'
                   ? 'bg-purple-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-white'
@@ -227,10 +234,30 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               <Zap className="w-3.5 h-3.5 text-amber-300" />
               <span>{isFa ? 'سواپ سریع' : 'Fast Swap'}</span>
             </button>
+
             <button
               type="button"
-              onClick={() => setSwapEngine('lifi')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold ${
+              onClick={() => {
+                playClickSound();
+                setSwapEngine('limit');
+              }}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold cursor-pointer ${
+                swapEngine === 'limit'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-cyan-300" />
+              <span>{isFa ? 'سفارش لیمیت' : 'Limit'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setSwapEngine('lifi');
+              }}
+              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold cursor-pointer ${
                 swapEngine === 'lifi'
                   ? 'bg-purple-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-white'
@@ -612,6 +639,17 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 feeConfig={{ fee: LIFI_CONFIG.fee }}
               />
             </div>
+          </div>
+        )}
+
+        {/* MODE 3: Gasless Permit2 Limit Order Book */}
+        {swapEngine === 'limit' && (
+          <div className="w-full max-w-4xl animate-fade-in">
+            <LimitOrderBook
+              tomanRate={tomanRate}
+              lang={lang}
+              isDarkMode={isDarkMode}
+            />
           </div>
         )}
       </div>
