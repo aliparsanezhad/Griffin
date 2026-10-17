@@ -336,7 +336,11 @@ export function App() {
       />
 
       {/* Modern Persian Footer */}
-      <Footer lang={lang} />
+      <Footer 
+        lang={lang} 
+        setActiveTab={setActiveTab} 
+        isDarkMode={isDarkMode} 
+      />
 
       {/* Floating Glassmorphic Mobile Bottom Dock Navigation */}
       <MobileBottomNav

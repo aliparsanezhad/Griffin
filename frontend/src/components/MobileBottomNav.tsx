@@ -3,7 +3,7 @@ import {
   ArrowLeftRight, 
   Flame, 
   Rocket, 
-  CreditCard, 
+  Wallet, 
   LayoutGrid 
 } from 'lucide-react';
 import type { NavTab } from './Navbar';
@@ -48,9 +48,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     },
     {
-      id: 'cards' as NavTab,
-      label: isFa ? 'کارت‌ها' : 'Cards',
-      icon: CreditCard,
+      id: 'portfolio' as NavTab,
+      label: isFa ? 'دارایی‌ها' : 'Assets',
+      icon: Wallet,
       badge: null,
     },
   ];
