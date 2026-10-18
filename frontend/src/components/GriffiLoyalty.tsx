@@ -7,13 +7,16 @@ import {
   Check, 
   Copy, 
   Gift, 
-  CheckCircle2,
-  ShieldCheck,
-  ExternalLink
+  CheckCircle2, 
+  ShieldCheck, 
+  ExternalLink,
+  Lock,
+  Unlock,
+  Coins
 } from 'lucide-react';
 import { toPersianDigits } from '../services/tomanService';
 import { LIFI_CONFIG } from '../services/lifiService';
-import { playCoinDingSound, playClickSound } from '../services/soundService';
+import { playCoinDingSound, playClickSound, playSwapSuccessSound } from '../services/soundService';
 
 interface GriffiLoyaltyProps {
   lang: 'fa' | 'en';
@@ -24,6 +27,7 @@ interface GriffiLoyaltyProps {
 
 interface LoyaltyTask {
   id: string;
+  category: 'daily' | 'defi' | 'security';
   titleFa: string;
   titleEn: string;
   points: number;
@@ -46,6 +50,8 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const [checkedInToday, setCheckedInToday] = useState<boolean>(false);
   const [copiedReferral, setCopiedReferral] = useState<boolean>(false);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'daily' | 'defi' | 'security'>('all');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(LIFI_CONFIG.feeRecipient);
@@ -54,9 +60,25 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     setTimeout(() => setCopiedWallet(false), 2000);
   };
 
+  const showFeatherToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const streakDays = [
+    { day: 1, reward: 25, labelFa: 'روز ۱', labelEn: 'Day 1' },
+    { day: 2, reward: 35, labelFa: 'روز ۲', labelEn: 'Day 2' },
+    { day: 3, reward: 45, labelFa: 'روز ۳', labelEn: 'Day 3' },
+    { day: 4, reward: 55, labelFa: 'روز ۴', labelEn: 'Day 4' },
+    { day: 5, reward: 70, labelFa: 'روز ۵', labelEn: 'Day 5' },
+    { day: 6, reward: 90, labelFa: 'روز ۶', labelEn: 'Day 6' },
+    { day: 7, reward: 250, labelFa: 'روز ۷ 🎁', labelEn: 'Day 7 🎁', isGrand: true },
+  ];
+
   const [tasks, setTasks] = useState<LoyaltyTask[]>([
     {
       id: 'task-checkin',
+      category: 'daily',
       titleFa: 'ورود روزانه و سلام به گریفی',
       titleEn: 'Daily check-in with Griffi',
       points: 25,
@@ -65,6 +87,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-first-swap',
+      category: 'defi',
       titleFa: 'انجام اولین سواپ بدون تحریم در شبکه لایه ۲',
       titleEn: 'First cross-chain swap on Layer 2',
       points: 150,
@@ -73,6 +96,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-rpc-test',
+      category: 'security',
       titleFa: 'تست پینگ و اتصال به نودهای RPC ضدتحریم',
       titleEn: 'Test anti-censorship RPC latency',
       points: 50,
@@ -81,6 +105,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-calculator',
+      category: 'daily',
       titleFa: 'محاسبه نرخ ریالی تتر در ماشین‌حساب هوشمند',
       titleEn: 'Calculate Toman rate with calculator',
       points: 30,
@@ -89,6 +114,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-earn-vault',
+      category: 'defi',
       titleFa: 'بررسی صندوق‌های سود سالانه دیفای (Earn Vaults)',
       titleEn: 'Explore curated DeFi Earn Vaults',
       points: 80,
@@ -97,6 +123,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-limit-order',
+      category: 'defi',
       titleFa: 'ثبت یک سفارش لیمیت آف‌چین بدون گس با Permit2',
       titleEn: 'Place a gasless Permit2 limit order',
       points: 60,
@@ -105,6 +132,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-audit-token',
+      category: 'security',
       titleFa: 'اسکن سلامت یک قرارداد در دیدبان هانی‌پات گریفی',
       titleEn: 'Audit a token contract with Griffi Honeypot Scanner',
       points: 40,
@@ -113,6 +141,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-cex-compare',
+      category: 'defi',
       titleFa: 'محاسبه صرفه‌جویی کارمزد خروج در مقایسه دکس با صرافی‌ها',
       titleEn: 'Calculate CEX vs DEX withdrawal savings',
       points: 30,
@@ -121,6 +150,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-paymaster',
+      category: 'daily',
       titleFa: 'دریافت سهمیه سوخت رایگان در جایگاه گریفین (Paymaster)',
       titleEn: 'Claim daily free fuel in Griffi Gas Station',
       points: 50,
@@ -129,6 +159,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-smart-router',
+      category: 'defi',
       titleFa: 'شبیه‌سازی تفکیک استخرها در مسیریاب هوشمند چندمسیری',
       titleEn: 'Simulate liquidity split in Smart Multi-Hop Router',
       points: 45,
@@ -137,6 +168,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     },
     {
       id: 'task-tax-statement',
+      category: 'security',
       titleFa: 'بررسی و دانلود گزارش حسابداری و مالیاتی معاملات به تومان',
       titleEn: 'Inspect Web3 Tax & PnL accounting statement in Tomans',
       points: 35,
@@ -153,10 +185,13 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const handleDailyCheckIn = () => {
     if (checkedInToday) return;
     playCoinDingSound();
+    playSwapSuccessSound();
     setCheckedInToday(true);
-    setPoints(prev => prev + 25);
+    const addedPoints = 25;
+    setPoints(prev => prev + addedPoints);
     setStreak(prev => prev + 1);
     setTasks(prev => prev.map(t => t.id === 'task-checkin' ? { ...t, completed: true } : t));
+    showFeatherToast(isFa ? `🎉 +۲۵ پر طلایی به کیف‌پول شما اضافه شد!` : `🎉 +25 Golden Feathers added to your pass!`);
   };
 
   const handleCompleteTask = (taskId: string, taskPoints: number) => {
@@ -164,6 +199,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       if (t.id === taskId && !t.completed) {
         playCoinDingSound();
         setPoints(p => p + taskPoints);
+        showFeatherToast(isFa ? `✨ +${taskPoints} پر طلایی بابت مأموریت دریافت شد!` : `✨ +${taskPoints} Feathers claimed!`);
         return { ...t, completed: true };
       }
       return t;
@@ -172,10 +208,42 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
 
   // Determine user rank level based on points
   const ranks = [
-    { level: 1, nameFa: 'جوجه گریفین 🥚', nameEn: 'Baby Hatchling 🥚', minPoints: 0, image: '/mascot/griffi-egg.jpg' },
-    { level: 2, nameFa: 'پیشاهنگ تیزبال 🌼', nameEn: 'Winged Scout 🌼', minPoints: 200, image: '/mascot/griffi-flower.jpg' },
-    { level: 3, nameFa: 'نگهبان آسمان 👋', nameEn: 'Sky Guardian 👋', minPoints: 600, image: '/mascot/griffi-wave.jpg' },
-    { level: 4, nameFa: 'شیردال اساطیری 🏆', nameEn: 'Mythical Griffin 🏆', minPoints: 1500, image: '/mascot/griffi-hero.jpg' }
+    { 
+      level: 1, 
+      nameFa: 'جوجه گریفین 🥚', 
+      nameEn: 'Baby Hatchling 🥚', 
+      minPoints: 0, 
+      image: '/mascot/griffi-egg.jpg',
+      perksFa: ['کارمزد پروتکل پایه ۰.۵٪', 'اتصال به نودهای RPC ضدتحریم', 'دسترسی کامل به مینی‌اپ تلگرام'],
+      perksEn: ['Base 0.5% fee', 'Anti-censorship RPC nodes', 'Telegram Mini App access']
+    },
+    { 
+      level: 2, 
+      nameFa: 'پیشاهنگ تیزبال 🌼', 
+      nameEn: 'Winged Scout 🌼', 
+      minPoints: 200, 
+      image: '/mascot/griffi-flower.jpg',
+      perksFa: ['۱۰٪ ریبیت کارمزد گس در Paymaster', 'دسترسی به هشدارهای لحظه‌ای رادار آربیتراژ', 'هشدارهای اختصاصی ربات تلگرام'],
+      perksEn: ['10% Gas rebate in Paymaster', 'Real-time Arbitrage alerts', 'Dedicated Telegram bot pings']
+    },
+    { 
+      level: 3, 
+      nameFa: 'نگهبان آسمان 👋', 
+      nameEn: 'Sky Guardian 👋', 
+      minPoints: 600, 
+      image: '/mascot/griffi-wave.jpg',
+      perksFa: ['۲۰٪ ریبیت کارمزد گس با تتر', 'تخصیص اولویت‌دار در پیش‌فروش لانچ‌پد گریفین', 'نشان VIP در کانال ارتباطی دکس'],
+      perksEn: ['20% Gas rebate in USDT', 'Priority Launchpad pool quota', 'VIP chat badge']
+    },
+    { 
+      level: 4, 
+      nameFa: 'شیردال اساطیری 🏆', 
+      nameEn: 'Mythical Griffin 🏆', 
+      minPoints: 1500, 
+      image: '/mascot/griffi-hero.jpg',
+      perksFa: ['تخفیف استثنایی کارمزد سواپ تا ۰.۳۵٪', 'تسویه آنی VIP شتاب و پایا در بخش P2P', '۵۰٪ تخفیف در ثبت دامنه‌های وب۳ (.griffi)'],
+      perksEn: ['0.35% discounted swap fee', 'Instant VIP Paya settlement in P2P', '50% off .griffi Web3 domain mints']
+    }
   ];
 
   const currentRank = ranks.slice().reverse().find(r => points >= r.minPoints) || ranks[0];
@@ -194,12 +262,22 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
     setTimeout(() => setCopiedReferral(false), 2000);
   };
 
+  const filteredTasks = tasks.filter(t => selectedCategory === 'all' || t.category === selectedCategory);
+
   return (
-    <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all ${
+    <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all relative ${
       isDarkMode 
         ? 'bg-[#100b24]/90 border-purple-500/25 text-slate-100 shadow-purple-950/30' 
         : 'bg-white border-purple-200 text-slate-800 shadow-xl'
     }`}>
+      {/* Toast notification banner */}
+      {toastMessage && (
+        <div className="fixed bottom-20 right-6 z-50 p-4 rounded-2xl bg-amber-500 text-purple-950 font-black text-xs shadow-2xl border-2 border-white flex items-center gap-2 animate-bounce">
+          <Sparkles className="w-4 h-4" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-purple-500/20">
         <div>
@@ -217,7 +295,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
           </p>
         </div>
 
-        {/* Daily Check-in Button */}
+        {/* Daily Check-in & Streak Stats */}
         <div className="flex flex-wrap items-center gap-3">
           {!walletAddress && (
             <button
@@ -244,6 +322,67 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
             {checkedInToday ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Sparkles className="w-4 h-4" />}
             <span>{isFa ? (checkedInToday ? 'امروز دریافت شد (+۲۵ پر)' : 'حضور روزانه (+۲۵ پر)') : (checkedInToday ? 'Claimed Today (+25)' : 'Daily Check-in (+25)')}</span>
           </button>
+        </div>
+      </div>
+
+      {/* 7-Day Interactive Streak Calendar Card */}
+      <div className="my-6 p-5 rounded-2xl bg-purple-950/40 border border-purple-500/25">
+        <div className="flex items-center justify-between mb-3 text-right">
+          <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <Flame className="w-4 h-4 text-amber-400" />
+            <span>{isFa ? 'زنجیره حضور هفتگی و پاداش استریک (Daily Streak Map)' : '7-Day Check-in Streak Map'}</span>
+          </span>
+          <span className="text-[11px] text-slate-400">
+            {isFa ? 'ورود متوالی روز هفتم = ۲۵۰ پر طلایی + نشان افتخار' : 'Day 7 = 250 Feathers Bonus'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
+          {streakDays.map((s) => {
+            const isCompleted = s.day < streak || (s.day === streak && checkedInToday);
+            const isCurrent = s.day === streak && !checkedInToday;
+
+            return (
+              <div 
+                key={s.day}
+                className={`p-3 rounded-2xl border text-center transition-all flex flex-col justify-between ${
+                  isCompleted
+                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                    : isCurrent
+                      ? 'bg-gradient-to-b from-amber-500/20 to-purple-900/40 border-amber-400/60 shadow-lg shadow-amber-500/10 ring-1 ring-amber-400/50'
+                      : 'bg-black/30 border-purple-500/20 text-slate-400 opacity-60'
+                }`}
+              >
+                <div className="flex items-center justify-between text-[10px] font-bold mb-1">
+                  <span>{isFa ? s.labelFa : s.labelEn}</span>
+                  {isCompleted ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : isCurrent ? (
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                  ) : (
+                    <Lock className="w-3 h-3 text-slate-500" />
+                  )}
+                </div>
+
+                <div className="my-1.5">
+                  <span className="text-base font-black font-mono text-amber-400 block">
+                    +{s.reward}
+                  </span>
+                  <span className="text-[10px] text-purple-300 block">🪶 پر طلایی</span>
+                </div>
+
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-1 ${
+                  isCompleted 
+                    ? 'bg-emerald-500/20 text-emerald-300' 
+                    : isCurrent 
+                      ? 'bg-amber-400 text-purple-950 font-black' 
+                      : 'bg-white/5 text-slate-500'
+                }`}>
+                  {isCompleted ? (isFa ? 'دریافت شد' : 'Claimed') : isCurrent ? (isFa ? 'امروز' : 'Today') : (isFa ? 'قفل' : 'Locked')}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -295,15 +434,99 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
         </div>
       </div>
 
-      {/* Quests & Tasks List */}
-      <div>
-        <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+      {/* Tier Perks & Rewards Unlock Showcase */}
+      <div className="my-6">
+        <h4 className="text-xs font-bold text-slate-300 mb-3 flex items-center gap-1.5 text-right">
           <Award className="w-4 h-4 text-purple-400" />
-          <span>{isFa ? 'مأموریت‌های فعال برای کسب امتیاز:' : 'Active Loyalty Quests:'}</span>
+          <span>{isFa ? 'امتیازات و جوایز ویژه هر سطح کاربری:' : 'Tier Privileges & Rewards Matrix:'}</span>
         </h4>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {ranks.map((r) => {
+            const isUserTier = points >= r.minPoints;
+            const isExactTier = currentRank.level === r.level;
+
+            return (
+              <div 
+                key={r.level}
+                className={`p-4 rounded-2xl border transition-all text-right flex flex-col justify-between ${
+                  isExactTier
+                    ? 'bg-purple-950/60 border-amber-400/60 ring-2 ring-amber-400/40 shadow-xl shadow-purple-950/40'
+                    : isUserTier
+                      ? 'bg-purple-950/30 border-emerald-500/30'
+                      : 'bg-black/30 border-purple-500/20 opacity-70'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-mono text-amber-400 font-black">
+                      {r.minPoints} 🪶
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                      isUserTier ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-slate-500'
+                    }`}>
+                      {isUserTier ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                      <span>{isUserTier ? (isExactTier ? (isFa ? 'سطح شما' : 'Active') : (isFa ? 'باز شده' : 'Unlocked')) : (isFa ? 'قفل' : 'Locked')}</span>
+                    </span>
+                  </div>
+
+                  <h5 className="text-sm font-extrabold text-white mb-2">{isFa ? r.nameFa : r.nameEn}</h5>
+
+                  <ul className="space-y-1.5 text-[11px] text-slate-300">
+                    {(isFa ? r.perksFa : r.perksEn).map((perk, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                        <Check className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                        <span>{perk}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-purple-500/20 text-left">
+                  <span className="text-[10px] text-slate-400 font-mono">Tier {r.level} of 4</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Quests & Tasks List with Category Filter */}
+      <div className="mt-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h4 className="text-sm font-bold text-white flex items-center gap-2 text-right">
+            <Coins className="w-4 h-4 text-amber-400" />
+            <span>{isFa ? 'مأموریت‌های فعال برای کسب امتیاز و ایردراپ:' : 'Active Loyalty Quests & Airdrop Tasks:'}</span>
+          </h4>
+
+          {/* Category Filter Pills */}
+          <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-purple-500/20 self-start sm:self-auto">
+            {[
+              { id: 'all', labelFa: 'همه', labelEn: 'All' },
+              { id: 'daily', labelFa: 'روزانه', labelEn: 'Daily' },
+              { id: 'defi', labelFa: 'دیفای و سواپ', labelEn: 'DeFi' },
+              { id: 'security', labelFa: 'امنیت و نود', labelEn: 'Security' },
+            ].map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  playClickSound();
+                  setSelectedCategory(cat.id as any);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  selectedCategory === cat.id
+                    ? 'bg-purple-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isFa ? cat.labelFa : cat.labelEn}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-2.5">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <div
               key={task.id}
               className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 text-right ${
@@ -341,7 +564,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
                 ) : (
                   <button
                     onClick={() => handleCompleteTask(task.id, task.points)}
-                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all active:scale-95"
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all active:scale-95 shadow"
                   >
                     {isFa ? 'دریافت پاداش' : 'Complete Quest'}
                   </button>
@@ -353,7 +576,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       </div>
 
       {/* Referral Program Banner */}
-      <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-amber-900/20 border border-purple-500/30">
+      <div className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-amber-900/20 border border-purple-500/30">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5 mb-1">
@@ -371,7 +594,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
             <span className="truncate flex-1">{referralLink}</span>
             <button
               onClick={handleCopyReferral}
-              className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1 transition-all"
+              className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 flex items-center gap-1 transition-all active:scale-95"
             >
               {copiedReferral ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedReferral ? (isFa ? 'کپی شد' : 'Copied') : (isFa ? 'کپی لینک' : 'Copy')}</span>
