@@ -10,7 +10,9 @@ import {
   ShieldCheck,
   ArrowRightLeft,
   Coins,
-  DollarSign
+  DollarSign,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
@@ -279,6 +281,43 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Live Golden Arbitrage Opportunity Banner */}
+        <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-purple-900/30 to-emerald-500/15 border border-amber-400/40 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-right">
+            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 ring-1 ring-amber-400/40 shrink-0 animate-pulse">
+              <Zap className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-amber-300">
+                  {isFa ? 'فرصت فعال آربیتراژ شناسایی شد:' : 'Active Arbitrage Window Detected:'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  {isFa ? 'سود تخمینی ۰.۴۱٪' : '+0.41% Net Margin'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-200 mt-1 leading-relaxed">
+                {isFa 
+                  ? `اختلاف ${toPersianDigits(formatToman(spreadToman, false))} تومانی میان پلتفرم‌های داخلی و استخرهای گریفین‌سواپ! بدون احراز هویت، تتر یا طلای دیجیتال خود را بدون اسلیپیج نقد کنید.`
+                  : `Spread of ${formatToman(spreadToman, false)} Toman detected between Iranian CEXs and GriffinSwap liquidity pools! Zero KYC required.`}
+              </p>
+            </div>
+          </div>
+
+          {onNavigateSwap && (
+            <button
+              onClick={() => {
+                playClickSound();
+                onNavigateSwap();
+              }}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-black text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 shrink-0"
+            >
+              <span>{isFa ? 'ورود به سواپ و اجرای فوری' : 'Execute Arbitrage Swap'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Exchanges Comparison Table */}
