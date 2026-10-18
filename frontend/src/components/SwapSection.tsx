@@ -127,6 +127,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   }, [initialFromSymbol, initialToSymbol, initialAmount]);
 
   const [slippage, setSlippage] = useState<number>(0.5);
+  const [speedMode, setSpeedMode] = useState<'eco' | 'normal' | 'turbo'>('normal');
+  const [antiMev, setAntiMev] = useState<boolean>(true);
   const [isGasless, setIsGasless] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [isSwapping, setIsSwapping] = useState<boolean>(false);
@@ -323,27 +325,89 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             {/* Top Laser Accent Line */}
             <div className="laser-line -mx-5 md:-mx-6 -mt-5 md:-mt-6 mb-4" />
 
-            {/* Slippage Settings Drawer */}
+            {/* Slippage & Routing Settings Drawer */}
             {showSettings && (
-              <div className="mb-4 p-3 rounded-2xl bg-purple-950/50 border border-purple-500/20 text-xs space-y-2 animate-fade-in">
-                <div className="flex justify-between items-center text-slate-300 font-medium">
-                  <span>{isFa ? 'میزان لغزش قیمت (Slippage Tolerance):' : 'Slippage Tolerance:'}</span>
-                  <span className="font-mono font-bold text-amber-400">{slippage}%</span>
+              <div className="mb-4 p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-xs space-y-3 animate-fade-in text-right">
+                <div>
+                  <div className="flex justify-between items-center text-slate-300 font-medium mb-1.5">
+                    <span>{isFa ? 'میزان لغزش مجاز قیمت (Slippage):' : 'Slippage Tolerance:'}</span>
+                    <span className="font-mono font-bold text-amber-400">{slippage}%</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[0.1, 0.5, 1.0, 2.0].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          setSlippage(s);
+                        }}
+                        className={`flex-1 py-1 rounded-lg font-mono text-xs font-bold transition-all ${
+                          slippage === s
+                            ? 'bg-purple-600 text-white shadow'
+                            : 'bg-purple-900/30 text-slate-300 hover:bg-purple-900/50'
+                        }`}
+                      >
+                        {s}%
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {[0.1, 0.5, 1.0, 2.0].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSlippage(s)}
-                      className={`flex-1 py-1 rounded-lg font-mono text-xs font-bold transition-all ${
-                        slippage === s
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-purple-900/30 text-slate-300 hover:bg-purple-900/50'
-                      }`}
-                    >
-                      {s}%
-                    </button>
-                  ))}
+
+                {/* Speed Mode Selector */}
+                <div>
+                  <span className="text-[11px] text-slate-300 block mb-1.5 font-bold">
+                    {isFa ? 'سرعت و اولویت تراکنش در شبکه:' : 'Transaction Speed Priority:'}
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5 font-mono text-[11px]">
+                    {[
+                      { id: 'eco', labelFa: 'اقتصادی 🌱', labelEn: 'Eco 🌱' },
+                      { id: 'normal', labelFa: 'پیشنهادی ⚡', labelEn: 'Normal ⚡' },
+                      { id: 'turbo', labelFa: 'توربو آنی 🚀', labelEn: 'Turbo 🚀' },
+                    ].map(sm => (
+                      <button
+                        key={sm.id}
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          setSpeedMode(sm.id as any);
+                        }}
+                        className={`py-1 rounded-lg font-bold transition-all ${
+                          speedMode === sm.id
+                            ? 'bg-amber-400 text-slate-950 shadow font-black'
+                            : 'bg-purple-900/30 text-slate-300 hover:bg-purple-900/50'
+                        }`}
+                      >
+                        {isFa ? sm.labelFa : sm.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Anti-MEV Sandwich Protection Toggle */}
+                <div className="flex items-center justify-between pt-2 border-t border-purple-500/15">
+                  <div>
+                    <span className="text-white font-bold block text-[11px]">
+                      {isFa ? 'سپر ضد فرانت‌ران و MEV:' : 'Anti-MEV Protection:'}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      {isFa ? 'ارسال تراکنش از طریق مم‌پول اختصاصی' : 'Routes via private mempool'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      setAntiMev(!antiMev);
+                    }}
+                    className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all ${
+                      antiMev
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : 'bg-white/5 text-slate-500 border-white/10'
+                    }`}
+                  >
+                    {antiMev ? (isFa ? 'فعال 🛡️' : 'ON 🛡️') : (isFa ? 'غیرفعال' : 'OFF')}
+                  </button>
                 </div>
               </div>
             )}
@@ -670,6 +734,32 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                   <span>&lt; 0.01%</span>
                   <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-sans">{isFa ? 'سپر فعال 🛡️' : 'Protected 🛡️'}</span>
                 </span>
+              </div>
+
+              {/* Visual Hop Pipeline */}
+              <div className="p-2.5 rounded-xl bg-black/40 border border-purple-500/15 my-1">
+                <span className="text-[10px] text-slate-400 block mb-1 font-bold">
+                  {isFa ? 'نقشه مسیر بهینه مبادله:' : 'Optimal Route Map:'}
+                </span>
+                <div className="flex items-center justify-between text-[10px] font-mono">
+                  <div className="flex items-center gap-1">
+                    <img src={fromToken.logo} alt={fromToken.symbol} className="w-4 h-4 rounded-full" />
+                    <span className="text-white font-bold">{fromToken.symbol}</span>
+                  </div>
+                  <span className="text-purple-400">➔</span>
+                  <div className="px-1.5 py-0.5 rounded bg-purple-900/40 text-purple-200 border border-purple-500/20 text-[9px]">
+                    Uniswap v3
+                  </div>
+                  <span className="text-purple-400">➔</span>
+                  <div className="px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-200 border border-indigo-500/20 text-[9px]">
+                    Across / Stargate
+                  </div>
+                  <span className="text-purple-400">➔</span>
+                  <div className="flex items-center gap-1">
+                    <img src={toToken.logo} alt={toToken.symbol} className="w-4 h-4 rounded-full" />
+                    <span className="text-emerald-400 font-bold">{toToken.symbol}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-between items-center">
