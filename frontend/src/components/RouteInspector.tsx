@@ -147,10 +147,10 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
       auditor: 'Zellic & OtterSec',
     },
     {
-      id: 'lifi',
-      name: 'LI.FI Super-Aggregator',
+      id: 'griffin-mesh',
+      name: 'Griffin Mesh Multi-Bridge',
       tagline: 'Multi-DEX Smart Order Routing',
-      taglineFa: 'مسیریاب هوشمند تجمیعی چندصرافی و چندپل',
+      taglineFa: 'مسیریاب هوشمند تجمیعی چندصرافی و چندپل گریفین',
       badge: 'Smart Optimal',
       badgeFa: 'بهینه‌ترین خروجی هوشمند',
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',

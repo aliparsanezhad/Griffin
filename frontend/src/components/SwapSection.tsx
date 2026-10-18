@@ -92,7 +92,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 }) => {
   const isFa = lang === 'fa';
   
-  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'limit' (Gasless Limit Book) vs 'lifi' (LI.FI Advanced Multi-chain Widget)
+  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'limit' (Gasless Limit Book) vs 'lifi' (Griffin Global Cross-Chain Bridge)
   const [swapEngine, setSwapEngine] = useState<'native' | 'limit' | 'lifi'>('native');
 
   // Native swap state
@@ -271,7 +271,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-purple-300" />
-              <span>{isFa ? 'بریج LI.FI' : 'LI.FI Bridge'}</span>
+              <span>{isFa ? 'بریج جامع بین‌زنجیره‌ای' : 'Cross-Chain Bridge'}</span>
             </button>
           </div>
 
@@ -742,7 +742,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
           </div>
         )}
 
-        {/* MODE 2: Full LI.FI Aggregator Widget */}
+        {/* MODE 2: Griffin Global Cross-Chain Bridge */}
         {swapEngine === 'lifi' && (
           <div className="w-full flex justify-center overflow-visible" dir="ltr">
             <div className="w-full max-w-[480px] rounded-3xl shadow-2xl overflow-visible">
@@ -750,7 +750,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 integrator={LIFI_CONFIG.integrator}
                 variant="compact"
                 appearance={isDarkMode ? 'dark' : 'light'}
-                hiddenUI={{ appearance: true }}
+                hiddenUI={{ appearance: true, poweredBy: true }}
                 feeConfig={{ fee: LIFI_CONFIG.fee }}
               />
             </div>

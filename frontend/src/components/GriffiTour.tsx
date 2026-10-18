@@ -144,12 +144,12 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
       icon: GitFork,
       image: '/mascot/griffi-navigator.jpg',
       contentFa: [
-        'گریفین‌سواپ از پل‌های مطرح نظیر Across V3، Stargate V2، و LI.FI تجمیع نقدینگی می‌کند.',
+        'گریفین‌سواپ از پل‌های مطرح نظیر Across V3، Stargate V2 و شبکه‌های پیشرفته لایه ۲ تجمیع نقدینگی می‌کند.',
         'با باز کردن «دیدبان مسیرها» می‌توانید سرعت هر پل، کارمزد گس، رتبه امنیت و مراحل انتقال را مشاهده کرده و شبیه‌سازی انجام دهید.',
         'بخش «دیدبان آربیتراژ» اختلاف قیمت تتر میان صرافی‌های نوبیتکس، والکس، تترلند و آبان‌تتر را رصد کرده و سود احتمالی را به شما نشان می‌دهد.'
       ],
       contentEn: [
-        'GriffinSwap aggregates liquidity from Across V3, Stargate V2, and LI.FI.',
+        'GriffinSwap aggregates liquidity from Across V3, Stargate V2, and high-speed Layer 2 mesh bridges.',
         'Open the Route Inspector to compare bridge speeds, gas, audits, and run animated execution tests.',
         'The Arbitrage Scanner monitors USDT price discrepancies across Nobitex, Wallex, and TetherLand.'
       ],

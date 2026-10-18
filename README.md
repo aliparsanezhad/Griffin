@@ -19,7 +19,7 @@
 ## 🌟 امکانات پرچمدار گریفین‌سواپ (Flagship Features)
 
 ### ۱. مبادله سریع چندزنجیره‌ای و سفارشات لیمیت بدون گس (Cross-Chain Swap & In-Card Limit Orders)
-- **سواپ سریع با بیش از ۵۸ بلاک‌چین**: تجمیع خودکار نقدینگی از طریق ۳۵ پل ارتباطی (Across V3، Stargate V2، LI.FI) و ۳۰ صرافی غیرمتمرکز (Uniswap، 1inch، PancakeSwap).
+- **سواپ سریع با بیش از ۵۸ بلاک‌چین**: تجمیع خودکار نقدینگی از طریق ۳۵ پل ارتباطی (Across V3، Stargate V2 و شبکه‌های امن چندزنجیره‌ای) و ۳۰ صرافی غیرمتمرکز (Uniswap، 1inch، PancakeSwap).
 - **دفتر سفارش لیمیت درون کارت (In-Card Limit Order Book)**: ثبت و لغو سفارش‌های خرید/فروش شرطی بدون پرداخت حتی ۱ ریال کارمزد گس به لطف امضای آف‌چین EIP-712 Permit2.
 - **حالت بدون نیاز به اتریوم (Gasless Permit2 Meta-Tx)**: امکان انجام تراکنش برای کاربرانی که فقط تتر دارند بدون نیاز به موجودی ETH؛ کارمزد شبکه مستقیماً از تتر کسر می‌شود.
 - **شبیه‌سازی امنیتی پیش از تراکنش (TxPreFlightModal)**: تست بایت‌کد در محیط شبیه‌ساز برای محافظت در برابر خطای گس و لغزش قیمت.
@@ -95,7 +95,7 @@ GriffinSwap/
 │   │   └── fonts/        # فونت‌های وزیرمتن (Vazirmatn) با فال‌بک اختصاصی ضدتحریم
 │   ├── src/
 │   │   ├── components/   # تمامی ماژول‌های Swap, LimitOrder, Futures, Launchpad, Cards, Domains, P2P, Gold, DCA, Arbitrage
-│   │   ├── services/     # ماژول‌های اتصال به LI.FI, Moralis, Toman Oracle, SoundFX, Anti-Censorship RPCs
+│   │   ├── services/     # ماژول‌های اتصال به Moralis, Toman Oracle, SoundFX, Anti-Censorship RPCs, Cross-Chain Routers
 │   │   ├── App.tsx       # مدیریت وضعیت سراسری، تم تاریک/روشن و زبان دوگانه (FA/EN)
 │   │   └── index.css     # استایل‌های مدرن Glassmorphism، تم‌های Obsidian و گرادیانت شیردال
 │   └── package.json

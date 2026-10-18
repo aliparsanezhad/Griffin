@@ -80,7 +80,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Arbitrum One",
       balance: 1450.5,
       priceUsd: 1.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/usdt.svg",
+      logo: "https://assets.coingecko.com/coins/images/325/large/Tether.png",
       color: "bg-emerald-500",
     },
     {
@@ -89,7 +89,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Ethereum",
       balance: 0.85,
       priceUsd: 3420.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/tokens/eth.svg",
+      logo: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
       color: "bg-indigo-500",
     },
     {
@@ -98,7 +98,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Arbitrum One",
       balance: 1250.0,
       priceUsd: 0.88,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/arbitrum.svg",
+      logo: "https://assets.coingecko.com/coins/images/16547/large/arbitrum_logo.png",
       color: "bg-cyan-500",
     },
     {
@@ -107,7 +107,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "BNB Chain",
       balance: 1.2,
       priceUsd: 590.00,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/bsc.svg",
+      logo: "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
       color: "bg-amber-500",
     },
     {
@@ -116,7 +116,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       chain: "Polygon",
       balance: 620.0,
       priceUsd: 0.45,
-      logo: "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/chains/polygon.svg",
+      logo: "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
       color: "bg-purple-500",
     },
     {

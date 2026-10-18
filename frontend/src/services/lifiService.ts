@@ -1,4 +1,4 @@
-// LI.FI integration configuration & helpers for GriffinSwap
+// Cross-chain routing integration configuration & helpers for GriffinSwap
 
 export const LIFI_CONFIG = {
   integrator: "GriffinSwap",
@@ -27,7 +27,7 @@ export const POPULAR_CHAINS: ChainOption[] = [
   { id: 1151111081099710, name: "Solana", key: "sol", logo: "https://assets.coingecko.com/coins/images/4128/large/solana.png", isPopularInIran: true },
 ];
 
-// Persian translation overrides for LI.FI Widget
+// Persian translation overrides for Cross-Chain Bridge Widget
 export const PERSIAN_WIDGET_TRANSLATIONS = {
   button: {
     connectWallet: "اتصال کیف پول",
@@ -91,7 +91,7 @@ export const PERSIAN_WIDGET_TRANSLATIONS = {
   },
 };
 
-// Direct quote fetch via LI.FI REST API
+// Direct quote fetch via Multi-Chain REST API
 export async function getDirectQuote(params: {
   fromChain: number;
   toChain: number;

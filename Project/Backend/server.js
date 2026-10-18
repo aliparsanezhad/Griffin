@@ -99,7 +99,7 @@ app.get("/api/gas", async (req, res) => {
   return res.status(200).json(cachedGasPrices);
 });
 
-// Curated DeFi Yield Vaults (Inspired by Jumper Earn & LI.FI Earn)
+// Curated DeFi Yield Vaults (Griffin Yield & Auto-Compounding Vaults)
 app.get("/api/earn/vaults", (req, res) => {
   const vaults = [
     {
