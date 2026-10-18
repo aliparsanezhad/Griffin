@@ -9,7 +9,12 @@ import {
   Eye, 
   EyeOff, 
   CheckCircle2, 
-  DollarSign
+  DollarSign,
+  Lock,
+  Unlock,
+  Sliders,
+  Zap,
+  PieChart
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound } from '../services/soundService';
@@ -18,6 +23,7 @@ interface Web3CardsProps {
   tomanRate: number;
   lang: 'fa' | 'en';
   isDarkMode?: boolean;
+  onInitiateSwap?: (fromToken: string, toToken: string, amount: string) => void;
 }
 
 interface VoucherItem {
@@ -114,6 +120,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
   tomanRate,
   lang,
   isDarkMode = true,
+  onInitiateSwap
 }) => {
   const isFa = lang === 'fa';
 
@@ -121,6 +128,10 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
   const [cardSkin, setCardSkin] = useState<CardSkin>('obsidian');
   const [walletPassAdded, setWalletPassAdded] = useState<'apple' | 'google' | null>(null);
   const [cardTilt, setCardTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Security Lock & Spending Limit State
+  const [isCardFrozen, setIsCardFrozen] = useState<boolean>(false);
+  const [monthlySpendingLimit, setMonthlySpendingLimit] = useState<number>(250); // $250 default
 
   const [selectedVoucher, setSelectedVoucher] = useState<VoucherItem>(VOUCHERS[0]);
   const [activeCategory, setActiveCategory] = useState<'all' | 'card' | 'subscription' | 'giftcard'>('all');
@@ -131,6 +142,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
 
   const priceToman = usdToToman(selectedVoucher.priceUsd, tomanRate);
+  const limitToman = usdToToman(monthlySpendingLimit, tomanRate);
 
   const filteredVouchers = activeCategory === 'all'
     ? VOUCHERS
@@ -147,7 +159,16 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
     setCardTilt({ x: 0, y: 0 });
   };
 
+  const handleToggleFreeze = () => {
+    playClickSound();
+    setIsCardFrozen(!isCardFrozen);
+  };
+
   const handleMintCard = () => {
+    if (isCardFrozen) {
+      alert(isFa ? 'کارت در حالت مسدودی امنیتی قرار دارد. لطفاً ابتدا آن را از انجماد خارج کنید.' : 'Card is frozen. Please unfreeze before minting.');
+      return;
+    }
     playSwapStartSound();
     setIsMinting(true);
 
@@ -212,21 +233,36 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </div>
         </div>
 
-        {/* 100% Guaranteed Shield */}
-        <div className={`p-3 rounded-2xl border flex items-center gap-3 ${
-          isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-        }`}>
-          <div className="p-2 rounded-xl bg-pink-500/20 text-pink-300">
-            <CreditCard className="w-5 h-5" />
-          </div>
-          <div className="text-right">
-            <span className="text-[10px] text-slate-400 block font-semibold">
-              {isFa ? 'وضعیت اتصال بانکی:' : 'Card Network:'}
-            </span>
-            <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              {isFa ? 'مسترکارت جهانی فعال' : 'Mastercard 3D Secure'}
-            </span>
+        {/* 100% Guaranteed Shield & Security Controls */}
+        <div className="flex items-center gap-3">
+          {/* Card Freeze/Unfreeze Toggle Button */}
+          <button
+            onClick={handleToggleFreeze}
+            className={`px-3 py-2 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm ${
+              isCardFrozen
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+            }`}
+          >
+            {isCardFrozen ? <Lock className="w-4 h-4 text-rose-400 animate-pulse" /> : <Unlock className="w-4 h-4 text-emerald-400" />}
+            <span>{isCardFrozen ? (isFa ? 'کارت منجمد است 🔒' : 'Card Frozen 🔒') : (isFa ? 'کارت فعال است 🟢' : 'Card Active 🟢')}</span>
+          </button>
+
+          <div className={`p-3 rounded-2xl border flex items-center gap-3 ${
+            isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+          }`}>
+            <div className="p-2 rounded-xl bg-pink-500/20 text-pink-300">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-slate-400 block font-semibold">
+                {isFa ? 'وضعیت اتصال بانکی:' : 'Card Network:'}
+              </span>
+              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {isFa ? 'مسترکارت جهانی فعال' : 'Mastercard 3D Secure'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -320,6 +356,30 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                     : 'bg-gradient-to-tr from-[#2d0a1e] via-[#481837] to-[#1c0822] border-pink-400/40 shadow-pink-950/50'
             }`}
           >
+            {/* Frozen Card Frosted Ice Overlay */}
+            {isCardFrozen && (
+              <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center animate-fade-in border-2 border-rose-500/50">
+                <div className="p-3 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-400 mb-2">
+                  <Lock className="w-8 h-8 animate-bounce" />
+                </div>
+                <span className="text-sm font-black text-rose-200 tracking-wider">
+                  {isFa ? 'کارت منجمد و مسدود شده است' : 'CARD IS CURRENTLY FROZEN'}
+                </span>
+                <span className="text-[11px] text-slate-300 mt-1 max-w-xs">
+                  {isFa ? 'جهت حفظ امنیت دارایی‌ها، تمامی تراکنش‌های آنلاین مسدود هستند.' : 'All online authorizations are temporarily suspended.'}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleFreeze();
+                  }}
+                  className="mt-3 px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md cursor-pointer"
+                >
+                  {isFa ? 'رفع انجماد کارت 🔓' : 'Unfreeze Card 🔓'}
+                </button>
+              </div>
+            )}
+
             {/* Holographic light reflection sheen */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
             
@@ -392,7 +452,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                 setWalletPassAdded('apple');
                 setTimeout(() => setWalletPassAdded(null), 3000);
               }}
-              className="py-2 px-3 rounded-xl bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold"
+              className="py-2 px-3 rounded-xl bg-black/70 hover:bg-black border border-white/20 text-white flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold cursor-pointer"
             >
               <span></span>
               <span>{walletPassAdded === 'apple' ? (isFa ? 'به اپل ولت اضافه شد ✓' : 'Added to Apple Wallet ✓') : (isFa ? 'افزودن به Apple Wallet' : 'Add to Apple Wallet')}</span>
@@ -403,11 +463,41 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                 setWalletPassAdded('google');
                 setTimeout(() => setWalletPassAdded(null), 3000);
               }}
-              className="py-2 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold"
+              className="py-2 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold cursor-pointer"
             >
               <span>G</span>
               <span>{walletPassAdded === 'google' ? (isFa ? 'به گوگل ولت اضافه شد ✓' : 'Added to Google Wallet ✓') : (isFa ? 'افزودن به Google Pay' : 'Add to Google Pay')}</span>
             </button>
+          </div>
+
+          {/* Interactive Monthly Spending Limit Slider */}
+          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/25 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-white flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isFa ? 'سقف تراکنش ماهانه کارت:' : 'Monthly Spend Limit:'}</span>
+              </span>
+              <span className="font-mono font-bold text-amber-300">
+                ${monthlySpendingLimit} USD (≈ {toPersianDigits(formatToman(limitToman, false))} ت)
+              </span>
+            </div>
+
+            <input 
+              type="range"
+              min="20"
+              max="1000"
+              step="10"
+              value={monthlySpendingLimit}
+              onChange={(e) => setMonthlySpendingLimit(Number(e.target.value))}
+              className="w-full accent-amber-400 cursor-pointer h-1.5 bg-purple-900/60 rounded-lg"
+            />
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+              <span>$20</span>
+              <span>$250</span>
+              <span>$500</span>
+              <span>$1,000</span>
+            </div>
           </div>
 
           {/* Pricing & Checkout Summary */}
@@ -434,8 +524,12 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
             {/* Mint Action Button */}
             <button
               onClick={handleMintCard}
-              disabled={isMinting}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-950/50 transition-all flex items-center justify-center gap-2"
+              disabled={isMinting || isCardFrozen}
+              className={`w-full py-3.5 rounded-2xl font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                isCardFrozen 
+                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white shadow-purple-950/50'
+              }`}
             >
               <CreditCard className="w-4 h-4" />
               <span>
@@ -445,6 +539,21 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                 }
               </span>
             </button>
+
+            {/* 1-Click CTA to Buy Required USDT in Swap */}
+            {onInitiateSwap && (
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  onInitiateSwap('ETH', 'USDT', selectedVoucher.priceUsd.toString());
+                }}
+                className="w-full py-2.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/50 border border-purple-500/30 text-amber-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isFa ? `نیاز به تتر دارید؟ تبدیل در سواپ (${selectedVoucher.priceUsd} USDT)` : `Need USDT? Swap for it directly`}</span>
+              </button>
+            )}
 
             {/* Issued Code Display */}
             {issuedCode && (
@@ -457,7 +566,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                   <span>{issuedCode}</span>
                   <button
                     onClick={handleCopyCode}
-                    className="p-1 hover:bg-white/10 rounded text-emerald-300"
+                    className="p-1 hover:bg-white/10 rounded text-emerald-300 cursor-pointer"
                     title="کپی کد"
                   >
                     {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -485,7 +594,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
                   playClickSound();
                   setActiveCategory(cat.id as any);
                 }}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   activeCategory === cat.id
                     ? 'bg-purple-600 text-white shadow-md'
                     : isDarkMode
@@ -547,6 +656,45 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
             })}
           </div>
 
+          {/* Categorized Expense Allocation visual chart */}
+          <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-white flex items-center gap-1.5">
+                <PieChart className="w-3.5 h-3.5 text-pink-400" />
+                <span>{isFa ? 'توزیع کاربرد کارت‌های وب۳ گریفین:' : 'Supported Web3 Card Expense Categories:'}</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">100% Acceptance</span>
+            </div>
+
+            {/* Visual breakdown progress bar */}
+            <div className="w-full h-2 rounded-full overflow-hidden flex bg-black/40">
+              <div style={{ width: '42%' }} className="bg-gradient-to-r from-purple-500 to-indigo-500" title="هوش مصنوعی ۴۲٪" />
+              <div style={{ width: '28%' }} className="bg-gradient-to-r from-cyan-400 to-teal-400" title="سرور و هاست ۲۸٪" />
+              <div style={{ width: '18%' }} className="bg-gradient-to-r from-amber-400 to-orange-400" title="گیمینگ و استریم ۱۸٪" />
+              <div style={{ width: '12%' }} className="bg-gradient-to-r from-pink-400 to-rose-400" title="ابزارهای طراحی ۱۲٪" />
+            </div>
+
+            {/* Legend Chips */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+              <div className="flex items-center gap-1 text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
+                <span>هوش مصنوعی (۴۲٪)</span>
+              </div>
+              <div className="flex items-center gap-1 text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                <span>سرور و VPS (۲۸٪)</span>
+              </div>
+              <div className="flex items-center gap-1 text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                <span>گیمینگ و اپل (۱۸٪)</span>
+              </div>
+              <div className="flex items-center gap-1 text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-pink-400 shrink-0" />
+                <span>ابزار توسعه (۱۲٪)</span>
+              </div>
+            </div>
+          </div>
+
           {/* Privacy & Anti-Sanctions Notice Box */}
           <div className={`p-4 rounded-2xl border text-right space-y-1.5 ${
             isDarkMode ? 'bg-purple-950/20 border-purple-500/20' : 'bg-purple-50 border-purple-200'
@@ -583,7 +731,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </code>
           <button
             onClick={handleCopyWallet}
-            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors"
+            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors cursor-pointer"
             title="کپی آدرس خزانه"
           >
             {copiedWallet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}

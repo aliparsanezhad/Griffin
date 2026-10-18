@@ -176,6 +176,11 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
+              onInitiateSwap={(fromToken, toToken, amount) => {
+                setSwapParams({ from: fromToken, to: toToken, amount });
+                setActiveTab('swap');
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }}
             />
           </div>
         )}
