@@ -8,7 +8,9 @@ import {
   DollarSign, 
   Check, 
   Copy, 
-  ExternalLink 
+  ExternalLink,
+  Clock,
+  Layers
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playGasIgnitionSound, playSwapSuccessSound } from '../services/soundService';
@@ -20,6 +22,19 @@ interface GasStationSectionProps {
 }
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
+
+interface HourGasProfile {
+  hour: number;
+  label: string;
+  gwei: number;
+  costUsd: number;
+  status: 'ultra-low' | 'normal' | 'peak';
+  statusFa: string;
+  statusEn: string;
+  color: string;
+  descFa: string;
+  descEn: string;
+}
 
 export const GasStationSection: React.FC<GasStationSectionProps> = ({
   tomanRate,
@@ -37,6 +52,13 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
   const [claimedDailyFree, setClaimedDailyFree] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [isFueling, setIsFueling] = useState<boolean>(false);
+  const [selectedHour, setSelectedHour] = useState<number>(() => {
+    // Current hour in Iran Standard Time (UTC+3:30)
+    const now = new Date();
+    const utcHours = now.getUTCHours();
+    const irstHour = (utcHours + 3 + (now.getUTCMinutes() >= 30 ? 1 : 0)) % 24;
+    return irstHour;
+  });
 
   const isFa = lang === 'fa';
 
@@ -83,6 +105,90 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
     { name: 'Polygon', gwei: '30 Gwei', usd: 0.01, speed: '2s', supported: true },
     { name: 'TON Network', gwei: '0.005 TON', usd: 0.03, speed: '3s', supported: true },
     { name: 'Ethereum Mainnet', gwei: '14 Gwei', usd: 0.95, speed: '12s', supported: true },
+  ];
+
+  // 24-hour Tehran Time (IRST) Gas Cost Heatmap
+  const tehranGasHours: HourGasProfile[] = Array.from({ length: 24 }).map((_, h) => {
+    let gwei = 12;
+    let costUsd = 0.02;
+    let status: 'ultra-low' | 'normal' | 'peak' = 'normal';
+    let statusFa = 'عادی';
+    let statusEn = 'Normal';
+    let color = 'bg-amber-400';
+    let descFa = 'ترافیک متوسط شبکه در ساعات کاری آسیا و اروپا';
+    let descEn = 'Moderate network activity during Asian/EU hours';
+
+    if (h >= 3 && h <= 8) {
+      gwei = 6;
+      costUsd = 0.008;
+      status = 'ultra-low';
+      statusFa = 'ساعات طلایی (بسیار ارزان)';
+      statusEn = 'Golden Hours (Ultra Low)';
+      color = 'bg-emerald-400';
+      descFa = 'ارزان‌ترین زمان شبانه‌روز برای انجام سواپ و تعامل با قراردادها به وقت تهران';
+      descEn = 'Cheapest window of the day for EVM transactions';
+    } else if (h >= 16 && h <= 21) {
+      gwei = 26;
+      costUsd = 0.055;
+      status = 'peak';
+      statusFa = 'اوج ترافیک (پیک آمریکا)';
+      statusEn = 'Peak Traffic (US Market)';
+      color = 'bg-rose-500';
+      descFa = 'همزمانی با بازگشایی وال‌استریت؛ توصیه به استفاده از سفارش لیمیت Permit2 آف‌چین بدون گس';
+      descEn = 'Peak congestion during Wall St hours; consider gasless Permit2 orders';
+    } else if (h >= 0 && h <= 2) {
+      gwei = 10;
+      costUsd = 0.015;
+      status = 'ultra-low';
+      statusFa = 'آرامش شبانه';
+      statusEn = 'Night Low';
+      color = 'bg-emerald-500';
+      descFa = 'کاهش ترافیک شبانه و افت نرخ کارمزد';
+      descEn = 'Late evening cooldown';
+    }
+
+    return {
+      hour: h,
+      label: `${h.toString().padStart(2, '0')}:00`,
+      gwei,
+      costUsd,
+      status,
+      statusFa,
+      statusEn,
+      color,
+      descFa,
+      descEn
+    };
+  });
+
+  const activeHourData = tehranGasHours[selectedHour] || tehranGasHours[4];
+
+  // Common operations cost estimator
+  const operationsCost = [
+    { 
+      titleFa: 'سواپ معمولی لایه دو (Arbitrum/Base)', 
+      titleEn: 'Simple L2 Swap', 
+      costUsd: 0.015,
+      savingFa: '۹۸٪ ارزان‌تر از صرافی متمرکز'
+    },
+    { 
+      titleFa: 'بریج بین شبکه‌ای کراس‌چین', 
+      titleEn: 'Cross-Chain Bridge', 
+      costUsd: 0.08,
+      savingFa: 'تسویه خودکار در کمتر از ۱ دقیقه'
+    },
+    { 
+      titleFa: 'سپرده‌گذاری در استخر نقدینگی دیفای', 
+      titleEn: 'DeFi LP Staking', 
+      costUsd: 0.045,
+      savingFa: 'شامل تایید هوشمند قرارداد'
+    },
+    { 
+      titleFa: 'سفارش لیمیت آف‌چین با امضای Permit2', 
+      titleEn: 'Permit2 Gasless Limit Order', 
+      costUsd: 0.00,
+      savingFa: 'کاملاً رایگان (بدون پرداخت گس)'
+    },
   ];
 
   return (
@@ -133,7 +239,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
               playClickSound();
               setPaymasterEnabled(!paymasterEnabled);
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 active:scale-95 ${
               paymasterEnabled
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/30'
                 : 'bg-white/10 text-slate-400'
@@ -195,7 +301,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
               className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                 claimedDailyFree
                   ? 'bg-white/5 border border-purple-500/20 text-slate-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 shadow-md shadow-amber-500/20 hover:scale-[1.02]'
+                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 shadow-md shadow-amber-500/20 hover:scale-[1.02] active:scale-95'
               }`}
             >
               <Gift className="w-4 h-4" />
@@ -253,7 +359,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
                   key={pack.usdt}
                   onClick={() => handleDepositGasCredits(pack.usdt)}
                   disabled={isFueling}
-                  className={`p-3 rounded-xl border text-center transition-all hover:scale-105 ${
+                  className={`p-3 rounded-xl border text-center transition-all hover:scale-105 active:scale-95 ${
                     isDarkMode 
                       ? 'bg-purple-900/20 border-purple-500/30 hover:bg-purple-900/40 text-slate-200' 
                       : 'bg-purple-50 border-purple-200 hover:bg-purple-100 text-slate-800'
@@ -319,6 +425,136 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
         </div>
       </div>
 
+      {/* Tehran Time Zone (IRST) 24h Gas Heatmap */}
+      <div className={`p-5 rounded-2xl border my-6 ${
+        isDarkMode ? 'bg-purple-950/25 border-purple-500/25' : 'bg-purple-50/50 border-purple-200'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 text-right">
+          <div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-black text-white">
+                {isFa ? 'نقشه حرارتی ۲۴ ساعته کارمزد گس به وقت رسمی ایران (IRST Heatmap)' : '24h IRST Gas Heatmap (Tehran Time)'}
+              </h3>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {isFa ? 'تشخیص دقیق ساعات طلایی سحرگاهی (۰۳:۰۰ تا ۰۸:۰۰) با کمترین کارمزد جهانی برای انجام معاملات بزرگ' : 'Identify ultra-low fee windows to execute large swaps at minimal cost'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto text-[10px] font-bold">
+            <span className="flex items-center gap-1 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              {isFa ? 'طلایی / سحرگاه' : 'Ultra Low'}
+            </span>
+            <span className="flex items-center gap-1 text-amber-400">
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              {isFa ? 'عادی' : 'Normal'}
+            </span>
+            <span className="flex items-center gap-1 text-rose-400">
+              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              {isFa ? 'پیک نیویورک' : 'Peak'}
+            </span>
+          </div>
+        </div>
+
+        {/* 24-hour visual bar selector */}
+        <div className="grid grid-cols-12 md:grid-cols-24 gap-1 py-2">
+          {tehranGasHours.map((gh) => {
+            const isSelected = selectedHour === gh.hour;
+            return (
+              <button
+                key={gh.hour}
+                onClick={() => {
+                  playClickSound();
+                  setSelectedHour(gh.hour);
+                }}
+                className={`flex flex-col items-center justify-between p-1.5 rounded-lg border transition-all text-center ${
+                  isSelected
+                    ? 'ring-2 ring-white border-white bg-white/20 scale-105 shadow-lg z-10'
+                    : 'border-purple-500/10 bg-black/30 hover:bg-purple-900/30'
+                }`}
+              >
+                <span className="text-[9px] font-mono font-bold text-slate-300">
+                  {gh.hour}
+                </span>
+                <span className={`w-2.5 h-6 rounded-full my-1 transition-all ${gh.color} ${gh.status === 'ultra-low' ? 'shadow-[0_0_8px_rgba(52,211,153,0.5)]' : ''}`} />
+                <span className="text-[8px] font-mono text-slate-400">
+                  {gh.gwei}G
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Hour Details Inspector */}
+        <div className="mt-3 p-3.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-right flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="px-2.5 py-1 rounded-xl bg-amber-400/20 text-amber-300 font-mono font-bold">
+              {activeHourData.label} IRST
+            </span>
+            <div>
+              <span className="text-white font-black block">
+                {isFa ? activeHourData.statusFa : activeHourData.statusEn}
+              </span>
+              <span className="text-[11px] text-slate-300">
+                {isFa ? activeHourData.descFa : activeHourData.descEn}
+              </span>
+            </div>
+          </div>
+
+          <div className="text-left font-mono">
+            <span className="font-extrabold text-amber-400 text-xs block">
+              میانگین گس: {activeHourData.gwei} Gwei
+            </span>
+            <span className="text-[10px] text-purple-300 block">
+              هزینه سواپ: ≈ {isFa ? `${toPersianDigits(formatToman(activeHourData.costUsd * tomanRate))} تومان` : `${formatToman(activeHourData.costUsd * tomanRate)} T`}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Operation Cost Estimator Matrix */}
+      <div className={`p-5 rounded-2xl border my-6 ${
+        isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/60 border-purple-200'
+      }`}>
+        <h4 className="text-xs font-bold text-slate-300 mb-3 flex items-center gap-1.5 text-right">
+          <Layers className="w-4 h-4 text-purple-400" />
+          <span>{isFa ? 'محاسبه کارمزد عملیات‌های رایج بر حسب تومان:' : 'Standard Operations Fee Estimator:'}</span>
+        </h4>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {operationsCost.map((op, idx) => (
+            <div 
+              key={idx}
+              className={`p-3.5 rounded-2xl border transition-all text-right flex flex-col justify-between ${
+                isDarkMode ? 'bg-black/30 border-purple-500/20' : 'bg-white border-purple-200 shadow-sm'
+              }`}
+            >
+              <div>
+                <span className="text-xs font-bold text-white block mb-1">
+                  {isFa ? op.titleFa : op.titleEn}
+                </span>
+                <span className="text-[10px] text-slate-400 block mb-2">
+                  {op.savingFa}
+                </span>
+              </div>
+
+              <div className="mt-2 pt-2 border-t border-purple-500/15 flex items-baseline justify-between font-mono">
+                <span className="text-[11px] text-emerald-400 font-extrabold">
+                  {op.costUsd === 0 ? (isFa ? 'رایگان' : 'FREE') : `$${op.costUsd}`}
+                </span>
+                <span className="text-[10px] text-amber-300 font-bold">
+                  {op.costUsd === 0 
+                    ? '0 IRT' 
+                    : isFa ? `${toPersianDigits(formatToman(op.costUsd * tomanRate))} تومان` : `${formatToman(op.costUsd * tomanRate)} T`}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Protocol Commission & Treasury Notice */}
       <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
         isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
@@ -338,7 +574,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
           </code>
           <button
             onClick={handleCopyWallet}
-            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors"
+            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors cursor-pointer"
             title="کپی آدرس خزانه"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
