@@ -249,6 +249,11 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
+              onTradePair={(base, quote) => {
+                setSwapParams({ from: quote, to: base, amount: '500' });
+                setActiveTab('swap');
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }}
             />
             <MarketSentimentGauge
               tomanRate={tomanRate}

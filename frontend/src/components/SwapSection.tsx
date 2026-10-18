@@ -871,7 +871,20 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {companionView === 'chart' && (
           <div className="animate-fade-in">
-            <PriceChart tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+            <PriceChart 
+              tomanRate={tomanRate} 
+              lang={lang} 
+              isDarkMode={isDarkMode} 
+              onTradePair={(base, quote) => {
+                const foundBase = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === base.toUpperCase());
+                const foundQuote = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === quote.toUpperCase());
+                if (foundBase && foundQuote) {
+                  setFromToken(foundQuote);
+                  setToToken(foundBase);
+                  window.scrollTo({ top: 120, behavior: 'smooth' });
+                }
+              }}
+            />
           </div>
         )}
 
