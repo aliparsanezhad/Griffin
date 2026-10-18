@@ -8,7 +8,9 @@ import {
   PlusCircle, 
   Copy, 
   Check, 
-  CheckCircle2
+  CheckCircle2,
+  Activity,
+  Clock
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound, playAnvilForgeSound } from '../services/soundService';
@@ -39,6 +41,16 @@ interface LaunchpadToken {
   chainIcon: string;
   isHalalVerified: boolean;
   isGraduated?: boolean;
+}
+
+interface RecentTrade {
+  id: string;
+  type: 'buy' | 'sell';
+  amountUsdt: number;
+  tokensAmount: string;
+  wallet: string;
+  timeAgoFa: string;
+  timeAgoEn: string;
 }
 
 const INITIAL_TOKENS: LaunchpadToken[] = [
@@ -134,12 +146,21 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
   const [tradeSuccess, setTradeSuccess] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
 
+  // Recent Live Trades Feed
+  const [trades, setTrades] = useState<RecentTrade[]>([
+    { id: 't1', type: 'buy', amountUsdt: 125, tokensAmount: '+2.57M', wallet: '0x89A...41b', timeAgoFa: '۲۵ ثانیه پیش', timeAgoEn: '25s ago' },
+    { id: 't2', type: 'buy', amountUsdt: 50, tokensAmount: '+1.03M', wallet: '0x3Fc...92c', timeAgoFa: '۱ دقیقه پیش', timeAgoEn: '1m ago' },
+    { id: 't3', type: 'sell', amountUsdt: 25, tokensAmount: '-515K', wallet: '0x71C...438', timeAgoFa: '۳ دقیقه پیش', timeAgoEn: '3m ago' },
+    { id: 't4', type: 'buy', amountUsdt: 250, tokensAmount: '+5.14M', wallet: '0x44B...19e', timeAgoFa: '۵ دقیقه پیش', timeAgoEn: '5m ago' },
+  ]);
+
   // New Token Creation Modal
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newSymbol, setNewSymbol] = useState('');
   const [newName, setNewName] = useState('');
   const [newDescFa, setNewDescFa] = useState('');
   const [newChain, setNewChain] = useState('Arbitrum One');
+  const [newCategory, setNewCategory] = useState<'meme' | 'utility' | 'culture' | 'ai'>('culture');
   const [isCreating, setIsCreating] = useState(false);
   const [createSuccessMsg, setCreateSuccessMsg] = useState(false);
 
@@ -197,6 +218,18 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
       setSelectedToken(updatedToken);
       setTokens(tokens.map((t) => (t.id === updatedToken.id ? updatedToken : t)));
 
+      // Prepend trade into live feed
+      const newTrade: RecentTrade = {
+        id: `trade-${Date.now()}`,
+        type: tradeType,
+        amountUsdt: numAmount,
+        tokensAmount: `${tradeType === 'buy' ? '+' : '-'}${(tokenQuantity / 1000000).toFixed(2)}M`,
+        wallet: '0x71C...438F (شما)',
+        timeAgoFa: 'چند لحظه پیش',
+        timeAgoEn: 'Just now'
+      };
+      setTrades([newTrade, ...trades.slice(0, 4)]);
+
       setTimeout(() => setTradeSuccess(false), 3000);
     }, 900);
   };
@@ -242,6 +275,19 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
       }, 2000);
     }, 1200);
   };
+
+  // SVG Geometry for Exponential Bonding Curve
+  const curveWidth = 320;
+  const curveHeight = 90;
+  const padX = 20;
+  const padY = 15;
+  const progressClamped = Math.min(100, Math.max(0, selectedToken.progressPercent));
+  
+  // Point on curve: x from padX to curveWidth - padX
+  const currentX = padX + (progressClamped / 100) * (curveWidth - 2 * padX);
+  // Quadratic exponential growth y from curveHeight - padY to padY
+  const normProgress = progressClamped / 100;
+  const currentY = (curveHeight - padY) - (Math.pow(normProgress, 1.8) * (curveHeight - 2 * padY));
 
   return (
     <div className="w-full space-y-6">
@@ -297,7 +343,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
             <img 
               src="/mascot/griffi-launchpad.jpg" 
               alt="Griffi the Token Alchemist" 
-              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent pointer-events-none" />
             <div className="absolute bottom-2 inset-x-2 text-center text-[10px] font-bold text-amber-300 bg-purple-950/80 backdrop-blur-md py-1 rounded-xl border border-amber-400/30">
@@ -311,7 +357,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
       {/* Main Grid: Token Explorer & Live Bonding Curve Terminal */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        {/* Left/Main Column: Token List & Bonding Curve Progress */}
+        {/* Left/Main Column: Token List & Bonding Curve Progress (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           
           {/* Filter Bar & Search */}
@@ -461,7 +507,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
 
         </div>
 
-        {/* Right Column: Live Trading & Bonding Curve Action Panel */}
+        {/* Right Column: Live Trading, Interactive Bonding Curve & Recent Trades (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           
           <div className={`p-5 rounded-3xl border sticky top-20 overflow-hidden relative ${
@@ -471,7 +517,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
             <div className="laser-line -mx-5 -mt-5 mb-4" />
             
             {/* Header of selected token */}
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-purple-500/20">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-purple-500/20">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-black text-amber-300">{selectedToken.symbol}</span>
                 <span className="text-xs text-slate-400">{selectedToken.nameFa}</span>
@@ -482,8 +528,57 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               </div>
             </div>
 
+            {/* Interactive Visual SVG Bonding Curve */}
+            <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 mb-3 space-y-1.5 text-right">
+              <div className="flex items-center justify-between text-[11px] font-bold">
+                <span className="text-white flex items-center gap-1">
+                  <Activity className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isFa ? 'منحنی هوشمند باندینگ کرو (P = k · S²):' : 'Live Bonding Curve:'}</span>
+                </span>
+                <span className="text-amber-300 font-mono text-[10px]">
+                  {selectedToken.progressPercent}% / $69,000
+                </span>
+              </div>
+
+              {/* Curve Graphic */}
+              <div className="relative w-full h-20 flex items-center justify-center">
+                <svg viewBox={`0 0 ${curveWidth} ${curveHeight}`} className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="curveGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#8b5cf6" />
+                      <stop offset="70%" stopColor="#ec4899" />
+                      <stop offset="100%" stopColor="#f59e0b" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Curve line */}
+                  <path 
+                    d={`M ${padX} ${curveHeight - padY} Q ${curveWidth * 0.6} ${curveHeight - padY} ${curveWidth - padX} ${padY}`} 
+                    fill="none" 
+                    stroke="url(#curveGlow)" 
+                    strokeWidth="3" 
+                    strokeLinecap="round" 
+                  />
+
+                  {/* Graduation Goal Node */}
+                  <circle cx={curveWidth - padX} cy={padY} r="5" fill="#10b981" stroke="#34d399" strokeWidth="2" />
+                  <text x={curveWidth - padX} y={padY - 8} textAnchor="end" fontSize="9" fill="#34d399" fontWeight="bold">
+                    🎓 Uniswap Burn ($69K)
+                  </text>
+
+                  {/* Current Token Position Marker */}
+                  <circle cx={currentX} cy={currentY} r="6" fill="#f59e0b" stroke="#ffffff" strokeWidth="2" className="animate-pulse" />
+                </svg>
+              </div>
+
+              <div className="flex justify-between text-[9px] text-slate-400 font-mono pt-1 border-t border-purple-500/10">
+                <span>استارت: $5,000</span>
+                <span className="text-emerald-400 font-bold">تکمیل: قفل نقدینگی ۱۲،۰۰۰$ در دکس</span>
+              </div>
+            </div>
+
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-2 mb-4 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 mb-3 text-xs font-mono">
               <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20">
                 <span className="text-slate-400 text-[10px] block">{isFa ? 'ارزش کل (تومان):' : 'MCap Toman:'}</span>
                 <span className="font-bold text-purple-200 text-xs">{toPersianDigits(formatToman(marketCapToman))} ت</span>
@@ -495,7 +590,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
             </div>
 
             {/* Buy / Sell Tabs */}
-            <div className="flex gap-2 p-1 bg-purple-950/60 rounded-xl mb-4 border border-purple-500/20">
+            <div className="flex gap-2 p-1 bg-purple-950/60 rounded-xl mb-3 border border-purple-500/20">
               <button
                 type="button"
                 onClick={() => setTradeType('buy')}
@@ -521,7 +616,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
             </div>
 
             {/* Trade Form */}
-            <form onSubmit={handleTrade} className="space-y-4">
+            <form onSubmit={handleTrade} className="space-y-3">
               <div>
                 <label className="text-xs text-slate-300 block mb-1">
                   {isFa ? 'مقدار پرداختی (تتر USDT):' : 'Amount (USDT):'}
@@ -533,7 +628,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                     step="any"
                     value={tradeAmountUsd}
                     onChange={(e) => setTradeAmountUsd(e.target.value)}
-                    className="w-full bg-purple-950/70 border border-purple-500/30 rounded-xl px-3 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-400"
+                    className="w-full bg-purple-950/70 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-amber-400"
                     placeholder="25"
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-300">
@@ -559,7 +654,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               </div>
 
               {/* Estimated token output */}
-              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/20 text-xs space-y-1 font-mono">
+              <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20 text-xs space-y-1 font-mono">
                 <div className="flex justify-between items-center text-slate-300">
                   <span>{isFa ? 'دریافتی تخمینی:' : 'Estimated Output:'}</span>
                   <span className="font-bold text-amber-300">
@@ -575,7 +670,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               {/* Submit Button */}
               <button
                 type="submit"
-                className={`w-full py-3 rounded-xl font-black text-sm text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95 ${
+                className={`w-full py-2.5 rounded-xl font-black text-xs md:text-sm text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95 ${
                   tradeType === 'buy'
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 shadow-emerald-600/30'
                     : 'bg-gradient-to-r from-rose-600 to-pink-600 shadow-rose-600/30'
@@ -595,13 +690,43 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               )}
             </form>
 
+            {/* Live Recent Trades Stream */}
+            <div className="mt-4 pt-3 border-t border-purple-500/20">
+              <span className="text-[11px] font-bold text-slate-300 block mb-2 text-right flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isFa ? 'جریان زنده معاملات توکن (Live Trades):' : 'Recent Token Trades:'}</span>
+              </span>
+
+              <div className="space-y-1.5 text-[10px] font-mono">
+                {trades.map((tr) => (
+                  <div 
+                    key={tr.id}
+                    className="p-1.5 rounded-lg bg-black/30 border border-purple-500/10 flex items-center justify-between text-right"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`px-1.5 py-0.5 rounded font-bold ${tr.type === 'buy' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+                        {tr.type === 'buy' ? (isFa ? 'خرید' : 'BUY') : (isFa ? 'فروش' : 'SELL')}
+                      </span>
+                      <span className="text-white font-bold">{tr.tokensAmount}</span>
+                      <span className="text-slate-400 font-mono text-[9px]">{tr.wallet}</span>
+                    </div>
+
+                    <div className="text-left">
+                      <span className="text-amber-300 font-bold block">${tr.amountUsdt}</span>
+                      <span className="text-slate-500 text-[8px] block">{isFa ? tr.timeAgoFa : tr.timeAgoEn}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Protocol Commission Wallet & Anti-Rug Assurance */}
-            <div className="mt-4 pt-3 border-t border-purple-500/20 text-[10px] space-y-2">
+            <div className="mt-3 pt-2 border-t border-purple-500/20 text-[10px] space-y-1.5">
               <div className="flex items-center justify-between text-slate-400">
                 <span>{isFa ? 'آدرس رسمی خزانه پروتکل:' : 'Treasury Wallet:'}</span>
                 <button
                   onClick={handleCopyWallet}
-                  className="font-mono text-purple-300 hover:text-amber-300 flex items-center gap-1"
+                  className="font-mono text-purple-300 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                   title="کپی آدرس خزانه"
                 >
                   <span>0xD9C1...A2D3</span>
@@ -609,7 +734,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 </button>
               </div>
 
-              <div className="p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-[10px] text-slate-300 leading-relaxed">
+              <div className="p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-[10px] text-slate-300 leading-relaxed text-right">
                 {isFa 
                   ? '🔒 امنیت باندینگ کرو: به محض رسیدن ارزش به ۶۹،۰۰۰ دلار، ۱۲،۰۰۰ دلار نقدینگی در صرافی واریز شده و توکن‌های LP برای همیشه سوزانده می‌شوند.'
                   : '🔒 Once $69,000 threshold is reached, $12,000 liquidity is migrated to Uniswap and LP is burned.'}
@@ -644,9 +769,9 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleCreateToken} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateToken} className="space-y-3.5 text-xs">
               <div>
-                <label className="text-slate-300 font-bold block mb-1">
+                <label className="text-slate-300 font-bold block mb-1 text-right">
                   {isFa ? 'نام توکن (مثلاً: Persepolis Coin):' : 'Token Name:'}
                 </label>
                 <input
@@ -655,12 +780,12 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="مثال: پرسپولیس وب۳"
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-bold block mb-1">
+                <label className="text-slate-300 font-bold block mb-1 text-right">
                   {isFa ? 'نماد اختصاری توکن (Symbol - حداکثر ۶ حرف):' : 'Symbol (Max 6 letters):'}
                 </label>
                 <input
@@ -674,14 +799,42 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 />
               </div>
 
+              {/* Category selector */}
               <div>
-                <label className="text-slate-300 font-bold block mb-1">
+                <label className="text-slate-300 font-bold block mb-1 text-right">
+                  {isFa ? 'دسته‌بندی توکن:' : 'Category:'}
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { id: 'culture', labelFa: 'فرهنگی/ملی', labelEn: 'Culture' },
+                    { id: 'meme', labelFa: 'میم‌کوین', labelEn: 'Meme' },
+                    { id: 'utility', labelFa: 'کاربردی', labelEn: 'Utility' },
+                    { id: 'ai', labelFa: 'هوش مصنوعی', labelEn: 'AI & Bot' },
+                  ].map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setNewCategory(cat.id as any)}
+                      className={`p-1.5 rounded-xl border text-[11px] font-bold transition-all ${
+                        newCategory === cat.id
+                          ? 'bg-amber-400 text-slate-950 border-amber-300 shadow'
+                          : 'bg-purple-950/40 text-slate-300 border-purple-500/20'
+                      }`}
+                    >
+                      {isFa ? cat.labelFa : cat.labelEn}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-300 font-bold block mb-1 text-right">
                   {isFa ? 'شبکه بلاک‌چین اولیه:' : 'Target Blockchain:'}
                 </label>
                 <select
                   value={newChain}
                   onChange={(e) => setNewChain(e.target.value)}
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
                 >
                   <option value="Arbitrum One">Arbitrum One (کمترین کارمزد - پیشنهادی)</option>
                   <option value="Base">Base (کوین‌بیس)</option>
@@ -690,20 +843,20 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               </div>
 
               <div>
-                <label className="text-slate-300 font-bold block mb-1">
+                <label className="text-slate-300 font-bold block mb-1 text-right">
                   {isFa ? 'توضیحات معرفی و اهداف پروژه (فارسی/انگلیسی):' : 'Project Description:'}
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={newDescFa}
                   onChange={(e) => setNewDescFa(e.target.value)}
                   placeholder="درباره ایده، اعضای کامیونیتی و کاربرد توکن خود بنویسید..."
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 leading-relaxed"
+                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 leading-relaxed text-right"
                 />
               </div>
 
               {/* Anti-Rug & Commission Note */}
-              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed space-y-1.5">
+              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed space-y-1.5 text-right">
                 <div className="flex items-center justify-between font-bold">
                   <span>{isFa ? 'ضمانت راستی‌آزمایی و خزانه‌داری:' : 'Griffin Assurance & Treasury:'}</span>
                   <span className="font-mono text-emerald-400">{isFa ? 'گس تخمینی: < $0.05' : 'Gas: < $0.05'}</span>
@@ -718,7 +871,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   <button
                     type="button"
                     onClick={handleCopyWallet}
-                    className="p-1 rounded hover:bg-white/10 text-amber-300 shrink-0"
+                    className="p-1 rounded hover:bg-white/10 text-amber-300 shrink-0 cursor-pointer"
                     title={isFa ? 'کپی آدرس' : 'Copy'}
                   >
                     {copiedWallet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
