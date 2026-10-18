@@ -128,6 +128,23 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
     ? selectedPair.price * (1 - (1 / leverage) + maintenanceMargin)
     : selectedPair.price * (1 + (1 / leverage) - maintenanceMargin);
 
+  const distanceToLiqPercent = Math.max(0.1, Math.abs((selectedPair.price - liquidationPrice) / selectedPair.price) * 100);
+  const distanceToLiqUsd = Math.abs(selectedPair.price - liquidationPrice);
+
+  const setTpByPercent = (percent: number) => {
+    playClickSound();
+    const priceShift = (selectedPair.price * (percent / 100)) / leverage;
+    const target = side === 'long' ? (selectedPair.price + priceShift) : (selectedPair.price - priceShift);
+    setTakeProfitPrice(Math.round(target).toString());
+  };
+
+  const setSlByPercent = (percent: number) => {
+    playClickSound();
+    const priceShift = (selectedPair.price * (percent / 100)) / leverage;
+    const target = side === 'long' ? (selectedPair.price - priceShift) : (selectedPair.price + priceShift);
+    setStopLossPrice(Math.round(target).toString());
+  };
+
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
     setCopiedWallet(true);
@@ -357,9 +374,15 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
 
           {/* Margin Input */}
           <div className="space-y-2">
-            <label className={`text-xs font-bold block ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-              {isFa ? 'مارجین ودیعه (USDT):' : 'Margin Collateral (USDT):'}
-            </label>
+            <div className="flex justify-between items-center text-xs">
+              <label className={`font-bold block ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                {isFa ? 'مارجین ودیعه (USDT):' : 'Margin Collateral (USDT):'}
+              </label>
+              <span className="text-[11px] font-mono text-slate-400">
+                {isFa ? 'موجودی در دسترس: ۲,۴۵۰ USDT' : 'Avail: 2,450 USDT'}
+              </span>
+            </div>
+
             <div className="relative">
               <input 
                 type="number"
@@ -372,48 +395,164 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                     : 'bg-white border-purple-200 text-slate-900'
                 }`}
               />
-              <span className="absolute left-3 top-3 text-xs text-purple-500 font-bold">
+              <span className="absolute left-3 top-3 text-xs text-purple-400 font-bold">
                 USDT
               </span>
             </div>
+
+            {/* Quick Margin Chips */}
+            <div className="flex items-center gap-1.5 pt-1 overflow-x-auto no-scrollbar">
+              {[50, 100, 250, 500, 1000].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setMarginInput(amt.toString());
+                  }}
+                  className={`flex-1 py-1 rounded-lg border font-mono text-[11px] transition-all min-w-[42px] ${
+                    marginInput === amt.toString()
+                      ? 'bg-purple-600 text-white border-purple-400 font-bold shadow-sm'
+                      : isDarkMode
+                        ? 'bg-purple-950/40 border-purple-500/20 text-slate-300 hover:bg-purple-900/40'
+                        : 'bg-white border-purple-200 text-slate-700 hover:bg-purple-50'
+                  }`}
+                >
+                  ${amt}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setMarginInput('2450');
+                }}
+                className="py-1 px-2.5 rounded-lg border font-mono text-[11px] font-bold bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-all shrink-0"
+              >
+                MAX
+              </button>
+            </div>
+
             <div className={`text-[11px] font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               {isFa ? 'معادل تومانی ودیعه:' : 'Toman Equivalent:'} {isFa ? toPersianDigits(formatToman(marginToman)) : formatToman(marginToman)} {isFa ? 'تومان' : 'IRT'}
             </div>
           </div>
 
-          {/* TP & SL Inputs */}
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="space-y-1">
-              <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                {isFa ? 'حد سود (TP):' : 'Take Profit:'}
-              </label>
-              <input 
-                type="number"
-                placeholder={side === 'long' ? `${selectedPair.price * 1.1}` : `${selectedPair.price * 0.9}`}
-                value={takeProfitPrice}
-                onChange={(e) => setTakeProfitPrice(e.target.value)}
-                className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
-                  isDarkMode 
-                    ? 'bg-black/30 border-emerald-500/30 text-emerald-300' 
-                    : 'bg-white border-emerald-300 text-emerald-800'
-                }`}
-              />
+          {/* TP & SL Inputs with ROI Quick Preset Chips */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {isFa ? 'حد سود (TP):' : 'Take Profit:'}
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-mono font-bold">+ROI</span>
+                </div>
+                <input 
+                  type="number"
+                  placeholder={side === 'long' ? `${selectedPair.price * 1.1}` : `${selectedPair.price * 0.9}`}
+                  value={takeProfitPrice}
+                  onChange={(e) => setTakeProfitPrice(e.target.value)}
+                  className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
+                    isDarkMode 
+                      ? 'bg-black/30 border-emerald-500/30 text-emerald-300' 
+                      : 'bg-white border-emerald-300 text-emerald-800'
+                  }`}
+                />
+                {/* TP Quick Presets */}
+                <div className="grid grid-cols-4 gap-1 pt-1 font-mono text-[10px]">
+                  {[25, 50, 100, 200].map((pct) => (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setTpByPercent(pct)}
+                      className="py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-colors"
+                      title={isFa ? `تنظیم تارگت سود +${pct}٪` : `+${pct}% ROI`}
+                    >
+                      +{pct}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {isFa ? 'حد ضرر (SL):' : 'Stop Loss:'}
+                  </label>
+                  <span className="text-[10px] text-rose-400 font-mono font-bold">-ROI</span>
+                </div>
+                <input 
+                  type="number"
+                  placeholder={side === 'long' ? `${selectedPair.price * 0.95}` : `${selectedPair.price * 1.05}`}
+                  value={stopLossPrice}
+                  onChange={(e) => setStopLossPrice(e.target.value)}
+                  className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
+                    isDarkMode 
+                      ? 'bg-black/30 border-rose-500/30 text-rose-300' 
+                      : 'bg-white border-rose-300 text-rose-800'
+                  }`}
+                />
+                {/* SL Quick Presets */}
+                <div className="grid grid-cols-4 gap-1 pt-1 font-mono text-[10px]">
+                  {[10, 20, 35, 50].map((pct) => (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setSlByPercent(pct)}
+                      className="py-0.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                      title={isFa ? `تنظیم حد ضرر -${pct}٪` : `-${pct}% ROI`}
+                    >
+                      -{pct}%
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className={`block font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                {isFa ? 'حد ضرر (SL):' : 'Stop Loss:'}
-              </label>
-              <input 
-                type="number"
-                placeholder={side === 'long' ? `${selectedPair.price * 0.95}` : `${selectedPair.price * 1.05}`}
-                value={stopLossPrice}
-                onChange={(e) => setStopLossPrice(e.target.value)}
-                className={`w-full p-2.5 rounded-xl border font-mono text-xs ${
-                  isDarkMode 
-                    ? 'bg-black/30 border-rose-500/30 text-rose-300' 
-                    : 'bg-white border-rose-300 text-rose-800'
-                }`}
-              />
+
+            {/* Liquidation Danger Zone Interactive Meter */}
+            <div className={`p-3 rounded-2xl border space-y-1.5 transition-all ${
+              distanceToLiqPercent <= 4 
+                ? 'bg-rose-950/40 border-rose-500/40 shadow-lg shadow-rose-950/30' 
+                : distanceToLiqPercent <= 10 
+                  ? 'bg-amber-950/30 border-amber-500/30' 
+                  : isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200'
+            }`}>
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <AlertTriangle className={`w-3.5 h-3.5 ${
+                    distanceToLiqPercent <= 4 ? 'text-rose-400 animate-bounce' : distanceToLiqPercent <= 10 ? 'text-amber-400' : 'text-emerald-400'
+                  }`} />
+                  <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
+                    {isFa ? 'حاشیه ایمنی فاصله تا لیکوئید:' : 'Liquidation Safety Buffer:'}
+                  </span>
+                </span>
+                <span dir="ltr" className={`font-mono font-black ${
+                  distanceToLiqPercent <= 4 ? 'text-rose-400' : distanceToLiqPercent <= 10 ? 'text-amber-400' : 'text-emerald-400'
+                }`}>
+                  {distanceToLiqPercent.toFixed(1)}% (${Math.round(distanceToLiqUsd).toLocaleString()})
+                </span>
+              </div>
+
+              {/* Meter progress bar */}
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden relative border border-white/5">
+                <div 
+                  className={`h-full transition-all duration-300 rounded-full ${
+                    distanceToLiqPercent <= 4 
+                      ? 'bg-gradient-to-r from-rose-600 to-red-500 animate-pulse' 
+                      : distanceToLiqPercent <= 10 
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-400' 
+                        : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                  }`}
+                  style={{ width: `${Math.min(100, Math.max(6, distanceToLiqPercent * 4))}%` }}
+                />
+              </div>
+
+              <div className="flex justify-between text-[9px] font-mono text-slate-400 pt-0.5">
+                <span className="text-rose-400 font-bold">{isFa ? 'خطر شدید (<۴٪)' : 'High Risk (<4%)'}</span>
+                <span className="text-amber-400">{isFa ? 'احتیاط' : 'Caution'}</span>
+                <span className="text-emerald-400 font-bold">{isFa ? 'امن (>۱۰٪)' : 'Safe (>10%)'}</span>
+              </div>
             </div>
           </div>
 

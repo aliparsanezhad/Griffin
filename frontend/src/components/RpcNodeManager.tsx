@@ -102,6 +102,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [isPinging, setIsPinging] = useState<boolean>(false);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+  const [walletAddSuccess, setWalletAddSuccess] = useState<string | null>(null);
 
   const isFa = lang === 'fa';
 
@@ -132,6 +133,37 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
     setCopiedUrl(url);
     playClickSound();
     setTimeout(() => setCopiedUrl(null), 2000);
+  };
+
+  const handleAddToWallet = async (node: RpcNode) => {
+    playClickSound();
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: `0x${node.chainId.toString(16)}`,
+              chainName: `Arbitrum (Griffin Anti-Censorship)`,
+              nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [node.url],
+              blockExplorerUrls: ['https://arbiscan.io'],
+            },
+          ],
+        });
+        playSwapSuccessSound();
+        setWalletAddSuccess(isFa ? `نود ${node.name} به ولت شما اضافه شد! ⚡` : `RPC added to wallet!`);
+        setTimeout(() => setWalletAddSuccess(null), 3500);
+      } catch (err) {
+        handleCopyUrl(node.url);
+        setWalletAddSuccess(isFa ? 'آدرس کپی شد! در بخش شبکه‌های متامسک جای‌گذاری کنید.' : 'RPC URL copied to clipboard.');
+        setTimeout(() => setWalletAddSuccess(null), 3500);
+      }
+    } else {
+      handleCopyUrl(node.url);
+      setWalletAddSuccess(isFa ? 'آدرس کپی شد! در بخش شبکه‌های متامسک جای‌گذاری کنید.' : 'RPC URL copied to clipboard.');
+      setTimeout(() => setWalletAddSuccess(null), 3500);
+    }
   };
 
   const handleCopyWallet = () => {
@@ -289,6 +321,24 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
             <span className="text-[10px] text-slate-400 block font-sans">Symbol:</span>
             <span className="text-emerald-400 font-bold">ETH</span>
           </div>
+        </div>
+
+        {/* 1-Click Wallet Add Button */}
+        <div className="pt-3 border-t border-purple-500/15 mt-3">
+          <button
+            type="button"
+            onClick={() => handleAddToWallet(nodes.find(n => n.id === activeNodeId) || nodes[0])}
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md shadow-cyan-900/30 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+          >
+            <Zap className="w-4 h-4 text-cyan-200" />
+            <span>{isFa ? 'افزودن خودکار نود فعال به متامسک یا ربی (۱-کلیک) 🦊' : 'Add Active RPC to MetaMask / Rabby (1-Click) 🦊'}</span>
+          </button>
+
+          {walletAddSuccess && (
+            <div className="mt-2 p-2 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs text-center font-bold animate-fade-in">
+              {walletAddSuccess}
+            </div>
+          )}
         </div>
       </div>
 

@@ -351,8 +351,32 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
             </div>
           </div>
 
+          {/* High-Tech Animated Radar Scanner Effect */}
+          {isScanning && (
+            <div className="p-8 rounded-3xl border border-emerald-500/40 bg-black/60 text-center space-y-4 animate-fade-in shadow-2xl">
+              <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                {/* Outer pulsing ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-400/40 animate-ping" />
+                {/* Middle rotating scanner */}
+                <div className="absolute inset-2 rounded-full border-2 border-dashed border-emerald-400/80 animate-spin" style={{ animationDuration: '3s' }} />
+                {/* Inner radar core */}
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-emerald-400 animate-pulse" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="font-mono text-sm font-black text-emerald-300 block">
+                  {isFa ? 'رادار گریفی در حال تجزیه بایت‌کد قرارداد هوشمند...' : 'Scanning contract bytecodes & bytecode functions...'}
+                </span>
+                <p className="text-xs text-slate-400 font-mono">
+                  {isFa ? 'بررسی توابع انتقال، بلک‌لیست، کارمزد پنهان و استخرهای نقدینگی' : 'Inspecting transfer functions, mint allowances, LP locks, honeypot traps.'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Audit Result Display */}
-          {auditResult && (
+          {!isScanning && auditResult && (
             <div className={`p-6 rounded-3xl border transition-all space-y-6 ${
               auditResult.isHoneypot || auditResult.score < 50
                 ? 'bg-rose-950/30 border-rose-500/40 shadow-rose-950/30'

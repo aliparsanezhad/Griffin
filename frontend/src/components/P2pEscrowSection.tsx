@@ -49,6 +49,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   const [bankTrackingId, setBankTrackingId] = useState<string>('');
   const [countdownSeconds, setCountdownSeconds] = useState<number>(900);
   const [showEscrowModal, setShowEscrowModal] = useState<boolean>(false);
+  const [showDisputeModal, setShowDisputeModal] = useState<boolean>(false);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'sheba' | 'card' | 'vip'>('all');
 
   useEffect(() => {
     let timer: any;
@@ -62,7 +64,7 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
 
   const isFa = lang === 'fa';
 
-  const merchants: MerchantOffer[] = [
+  const merchants: (MerchantOffer & { bankBadges: string[]; isVip: boolean })[] = [
     {
       id: 'm-1',
       name: 'آریا اکسچنج (تایید هویت طلایی)',
@@ -74,6 +76,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
       minAmountToman: 5000000,
       maxAmountToman: 200000000,
       paymentMethods: ['پایا و ساتنا', 'کارت به کارت بانک ملت/سامان'],
+      bankBadges: ['بانک ملت', 'بانک سامان'],
+      isVip: true,
       avgReleaseTimeMinutes: 4,
     },
     {
@@ -87,6 +91,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
       minAmountToman: 10000000,
       maxAmountToman: 450000000,
       paymentMethods: ['حواله ساتنا فوری', 'بانک پاسارگاد'],
+      bankBadges: ['پاسارگاد', 'ساتنا آنی'],
+      isVip: true,
       avgReleaseTimeMinutes: 6,
     },
     {
@@ -100,6 +106,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
       minAmountToman: 2000000,
       maxAmountToman: 80000000,
       paymentMethods: ['کارت به کارت', 'پایا'],
+      bankBadges: ['بانک ملی', 'کارت‌به‌کارت'],
+      isVip: false,
       avgReleaseTimeMinutes: 5,
     },
     {
@@ -113,11 +121,35 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
       minAmountToman: 15000000,
       maxAmountToman: 600000000,
       paymentMethods: ['پایا و ساتنا امن', 'تسويه در ۱۰ دقیقه'],
+      bankBadges: ['تجارت', 'سامان'],
+      isVip: true,
       avgReleaseTimeMinutes: 7,
+    },
+    {
+      id: 'm-5',
+      name: 'سینا اکسچنجر (تسویه کارت آنی)',
+      reputation: 99.4,
+      tradesCount: 640,
+      type: 'sell',
+      token: 'USDT',
+      priceToman: tomanRate + 250,
+      minAmountToman: 3000000,
+      maxAmountToman: 120000000,
+      paymentMethods: ['کارت به کارت شتابی', 'پایا'],
+      bankBadges: ['بلوبانک', 'بانک ملت'],
+      isVip: false,
+      avgReleaseTimeMinutes: 4,
     },
   ];
 
-  const filteredMerchants = merchants.filter((m) => m.type === tradeType);
+  const filteredMerchants = merchants
+    .filter((m) => m.type === tradeType)
+    .filter((m) => {
+      if (paymentFilter === 'vip') return m.isVip;
+      if (paymentFilter === 'sheba') return m.paymentMethods.some(p => p.includes('پایا') || p.includes('ساتنا'));
+      if (paymentFilter === 'card') return m.paymentMethods.some(p => p.includes('کارت'));
+      return true;
+    });
 
   const handleOpenEscrow = (offer: MerchantOffer) => {
     playClickSound();
@@ -269,66 +301,141 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
         </div>
       </div>
 
-      {/* Merchants List Table */}
+      {/* Paya Clearing Cycle & Anti-Fraud Live Alert */}
+      <div className={`mb-4 p-3.5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      }`}>
+        <div className="flex items-center gap-2 text-right">
+          <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
+            {isFa 
+              ? 'سیکل تسویه بعدی پایا شاپرک: ساعت ۱۵:۴۵ • حواله ساتنا و کارت به کارت ظرف حداکثر ۱۰ دقیقه تسویه و تایید می‌گردد.' 
+              : 'Next Iranian Paya cycle: 15:45 • Satna & Card transfers clear within 10 minutes.'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            playClickSound();
+            setShowDisputeModal(true);
+          }}
+          className="px-3 py-1.5 rounded-xl border font-bold text-[11px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+        >
+          <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+          <span>{isFa ? 'داوری و ضمانت گریفی 🛡️' : 'Griffi Guardian Arb 🛡️'}</span>
+        </button>
+      </div>
+
+      {/* Merchants List Table with Filter Chips */}
       <div className={`rounded-2xl border overflow-hidden ${
         isDarkMode ? 'bg-black/20 border-purple-500/20' : 'bg-white border-purple-200'
       }`}>
-        <div className="p-4 border-b border-purple-500/20 flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-            <Search className="w-3.5 h-3.5 text-purple-400" />
-            {isFa ? 'صرافان و خریداران همتابه‌همتای برگزیده:' : 'Verified P2P Merchants:'}
-          </span>
-          <span className="text-[11px] text-slate-400">
-            {isFa ? 'بروزرسانی زنده قیمت‌ها' : 'Live rates'}
-          </span>
+        <div className="p-4 border-b border-purple-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5 text-purple-400" />
+              {isFa ? 'صرافان و خریداران همتابه‌همتای برگزیده:' : 'Verified P2P Merchants:'}
+            </span>
+          </div>
+
+          {/* Quick Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar font-mono text-[11px]">
+            {[
+              { id: 'all', label: isFa ? 'همه' : 'All' },
+              { id: 'sheba', label: isFa ? 'شبا / پایا / ساتنا' : 'IBAN / Paya' },
+              { id: 'card', label: isFa ? 'کارت‌به‌کارت' : 'Card' },
+              { id: 'vip', label: isFa ? 'صرافان طلایی VIP' : 'VIP Only' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setPaymentFilter(f.id as any);
+                }}
+                className={`px-2.5 py-1 rounded-lg border transition-all ${
+                  paymentFilter === f.id
+                    ? 'bg-purple-600 text-white border-purple-400 font-bold shadow-sm'
+                    : isDarkMode
+                      ? 'bg-purple-950/40 border-purple-500/20 text-slate-400 hover:text-white'
+                      : 'bg-white border-purple-200 text-slate-600 hover:bg-purple-50'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="divide-y divide-purple-500/10">
-          {filteredMerchants.map((merchant) => (
-            <div 
-              key={merchant.id}
-              className={`p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
-                isDarkMode ? 'hover:bg-white/5' : 'hover:bg-purple-50/50'
-              }`}
-            >
-              {/* Merchant Info */}
-              <div className="text-right">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-white">{merchant.name}</span>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-1.5 py-0.5 rounded font-bold">
-                    ★ {merchant.reputation}% ({merchant.tradesCount} معامله)
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
-                  <span>روش‌های پرداخت: {merchant.paymentMethods.join(' ، ')}</span>
-                  <span>•</span>
-                  <span>میانگین آزادسازی: {merchant.avgReleaseTimeMinutes} دقیقه</span>
-                </div>
-              </div>
-
-              {/* Price & Limits */}
-              <div className="text-right md:text-left">
-                <span className="text-base font-extrabold text-amber-400 font-mono block">
-                  {isFa ? `${toPersianDigits(formatToman(merchant.priceToman, false))} تومان` : `${formatToman(merchant.priceToman, false)} T`}
-                </span>
-                <span className="text-[11px] text-slate-400 block mt-0.5">
-                  محدوده: {toPersianDigits(formatToman(merchant.minAmountToman, false))} تا {toPersianDigits(formatToman(merchant.maxAmountToman, false))} تومان
-                </span>
-              </div>
-
-              {/* Action Button */}
-              <button
-                onClick={() => handleOpenEscrow(merchant)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md hover:scale-105 ${
-                  tradeType === 'buy'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20'
-                    : 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-rose-500/20'
+          {filteredMerchants.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-xs">
+              {isFa ? 'صرافی با فیلتر انتخابی شما یافت نشد.' : 'No merchants found for this filter.'}
+            </div>
+          ) : (
+            filteredMerchants.map((merchant) => (
+              <div 
+                key={merchant.id}
+                className={`p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
+                  isDarkMode ? 'hover:bg-white/5' : 'hover:bg-purple-50/50'
                 }`}
               >
-                {tradeType === 'buy' ? (isFa ? 'خرید با اسکرو هوشمند' : 'Buy with Escrow') : (isFa ? 'فروش با اسکرو هوشمند' : 'Sell with Escrow')}
-              </button>
-            </div>
-          ))}
+                {/* Merchant Info */}
+                <div className="text-right space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-white">{merchant.name}</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-1.5 py-0.5 rounded font-bold">
+                      ★ {merchant.reputation}% ({merchant.tradesCount} معامله)
+                    </span>
+                    {merchant.isVip && (
+                      <span className="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.5 rounded border border-amber-500/30">
+                        تضمین طلایی VIP
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span>روش‌ها: {merchant.paymentMethods.join(' ، ')}</span>
+                    <span>•</span>
+                    <span>میانگین آزادسازی: {merchant.avgReleaseTimeMinutes} دقیقه</span>
+                  </div>
+
+                  {/* Bank Badges */}
+                  <div className="flex items-center gap-1.5 pt-0.5">
+                    {merchant.bankBadges.map((b) => (
+                      <span 
+                        key={b} 
+                        className="text-[10px] px-2 py-0.5 rounded-md bg-purple-950/60 border border-purple-500/20 text-purple-300 font-medium"
+                      >
+                        {b}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price & Limits */}
+                <div className="text-right md:text-left">
+                  <span className="text-base font-extrabold text-amber-400 font-mono block">
+                    {isFa ? `${toPersianDigits(formatToman(merchant.priceToman, false))} تومان` : `${formatToman(merchant.priceToman, false)} T`}
+                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5 font-mono">
+                    محدوده: {toPersianDigits(formatToman(merchant.minAmountToman, false))} تا {toPersianDigits(formatToman(merchant.maxAmountToman, false))} ت
+                  </span>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => handleOpenEscrow(merchant)}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md hover:scale-105 cursor-pointer active:scale-95 ${
+                    tradeType === 'buy'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20'
+                      : 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-rose-500/20'
+                  }`}
+                >
+                  {tradeType === 'buy' ? (isFa ? 'خرید با اسکرو هوشمند ⚡' : 'Buy with Escrow ⚡') : (isFa ? 'فروش با اسکرو هوشمند ⚡' : 'Sell with Escrow ⚡')}
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -504,6 +611,73 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
                 {isFa ? 'انصراف' : 'Cancel'}
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Griffi Escrow Guardian Dispute Resolver Modal */}
+      {showDisputeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in text-right">
+          <div className="w-full max-w-lg rounded-3xl p-6 lg:p-8 border border-purple-500/40 bg-gradient-to-b from-[#190f38] via-[#100a26] to-[#0a0618] text-white shadow-2xl relative overflow-hidden">
+            <div className="flex items-center gap-4 pb-4 mb-4 border-b border-purple-500/20">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-emerald-400/80 shadow-lg shrink-0 bg-black/40">
+                <img src="/mascot/griffi-escrow.jpg" alt="Griffi Escrow Guardian" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h3 className="font-black text-base griffin-gradient-text">
+                  {isFa ? 'داوری و حل اختلاف هوشمند گریفی (Guardian Dispute)' : 'Griffi Trustless Escrow Arbitration'}
+                </h3>
+                <p className="text-xs text-slate-300">
+                  {isFa ? 'مکانیزم حل اختلاف چندامضایی (Multi-Sig) قراردادهای هوشمند وب۳' : 'Decentralized 2-of-3 multi-sig protection'}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs leading-relaxed text-slate-300 mb-6">
+              <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 space-y-1.5">
+                <span className="font-bold text-amber-300 block">
+                  {isFa ? '۱. قفل زمانی تایم‌لاک (Timelock Lock):' : '1. On-Chain Timelock:'}
+                </span>
+                <p>
+                  {isFa
+                    ? 'تا ۱۵ دقیقه پس از ثبت سفارش، تترها منحصراً در قرارداد هوشمند قفل هستند و هیچ شخص یا صرافی نمی‌تواند به آن دسترسی داشته باشد.'
+                    : 'USDT is strictly locked in smart contracts for 15 minutes.'}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 space-y-1.5">
+                <span className="font-bold text-emerald-300 block">
+                  {isFa ? '۲. اعتبارسنجی استعلام شماره پیگیری شبا / پایا:' : '2. Bank Receipt Verification:'}
+                </span>
+                <p>
+                  {isFa
+                    ? 'در صورت بروز اختلاف، کد رهگیری ثبت‌شده توسط خریدار با استعلام خودکار سامانه ساتنا/پایا مقایسه می‌گردد.'
+                    : 'Bank tracking codes are validated automatically against clearing settlement timestamps.'}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 space-y-1.5">
+                <span className="font-bold text-purple-300 block">
+                  {isFa ? '۳. تسویه قطعی به کیف‌پول کاربر:' : '3. Guaranteed Resolution:'}
+                </span>
+                <p>
+                  {isFa
+                    ? 'در صورت اثبات واریز، قرارداد دارایی را مستقیماً به کیف‌پول خریدار آزاد می‌کند؛ در غیر اینصورت، ودیعه به فروشنده بازگردانده می‌شود.'
+                    : 'Funds are trustlessly unlocked to the buyer or refunded to seller based on verifiable proof.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setShowDisputeModal(false);
+              }}
+              className="w-full py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+            >
+              {isFa ? 'متوجه شدم (بازگشت به فهرست معامله‌گران)' : 'Understood'}
+            </button>
           </div>
         </div>
       )}

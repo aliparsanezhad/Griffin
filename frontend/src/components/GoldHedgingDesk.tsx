@@ -317,12 +317,48 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
               </span>
             </div>
 
+            {/* Visual Comparison: Seke vs PAXG Bubble Ratio Bar */}
+            <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/20 space-y-2 text-xs">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="font-bold text-amber-300">
+                  {isFa ? 'مقایسه ریسک حباب: طلای دیجیتال vs سکه فیزیکی' : 'Bubble Risk Comparison'}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                  {isFa ? 'طلای دیجیتال: ۱۰۰٪ ارزش خالص' : 'PAXG: 100% Real Value'}
+                </span>
+              </div>
+
+              {/* Dual comparison meter */}
+              <div className="space-y-1.5 font-mono text-[10px]">
+                <div>
+                  <div className="flex justify-between text-slate-300 mb-0.5">
+                    <span>{isFa ? 'طلای PAXG (دکس گریفین):' : 'PAXG (GriffinSwap):'}</span>
+                    <span className="text-emerald-400 font-bold">{isFa ? '۱۰۰٪ طلای خالص • ۰٪ حباب' : '100% Real Gold • 0% Bubble'}</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-r from-emerald-500 to-teal-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-slate-300 mb-0.5">
+                    <span>{isFa ? 'سکه امامی (بازار سنتی طلا):' : 'Physical Coin (Bazaar):'}</span>
+                    <span className="text-rose-400 font-bold">{isFa ? `+${sekeBubblePercent}٪ حباب سوختنی!` : `+${sekeBubblePercent}% Bubble Deflation Risk!`}</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div className="h-full bg-amber-400" style={{ width: `${100 - parseFloat(sekeBubblePercent)}%` }} />
+                    <div className="h-full bg-rose-500 animate-pulse" style={{ width: `${sekeBubblePercent}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <button
               onClick={handleQuickSwap}
-              className="w-full mt-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-black text-xs shadow-md shadow-amber-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+              className="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-black text-xs shadow-lg shadow-amber-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer active:scale-95"
             >
               <Coins className="w-4 h-4 text-purple-950" />
-              <span>{isFa ? 'تبدیل آنی به طلای دیجیتال در آربیتروم' : 'Swap to Digital Gold on Arbitrum'}</span>
+              <span>{isFa ? 'سواپ این مبلغ به طلای دیجیتال در گریفین ⚡' : 'Swap to Digital Gold on Griffin ⚡'}</span>
             </button>
           </div>
         </div>

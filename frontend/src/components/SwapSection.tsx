@@ -92,8 +92,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 }) => {
   const isFa = lang === 'fa';
   
-  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'limit' (Gasless Limit Book) vs 'lifi' (Griffin Global Cross-Chain Bridge)
-  const [swapEngine, setSwapEngine] = useState<'native' | 'limit' | 'lifi'>('native');
+  // Swap mode toggle: 'native' (Griffin Fast Swap) vs 'limit' (Gasless Limit Book) vs 'bridge' (Griffin Global Cross-Chain Bridge)
+  const [swapEngine, setSwapEngine] = useState<'native' | 'limit' | 'bridge'>('native');
 
   // Native swap state
   const [fromToken, setFromToken] = useState<TokenChoice>(() => {
@@ -270,10 +270,10 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               type="button"
               onClick={() => {
                 playClickSound();
-                setSwapEngine('lifi');
+                setSwapEngine('bridge');
               }}
               className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-bold cursor-pointer ${
-                swapEngine === 'lifi'
+                swapEngine === 'bridge'
                   ? 'bg-purple-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -751,7 +751,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         )}
 
         {/* MODE 2: Griffin Global Cross-Chain Bridge */}
-        {swapEngine === 'lifi' && (
+        {swapEngine === 'bridge' && (
           <div className="w-full flex justify-center overflow-visible" dir="ltr">
             <div className="w-full max-w-[480px] rounded-3xl shadow-2xl overflow-visible">
               <LiFiWidget 
