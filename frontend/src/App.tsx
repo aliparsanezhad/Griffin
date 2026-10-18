@@ -265,8 +265,14 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
-              onNavigateSwap={() => setActiveTab('swap')}
-              onNavigateDca={() => setActiveTab('dca')}
+              onNavigateSwap={() => {
+                setActiveTab('swap');
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }}
+              onNavigateDca={() => {
+                setActiveTab('dca');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             />
           </div>
         )}
@@ -277,7 +283,10 @@ export function App() {
               tomanRate={tomanRate}
               lang={lang}
               isDarkMode={isDarkMode}
-              onNavigateSwap={() => setActiveTab('swap')}
+              onNavigateSwap={() => {
+                setActiveTab('swap');
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }}
             />
           </div>
         )}
