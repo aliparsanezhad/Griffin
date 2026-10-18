@@ -161,6 +161,11 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
     );
   });
 
+  const numAmount = parseFloat(tradeAmountUsd) || 0;
+  const tomanValue = usdToToman(numAmount, tomanRate);
+  const tokenQuantity = selectedToken.priceUsd > 0 ? numAmount / selectedToken.priceUsd : 0;
+  const marketCapToman = usdToToman(selectedToken.marketCapUsd, tomanRate);
+
   const handleTrade = (e: React.FormEvent) => {
     e.preventDefault();
     if (numAmount <= 0) return;
@@ -237,11 +242,6 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
       }, 2000);
     }, 1200);
   };
-
-  const numAmount = parseFloat(tradeAmountUsd) || 0;
-  const tomanValue = usdToToman(numAmount, tomanRate);
-  const tokenQuantity = selectedToken.priceUsd > 0 ? numAmount / selectedToken.priceUsd : 0;
-  const marketCapToman = usdToToman(selectedToken.marketCapUsd, tomanRate);
 
   return (
     <div className="w-full space-y-6">
