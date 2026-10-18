@@ -44,6 +44,19 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [cardFlipped, setCardFlipped] = useState<boolean>(false);
+  const [cardTilt, setCardTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -14;
+    setCardTilt({ x, y });
+  };
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ x: 0, y: 0 });
+  };
 
   // Sample registered domains for demonstration
   const [myDomains, setMyDomains] = useState<DomainRecord[]>([
@@ -265,7 +278,19 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
             {isFa ? 'کارت هویت پاسپورت وب۳ شما (پیش‌نمایش NFT):' : 'Web3 Identity NFT Passport Preview:'}
           </span>
 
-          <div className="w-full rounded-3xl p-6 bg-gradient-to-br from-[#1a0e2e] via-[#2a134a] to-[#120824] border-2 border-amber-400/50 shadow-2xl shadow-purple-950/60 relative overflow-hidden text-right space-y-5">
+          <div 
+            className="w-full rounded-3xl p-6 bg-gradient-to-br from-[#1a0e2e] via-[#2a134a] to-[#120824] border-2 border-amber-400/50 shadow-2xl shadow-purple-950/60 relative overflow-hidden text-right space-y-5 cursor-pointer select-none"
+            style={{
+              transform: `perspective(1000px) rotateX(${cardTilt.y}deg) rotateY(${cardTilt.x}deg)`,
+              transition: 'transform 0.15s ease-out',
+            }}
+            onMouseMove={handleCardMouseMove}
+            onMouseLeave={handleCardMouseLeave}
+            onClick={() => {
+              playClickSound();
+              setCardFlipped(!cardFlipped);
+            }}
+          >
             {/* Ambient gold glow */}
             <div className="absolute top-0 right-0 w-40 h-40 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -284,29 +309,51 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
               </span>
             </div>
 
-            {/* Center Domain Display */}
-            <div className="text-center py-4 bg-black/40 rounded-2xl border border-purple-500/20 space-y-1">
-              <span className="text-2xl lg:text-3xl font-black font-mono griffin-gradient-text tracking-tight block">
-                {fullName}
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">
-                Decentralized Arbitrum Layer-2 Domain
-              </span>
-            </div>
+            {!cardFlipped ? (
+              <>
+                {/* Center Domain Display */}
+                <div className="text-center py-4 bg-black/40 rounded-2xl border border-purple-500/20 space-y-1">
+                  <span className="text-2xl lg:text-3xl font-black font-mono griffin-gradient-text tracking-tight block">
+                    {fullName}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    Decentralized Arbitrum Layer-2 Domain
+                  </span>
+                </div>
 
-            {/* Resolved Wallet Address */}
-            <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/20 font-mono text-xs flex items-center justify-between gap-2">
-              <div className="text-left">
-                <span className="text-[9px] text-slate-400 block font-sans">RESOLVED WALLET ADDRESS:</span>
-                <span className="text-purple-200 font-bold truncate block max-w-[200px]">0x71C8705a2B88e3083feC7B58273683243354438F</span>
+                {/* Resolved Wallet Address */}
+                <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/20 font-mono text-xs flex items-center justify-between gap-2">
+                  <div className="text-left">
+                    <span className="text-[9px] text-slate-400 block font-sans">RESOLVED WALLET ADDRESS:</span>
+                    <span className="text-purple-200 font-bold truncate block max-w-[200px]">0x71C8705a2B88e3083feC7B58273683243354438F</span>
+                  </div>
+                  <QrCode className="w-6 h-6 text-amber-400 shrink-0" />
+                </div>
+              </>
+            ) : (
+              /* Flipped QR Code View */
+              <div className="text-center py-3 bg-black/60 rounded-2xl border border-amber-400/30 space-y-2 animate-fade-in">
+                <div className="w-24 h-24 mx-auto p-1.5 rounded-xl bg-white flex items-center justify-center">
+                  {/* Simulated QR block */}
+                  <div className="w-full h-full bg-slate-900 rounded-lg flex items-center justify-center p-2 text-center">
+                    <span className="text-[9px] font-mono font-bold text-amber-300">0x71C8...438F</span>
+                  </div>
+                </div>
+                <span className="text-[11px] font-mono font-bold text-amber-300 block">
+                  {fullName}
+                </span>
+                <span className="text-[10px] text-slate-400 block font-sans">
+                  {isFa ? 'اسکن جهت واریز رمزارز به شناسه شما' : 'Scan to send tokens to this Web3 domain'}
+                </span>
               </div>
-              <QrCode className="w-6 h-6 text-amber-400 shrink-0" />
-            </div>
+            )}
 
             {/* Card Footer Details */}
-            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-purple-500/15">
               <span>{isFa ? 'شبکه: آربیتروم وان (Arbitrum)' : 'Network: Arbitrum One'}</span>
-              <span>{isFa ? 'کارمزد ثبت: ۰.۰۴ دلار گس' : 'Gas: ~$0.04'}</span>
+              <span className="text-amber-400 font-medium">
+                {cardFlipped ? (isFa ? 'کلیک جهت چرخش به نام' : 'Click to view name') : (isFa ? 'کلیک جهت نمایش بارکد QR 🔄' : 'Click for QR code 🔄')}
+              </span>
             </div>
           </div>
         </div>
