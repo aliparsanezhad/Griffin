@@ -89,8 +89,14 @@ export function App() {
     setWalletAddress(null);
   };
 
-  const handleSelectVaultToDeposit = (_vault: any) => {
+  const handleSelectVaultToDeposit = (vault: any) => {
+    setSwapParams({
+      from: 'USDT',
+      to: vault.asset || 'USDT',
+      amount: '500'
+    });
     setActiveTab('swap');
+    window.scrollTo({ top: 120, behavior: 'smooth' });
   };
 
   return (
