@@ -142,6 +142,12 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
   const handleSelectToken = (token: TokenItem) => {
     if (selectingFor === 'from') {
+      const prevUsd = numericFrom * fromToken.priceUsd;
+      const targetTokenPrice = token.priceUsd;
+      if (numericFrom > 5 && targetTokenPrice > 500) {
+        const smartAmount = prevUsd > 0 && targetTokenPrice > 0 ? (prevUsd / targetTokenPrice) : (100 / targetTokenPrice);
+        setFromAmount(smartAmount >= 1 ? smartAmount.toFixed(2) : smartAmount.toFixed(4));
+      }
       setFromToken({
         symbol: token.symbol,
         name: token.name,
@@ -178,8 +184,10 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const handleFlipTokens = () => {
     playClickSound();
     const temp = fromToken;
+    const flippedAmount = calculatedOutput > 0 ? (calculatedOutput < 0.01 ? calculatedOutput.toFixed(6) : calculatedOutput.toFixed(4)) : fromAmount;
     setFromToken(toToken);
     setToToken(temp);
+    setFromAmount(flippedAmount);
   };
 
   const handleExecuteNativeSwap = () => {
@@ -400,7 +408,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                           else if (val >= 1) setFromAmount(val.toFixed(2));
                           else setFromAmount(val.toFixed(4));
                         }}
-                        className="px-2 py-1 min-h-[28px] rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 font-bold transition-colors flex items-center justify-center active:scale-95"
+                        className="px-2.5 py-1 min-h-[30px] rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 font-bold transition-all flex items-center justify-center active:scale-95 cursor-pointer shadow-sm"
                       >
                         {btn.label}
                       </button>
@@ -475,7 +483,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                         else if (tokenAmount >= 1) setFromAmount(tokenAmount.toFixed(2));
                         else setFromAmount(tokenAmount.toFixed(4));
                       }}
-                      className="px-2 py-0.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/25 font-bold transition-all shrink-0 active:scale-95 cursor-pointer"
+                      className="px-2.5 py-1 min-h-[26px] rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/25 font-bold transition-all shrink-0 active:scale-95 cursor-pointer flex items-center justify-center"
                       title={isFa ? `تنظیم معادل ${chip.labelFa}ومان به نرخ زنده` : `Set ${chip.labelEn}oman equivalent`}
                     >
                       {isFa ? chip.labelFa : chip.labelEn}
