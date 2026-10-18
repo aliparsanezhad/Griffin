@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Calendar, 
   TrendingUp,
@@ -7,10 +7,11 @@ import {
   Check,
   Copy,
   ExternalLink,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Zap
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
-import { playClickSound } from '../services/soundService';
+import { playClickSound, playSwapStartSound } from '../services/soundService';
 import { LimitOrderBook } from './LimitOrderBook';
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
@@ -19,12 +20,14 @@ interface DcaSectionProps {
   tomanRate: number;
   lang: 'fa' | 'en';
   isDarkMode: boolean;
+  onInitiateSwap?: (fromToken: string, toToken: string, amount: string) => void;
 }
 
 export const DcaSection: React.FC<DcaSectionProps> = ({
   tomanRate,
   lang,
-  isDarkMode
+  isDarkMode,
+  onInitiateSwap
 }) => {
   const isFa = lang === 'fa';
 
@@ -51,6 +54,57 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
   const growthRate = assetAnnualGrowth[selectedAsset] * (durationMonths / 12);
   const projectedFutureToman = Math.round(totalInvestedToman * (1 + growthRate));
   const profitToman = projectedFutureToman - totalInvestedToman;
+
+  // Trajectory simulation
+  const trajectoryPoints = useMemo(() => {
+    const points: { month: number; invested: number; dcaVal: number; cashVal: number }[] = [];
+    for (let m = 1; m <= durationMonths; m++) {
+      const invested = monthlyToman * m;
+      const cashVal = Math.round(invested * Math.pow(1 - 0.42 / 12, m));
+      const dcaVal = Math.round(invested * (1 + (assetAnnualGrowth[selectedAsset] / 12) * (m / 1.7)));
+      points.push({ month: m, invested, dcaVal, cashVal });
+    }
+    return points;
+  }, [monthlyToman, durationMonths, selectedAsset]);
+
+  // SVG Chart math for DCA comparison
+  const maxVal = Math.max(...trajectoryPoints.map(p => p.dcaVal), totalInvestedToman) * 1.05;
+  const minVal = Math.min(...trajectoryPoints.map(p => p.cashVal)) * 0.95;
+  const chartValRange = maxVal - minVal || 1;
+
+  const chartW = 700;
+  const chartH = 140;
+  const padX = 25;
+  const padY = 15;
+  const innerW = chartW - padX * 2;
+  const innerH = chartH - padY * 2;
+
+  const getDcaX = (idx: number) => padX + (idx / (durationMonths - 1 || 1)) * innerW;
+  const getDcaY = (val: number) => padY + innerH - ((val - minVal) / chartValRange) * innerH;
+
+  const dcaLinePath = useMemo(() => {
+    return trajectoryPoints.reduce((acc, pt, i) => {
+      const x = getDcaX(i);
+      const y = getDcaY(pt.dcaVal);
+      return i === 0 ? `M ${x} ${y}` : `${acc} L ${x} ${y}`;
+    }, '');
+  }, [trajectoryPoints, maxVal, minVal]);
+
+  const cashLinePath = useMemo(() => {
+    return trajectoryPoints.reduce((acc, pt, i) => {
+      const x = getDcaX(i);
+      const y = getDcaY(pt.cashVal);
+      return i === 0 ? `M ${x} ${y}` : `${acc} L ${x} ${y}`;
+    }, '');
+  }, [trajectoryPoints, maxVal, minVal]);
+
+  const dcaAreaPath = useMemo(() => {
+    if (!dcaLinePath || trajectoryPoints.length === 0) return '';
+    const lastX = getDcaX(trajectoryPoints.length - 1);
+    const firstX = getDcaX(0);
+    const bottomY = padY + innerH;
+    return `${dcaLinePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+  }, [dcaLinePath, trajectoryPoints]);
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
@@ -292,6 +346,82 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                     (+{Math.round(growthRate * 100)}% بازدهی نسبت به ریال)
                   </span>
                 </div>
+              </div>
+
+              {/* Visual Inflation vs DCA Curve */}
+              <div className="mt-6 pt-5 border-t border-purple-500/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 text-xs">
+                  <span className="font-bold text-slate-200">
+                    {isFa ? 'منحنی مقایسه قدرت خرید (DCA در برابر نگهداری ریال):' : 'Purchasing Power Trajectory:'}
+                  </span>
+                  <div className="flex items-center gap-4 text-[11px] font-mono">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                      {isFa ? `پورتفولیو ${selectedAsset}` : `${selectedAsset} Portfolio`}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-rose-400 font-bold">
+                      <span className="w-2.5 h-0.5 bg-rose-400 border-b border-dashed" />
+                      {isFa ? 'نگهداری ریال (تورم ۴۲٪)' : 'Cash Rial (Inflation)'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative w-full h-[140px] bg-black/40 rounded-xl border border-purple-500/20 overflow-hidden">
+                  <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="dcaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* DCA Area & Line */}
+                    <path d={dcaAreaPath} fill="url(#dcaGradient)" />
+                    <path d={dcaLinePath} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
+
+                    {/* Cash Erosion Line */}
+                    <path d={cashLinePath} fill="none" stroke="#f43f5e" strokeWidth="2" strokeDasharray="4 4" strokeLinecap="round" />
+
+                    {/* Points on DCA Curve */}
+                    {trajectoryPoints.map((pt, i) => (
+                      <circle
+                        key={`pt-${i}`}
+                        cx={getDcaX(i)}
+                        cy={getDcaY(pt.dcaVal)}
+                        r="3.5"
+                        fill="#10b981"
+                        stroke="#ffffff"
+                        strokeWidth="1.5"
+                      />
+                    ))}
+                  </svg>
+                </div>
+              </div>
+
+              {/* 1-Click Action to Start DCA Plan in Swap */}
+              <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-purple-900/30 p-3.5 rounded-xl border border-purple-500/25">
+                <div className="text-right">
+                  <span className="text-xs font-black text-white block">
+                    {isFa ? `آماده شروع سرمایه‌گذاری ماه اول با ${selectedAsset} هستید؟` : `Ready to start Month 1 DCA with ${selectedAsset}?`}
+                  </span>
+                  <span className="text-[11px] text-slate-300">
+                    {isFa ? `معادل ${(monthlyToman / tomanRate).toFixed(1)} تتر برای ماه اول به صورت خودکار در سواپ تنظیم می‌شود.` : `Sets up ${(monthlyToman / tomanRate).toFixed(1)} USDT equivalent for month 1.`}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSwapStartSound();
+                    if (onInitiateSwap) {
+                      onInitiateSwap('USDT', selectedAsset, (monthlyToman / tomanRate).toFixed(1));
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-950/40 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <Zap className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{isFa ? 'شروع خرید ماه اول در سواپ ⚡' : 'Start Month 1 in Swap ⚡'}</span>
+                </button>
               </div>
             </div>
 
