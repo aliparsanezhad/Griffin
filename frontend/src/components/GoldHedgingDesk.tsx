@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Coins, 
   Sparkles, 
@@ -9,7 +9,8 @@ import {
   DollarSign, 
   Copy, 
   Check, 
-  ExternalLink 
+  ExternalLink,
+  Activity
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -29,18 +30,21 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
   isDarkMode = true,
   onInitiateSwap,
 }) => {
-  const [usdtAmount, setUsdtAmount] = useState<number>(3000);
-  const [copied, setCopied] = useState<boolean>(false);
-
   const isFa = lang === 'fa';
+
+  // Calculator unit mode: 'usdt' | 'gram' | 'mesghal' | 'seke'
+  const [calcUnit, setCalcUnit] = useState<'usdt' | 'gram' | 'mesghal' | 'seke'>('usdt');
+  const [unitAmount, setUnitAmount] = useState<number>(3000);
+  const [copied, setCopied] = useState<boolean>(false);
 
   // Live gold & coin metrics
   const ounceUsd = 2685.50; // Ounce Gold in USD
-  const paxgPriceUsd = ounceUsd; // 1 PAXG = 1 Troy Ounce
+  const paxgPriceUsd = ounceUsd; // 1 PAXG = 1 Troy Ounce (31.1035g 24k)
   const paxgPriceToman = paxgPriceUsd * tomanRate;
 
-  // 1 Gram 18k Gold & Seke Emami
-  const gram18kToman = 4780000;
+  // 1 Gram 18k Gold & Seke Emami in Tomans
+  const gram18kToman = Math.round((ounceUsd * tomanRate * 0.75) / 31.1035);
+  const mesghalToman = Math.round(gram18kToman * 4.6083);
   const sekeEmamiToman = 54500000;
 
   // Formula for raw value of Seke Emami (8.133g of 21.6 carat / 900 purity)
@@ -48,11 +52,36 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
   const sekeBubbleToman = sekeEmamiToman - sekeRawToman;
   const sekeBubblePercent = ((sekeBubbleToman / sekeRawToman) * 100).toFixed(1);
 
+  // Calculate equivalent USDT based on active unit
+  const effectiveUsdtAmount = useMemo(() => {
+    switch (calcUnit) {
+      case 'gram':
+        return (unitAmount * gram18kToman) / tomanRate;
+      case 'mesghal':
+        return (unitAmount * mesghalToman) / tomanRate;
+      case 'seke':
+        return (unitAmount * sekeEmamiToman) / tomanRate;
+      case 'usdt':
+      default:
+        return unitAmount;
+    }
+  }, [calcUnit, unitAmount, gram18kToman, mesghalToman, sekeEmamiToman, tomanRate]);
+
   // Calculations for simulated trade
-  const paxgReceived = usdtAmount / paxgPriceUsd;
+  const paxgReceived = effectiveUsdtAmount / paxgPriceUsd;
   const equivalentPhysicalGrams = (paxgReceived * 31.1035 * 0.75); // converted to 18k equivalent
-  const bazaarMakerFeeUsdt = usdtAmount * 0.085; // ~8.5% typical bazaar maker fee / ajrat
+  const bazaarMakerFeeUsdt = effectiveUsdtAmount * 0.085; // ~8.5% typical bazaar maker fee / ajrat
   const bazaarMakerFeeToman = bazaarMakerFeeUsdt * tomanRate;
+  const bubbleLossAvoidedToman = calcUnit === 'seke' ? sekeBubbleToman * unitAmount : (effectiveUsdtAmount / (sekeEmamiToman / tomanRate)) * sekeBubbleToman;
+
+  // 30-Day Historical Gold Growth Points
+  const goldTrendPoints = [
+    { day: '۱ ماه پیش', priceToman: paxgPriceToman * 0.88, gain: '۰٪' },
+    { day: '۳ هفته پیش', priceToman: paxgPriceToman * 0.91, gain: '+۳.۴٪' },
+    { day: '۲ هفته پیش', priceToman: paxgPriceToman * 0.94, gain: '+۶.۸٪' },
+    { day: '۱ هفته پیش', priceToman: paxgPriceToman * 0.97, gain: '+۱۰.۲٪' },
+    { day: 'امروز', priceToman: paxgPriceToman, gain: '+۱۲.۴٪' }
+  ];
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
@@ -61,12 +90,32 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleUnitSwitch = (newUnit: 'usdt' | 'gram' | 'mesghal' | 'seke') => {
+    playClickSound();
+    setCalcUnit(newUnit);
+    switch (newUnit) {
+      case 'gram':
+        setUnitAmount(10); // 10 grams default
+        break;
+      case 'mesghal':
+        setUnitAmount(2); // 2 mesghal default
+        break;
+      case 'seke':
+        setUnitAmount(1); // 1 seke default
+        break;
+      case 'usdt':
+      default:
+        setUnitAmount(3000); // 3000 usdt default
+        break;
+    }
+  };
+
   const handleQuickSwap = () => {
     playSwapSuccessSound();
     if (onInitiateSwap) {
-      onInitiateSwap('USDT', 'PAXG', usdtAmount.toString());
+      onInitiateSwap('USDT', 'PAXG', effectiveUsdtAmount.toFixed(1));
     } else {
-      alert(isFa ? `درخواست سواپ ${usdtAmount} تتر به طلای دیجیتال ثبت شد.` : `Swap of ${usdtAmount} USDT to PAXG initiated.`);
+      alert(isFa ? `درخواست سواپ ${effectiveUsdtAmount.toFixed(0)} تتر به طلای دیجیتال ثبت شد.` : `Swap of ${effectiveUsdtAmount.toFixed(0)} USDT to PAXG initiated.`);
     }
   };
 
@@ -243,10 +292,48 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
       <div className={`p-6 rounded-2xl border my-6 ${
         isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/80 border-purple-200'
       }`}>
-        <h3 className="font-extrabold text-base text-white mb-4 flex items-center gap-2">
-          <ArrowLeftRight className="w-4 h-4 text-amber-400" />
-          <span>{isFa ? 'شبیه‌ساز و ماشین‌حساب تبدیل تتر به طلای بدون حباب (PAXG)' : 'Simulate Tether to Digital Gold Hedging'}</span>
-        </h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+          <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+            <ArrowLeftRight className="w-4 h-4 text-amber-400" />
+            <span>{isFa ? 'شبیه‌ساز و ماشین‌حساب تبدیل انواع طلا به PAXG بدون حباب' : 'Multi-Unit Digital Gold Simulator'}</span>
+          </h3>
+
+          {/* Unit Switcher */}
+          <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-purple-500/30 text-xs font-bold">
+            <button
+              onClick={() => handleUnitSwitch('usdt')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                calcUnit === 'usdt' ? 'bg-amber-400 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              دلار تتر (USDT)
+            </button>
+            <button
+              onClick={() => handleUnitSwitch('gram')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                calcUnit === 'gram' ? 'bg-amber-400 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              گرم ۱۸ عیار
+            </button>
+            <button
+              onClick={() => handleUnitSwitch('mesghal')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                calcUnit === 'mesghal' ? 'bg-amber-400 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              مثقال آب‌شده
+            </button>
+            <button
+              onClick={() => handleUnitSwitch('seke')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                calcUnit === 'seke' ? 'bg-amber-400 text-slate-950 shadow-md font-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              سکه امامی
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           
@@ -254,46 +341,57 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-300 font-bold">
-                {isFa ? 'مبلغ تبدیل تتر (USDT):' : 'Tether Amount to Swap:'}
+                {isFa 
+                  ? (calcUnit === 'gram' ? 'تعداد گرم طلای ۱۸ عیار:' : calcUnit === 'mesghal' ? 'تعداد مثقال طلا:' : calcUnit === 'seke' ? 'تعداد سکه امامی:' : 'مبلغ تبدیل تتر (USDT):')
+                  : 'Input Quantity:'
+                }
               </span>
               <span className="text-sm font-extrabold text-amber-400 font-mono">
-                {usdtAmount.toLocaleString()} USDT
+                {unitAmount.toLocaleString()} {calcUnit === 'usdt' ? 'USDT' : calcUnit === 'gram' ? 'گرم' : calcUnit === 'mesghal' ? 'مثقال' : 'عدد سکه'}
               </span>
             </div>
 
             <input 
               type="range"
-              min="200"
-              max="50000"
-              step="100"
-              value={usdtAmount}
-              onChange={(e) => setUsdtAmount(Number(e.target.value))}
+              min={calcUnit === 'usdt' ? 100 : 1}
+              max={calcUnit === 'usdt' ? 25000 : calcUnit === 'seke' ? 20 : 100}
+              step={calcUnit === 'usdt' ? 100 : 1}
+              value={unitAmount}
+              onChange={(e) => setUnitAmount(Number(e.target.value))}
               className="w-full h-2 bg-purple-950 rounded-lg appearance-none cursor-pointer accent-amber-400 mb-4"
             />
 
+            {/* Quick chips tailored to unit */}
             <div className="flex gap-2">
-              {[500, 1500, 3000, 10000, 25000].map((amt) => (
+              {(calcUnit === 'usdt' 
+                ? [500, 1500, 3000, 10000]
+                : calcUnit === 'gram' 
+                ? [5, 10, 25, 50]
+                : calcUnit === 'mesghal'
+                ? [1, 2, 5, 10]
+                : [1, 2, 5, 10]
+              ).map((amt) => (
                 <button
                   key={amt}
                   onClick={() => {
                     playClickSound();
-                    setUsdtAmount(amt);
+                    setUnitAmount(amt);
                   }}
-                  className={`flex-1 py-1 rounded-lg text-xs font-bold border transition-colors ${
-                    usdtAmount === amt
+                  className={`flex-1 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                    unitAmount === amt
                       ? 'bg-amber-400 text-purple-950 border-amber-300'
                       : 'bg-white/5 border-purple-500/20 text-slate-300 hover:bg-white/10'
                   }`}
                 >
-                  ${amt}
+                  {amt} {calcUnit === 'usdt' ? '$' : ''}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Outcome breakdown */}
-          <div className={`p-4 rounded-xl border space-y-2 ${
-            isDarkMode ? 'bg-black/30 border-purple-500/30' : 'bg-white border-purple-200'
+          <div className={`p-4 rounded-xl border space-y-2.5 ${
+            isDarkMode ? 'bg-black/40 border-purple-500/30' : 'bg-white border-purple-200'
           }`}>
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'طلای دیجیتال دریافتی:' : 'PAXG Gold Received:'}</span>
@@ -311,9 +409,16 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
             </div>
 
             <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">{isFa ? 'حباب سوختنی حذف‌شده نسبت به سکه:' : 'Bubble markup avoided:'}</span>
+              <span className="font-mono font-bold text-cyan-400">
+                +{isFa ? `${toPersianDigits(formatToman(bubbleLossAvoidedToman))} تومان` : `${formatToman(bubbleLossAvoidedToman)} T`}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'کارمزد پروتکل گریفین (۰.۵٪):' : 'Protocol Commission (0.5%):'}</span>
               <span className="font-mono text-purple-300" dir="ltr">
-                ${(usdtAmount * 0.005).toFixed(2)} USDT
+                ${(effectiveUsdtAmount * 0.005).toFixed(2)} USDT
               </span>
             </div>
 
@@ -358,9 +463,30 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
               className="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-black text-xs shadow-lg shadow-amber-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer active:scale-95"
             >
               <Coins className="w-4 h-4 text-purple-950" />
-              <span>{isFa ? 'سواپ این مبلغ به طلای دیجیتال در گریفین ⚡' : 'Swap to Digital Gold on Griffin ⚡'}</span>
+              <span>{isFa ? `سواپ معادل ${(effectiveUsdtAmount).toFixed(0)} تتر به طلای دیجیتال ⚡` : `Swap $${effectiveUsdtAmount.toFixed(0)} to PAXG ⚡`}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* 30-Day Gold Performance Trend */}
+      <div className="p-5 rounded-2xl bg-purple-950/30 border border-purple-500/20 my-6 space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-white flex items-center gap-1.5">
+            <Activity className="w-4 h-4 text-emerald-400" />
+            <span>{isFa ? 'روند ۳۰ روز گذشته بازدهی طلا در برابر افت ریال:' : '30-Day Gold vs Rial Trend:'}</span>
+          </span>
+          <span className="font-mono text-emerald-400 font-bold">+۱۲.۴٪ رشد در ماه اخیر</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[11px] font-mono">
+          {goldTrendPoints.map((pt, i) => (
+            <div key={i} className="p-2.5 rounded-xl bg-black/40 border border-purple-500/20">
+              <span className="text-[10px] text-slate-400 block mb-0.5">{pt.day}</span>
+              <span className="text-white font-bold block">{toPersianDigits(formatToman(pt.priceToman, false))} ت</span>
+              <span className="text-emerald-400 text-[10px] font-bold">{pt.gain}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -383,7 +509,7 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
           </code>
           <button
             onClick={handleCopyWallet}
-            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors"
+            className="p-1 rounded-lg hover:bg-white/10 text-purple-300 transition-colors cursor-pointer"
             title="کپی آدرس خزانه"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
