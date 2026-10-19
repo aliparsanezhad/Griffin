@@ -10,7 +10,10 @@ import {
   Check, 
   CheckCircle2,
   Activity,
-  Clock
+  Clock,
+  Users,
+  Share2,
+  Crown
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound, playAnvilForgeSound } from '../services/soundService';
@@ -145,6 +148,14 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
   const [tradeAmountUsd, setTradeAmountUsd] = useState<string>('25');
   const [tradeSuccess, setTradeSuccess] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const handleShareToken = (symbol: string) => {
+    navigator.clipboard.writeText(`https://griffinswap.io/#launchpad?token=${symbol}&treasury=${COMMISSION_WALLET}`);
+    setCopiedShare(true);
+    playClickSound();
+    setTimeout(() => setCopiedShare(false), 2000);
+  };
 
   // Recent Live Trades Feed
   const [trades, setTrades] = useState<RecentTrade[]>([
@@ -522,9 +533,20 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 <span className="text-lg font-black text-amber-300">{selectedToken.symbol}</span>
                 <span className="text-xs text-slate-400">{selectedToken.nameFa}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{isFa ? 'حلال و ضد راگ‌پول' : 'Anti-Rug Certified'}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleShareToken(selectedToken.symbol)}
+                  className="p-1.5 rounded-lg bg-purple-900/40 hover:bg-purple-800 text-purple-200 border border-purple-500/20 text-xs flex items-center gap-1 cursor-pointer transition-all"
+                  title="اشتراک‌گذاری توکن"
+                >
+                  {copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+                  <span className="text-[10px] hidden sm:inline">{copiedShare ? (isFa ? 'کپی شد' : 'Copied') : (isFa ? 'اشتراک' : 'Share')}</span>
+                </button>
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{isFa ? 'حلال و ضد راگ‌پول' : 'Anti-Rug Certified'}</span>
+                </div>
               </div>
             </div>
 
@@ -586,6 +608,83 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
               <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20">
                 <span className="text-slate-400 text-[10px] block">{isFa ? 'وضعیت باندینگ:' : 'Bonding Status:'}</span>
                 <span className="font-bold text-amber-300 text-xs">{selectedToken.progressPercent}% {isFa ? 'تکمیل' : 'Filled'}</span>
+              </div>
+            </div>
+
+            {/* 4-Stage Milestone Roadmap */}
+            <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 mb-3 space-y-2 text-right">
+              <span className="text-[11px] font-bold text-slate-300 block flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isFa ? 'مراحل تکاملی باندینگ کرو تا صرافی:' : 'Curve Milestones to Uniswap:'}</span>
+                </span>
+                <span className="text-[10px] text-amber-300 font-mono">
+                  {selectedToken.progressPercent >= 100 ? (isFa ? 'فارغ‌التحصیل 🎓' : 'Graduated') : (isFa ? 'مرحله ۲ از ۴' : 'Stage 2/4')}
+                </span>
+              </span>
+
+              <div className="grid grid-cols-4 gap-1 text-[9px] font-mono text-center">
+                <div className="p-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                  <span className="block font-bold">۱. ریخته‌گری</span>
+                  <span className="text-[8px] text-emerald-400/80">تکمیل ✓</span>
+                </div>
+                <div className={`p-1.5 rounded-lg border ${
+                  selectedToken.progressPercent > 0 
+                    ? 'bg-amber-500/20 border-amber-400/50 text-amber-300 font-bold' 
+                    : 'bg-purple-950/30 border-purple-500/20 text-slate-400'
+                }`}>
+                  <span className="block">۲. باندینگ</span>
+                  <span className="text-[8px]">{selectedToken.progressPercent}%</span>
+                </div>
+                <div className={`p-1.5 rounded-lg border ${
+                  selectedToken.marketCapUsd >= 30000 
+                    ? 'bg-amber-500/20 border-amber-400/50 text-amber-300 font-bold' 
+                    : 'bg-purple-950/30 border-purple-500/20 text-slate-400'
+                }`}>
+                  <span className="block">۳. قله پادشاه</span>
+                  <span className="text-[8px]">$30k+</span>
+                </div>
+                <div className={`p-1.5 rounded-lg border ${
+                  selectedToken.isGraduated 
+                    ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 font-bold' 
+                    : 'bg-purple-950/30 border-purple-500/20 text-slate-400'
+                }`}>
+                  <span className="block">۴. دکس یونی</span>
+                  <span className="text-[8px]">$69k</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Fair Holder Distribution Safety Meter */}
+            <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 mb-3 space-y-1.5 text-right text-xs">
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-slate-300 font-bold flex items-center gap-1">
+                  <Users className="w-3 h-3 text-purple-400" />
+                  <span>{isFa ? 'توزیع امن هولدرها و نبود ریسک نهنگ:' : 'Anti-Whale Distribution:'}</span>
+                </span>
+                <span className="text-emerald-400 font-bold text-[10px]">{isFa ? 'امنیت ۱۰۰٪' : 'Safe Tier'}</span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-2 rounded-full bg-black/50 overflow-hidden flex">
+                <div className="bg-indigo-500 h-full" style={{ width: '65%' }} title="Bonding Curve: 65%" />
+                <div className="bg-purple-500 h-full" style={{ width: '31%' }} title="Community: 31%" />
+                <div className="bg-amber-400 h-full" style={{ width: '4%' }} title="Creator: 4%" />
+              </div>
+
+              <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono pt-0.5">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                  <span>استخر باندینگ (۶۵٪)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                  <span>جامعه ({selectedToken.holdersCount} نفر - ۳۱٪)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <span>سازنده (۴٪)</span>
+                </span>
               </div>
             </div>
 
