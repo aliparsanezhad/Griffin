@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Percent, 
   Sparkles, 
@@ -8,10 +8,12 @@ import {
   Copy,
   Check,
   ExternalLink,
-  Coins
+  Coins,
+  Wallet,
+  Flame
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
-import { playClickSound } from '../services/soundService';
+import { playClickSound, playSwapSuccessSound } from '../services/soundService';
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
@@ -43,9 +45,55 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
   onSelectVaultToDeposit,
 }) => {
   const isFa = lang === 'fa';
+  const [earnSubTab, setEarnSubTab] = useState<'vaults' | 'my_deposits'>('vaults');
   const [filterAsset, setFilterAsset] = useState<'all' | 'usdt' | 'usdc' | 'eth' | 'paxg' | 'halal'>('all');
   const [calculatorDeposit, setCalculatorDeposit] = useState<number>(1000);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+  const [claimedToast, setClaimedToast] = useState<string | null>(null);
+
+  // Live ticking accrued yields for active deposits
+  const [activeDeposits, setActiveDeposits] = useState([
+    {
+      id: 'dep-1',
+      vaultName: 'صندوق طلای فیزیکی گریفین (PAXG)',
+      asset: 'PAXG',
+      principalAmount: 2.5,
+      principalUsd: 6713.75,
+      apy: 6.85,
+      accruedYieldToken: 0.0342,
+      stakedAt: '۱۴ روز پیش',
+      isHalal: true
+    },
+    {
+      id: 'dep-2',
+      vaultName: 'استخر سهم کارمزد سواپ گریفین (USDT)',
+      asset: 'USDT',
+      principalAmount: 1500,
+      principalUsd: 1500,
+      apy: 11.40,
+      accruedYieldToken: 24.15,
+      stakedAt: '۲۱ روز پیش',
+      isHalal: true
+    }
+  ]);
+
+  // Live ticking interest simulator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveDeposits(prev => prev.map(dep => ({
+        ...dep,
+        accruedYieldToken: dep.accruedYieldToken + (dep.principalAmount * (dep.apy / 100) / (365 * 86400)) * 2
+      })));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleClaimYield = (id: string, asset: string, amount: number) => {
+    playSwapSuccessSound();
+    setActiveDeposits(prev => prev.map(dep => dep.id === id ? { ...dep, accruedYieldToken: 0.0001 } : dep));
+    setClaimedToast(`سود ${amount.toFixed(4)} ${asset} با موفقیت به کیف‌پول شما واریز شد!`);
+    setTimeout(() => setClaimedToast(null), 3500);
+  };
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
@@ -217,14 +265,127 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
         </div>
       </div>
 
-      {/* Interactive Yield Calculator Banner */}
-      <div className={`p-6 md:p-8 rounded-3xl border shadow-2xl mb-8 relative overflow-hidden transition-all ${
-        isDarkMode 
-          ? 'cyber-gradient-card border-purple-500/35 neon-glow-purple' 
-          : 'glass-panel-light border-purple-200'
-      }`}>
-        {/* Top Laser Accent Line */}
-        <div className="laser-line -mx-6 md:-mx-8 -mt-6 md:-mt-8 mb-6" />
+      {/* Sub-tab Navigation */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 border-b border-purple-500/20 pb-4">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => {
+              playClickSound();
+              setEarnSubTab('vaults');
+            }}
+            className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              earnSubTab === 'vaults'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Coins className="w-4 h-4" />
+            <span>{isFa ? 'صندوق‌های سودآور دیفای' : 'Explore Vaults'}</span>
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setEarnSubTab('my_deposits');
+            }}
+            className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 relative ${
+              earnSubTab === 'my_deposits'
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Wallet className="w-4 h-4 text-emerald-400" />
+            <span>{isFa ? 'سپرده‌های فعال من' : 'My Staked Vaults'}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-500/25">
+          <Flame className="w-3.5 h-3.5 text-amber-400" />
+          <span>{isFa ? 'سود ثانیه‌ای در حال تجمیع است (Live Yield)' : 'Accruing Live Yield'}</span>
+        </div>
+      </div>
+
+      {/* Toast Notification */}
+      {claimedToast && (
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs flex items-center justify-between animate-fade-in shadow-2xl">
+          <span className="font-bold flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-400" />
+            <span>{claimedToast}</span>
+          </span>
+          <span className="text-[10px] text-emerald-400 font-mono">تسویه غیرحضانتی ولت</span>
+        </div>
+      )}
+
+      {/* VIEW 1: MY ACTIVE DEPOSITS */}
+      {earnSubTab === 'my_deposits' && (
+        <div className="space-y-4 mb-8 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {activeDeposits.map((dep) => {
+              const yieldToman = usdToToman(dep.accruedYieldToken * (dep.asset === 'PAXG' ? 2685.5 : 1), tomanRate);
+              const principalToman = usdToToman(dep.principalUsd, tomanRate);
+
+              return (
+                <div
+                  key={dep.id}
+                  className="p-6 rounded-3xl border border-purple-500/30 bg-purple-950/40 flex flex-col justify-between space-y-4 shadow-xl"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-black text-white text-base">{dep.vaultName}</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+                        {dep.apy}% APY
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-black/40 border border-purple-500/20 text-xs font-mono">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block mb-0.5">اصل سپرده:</span>
+                        <span className="text-white font-bold">{dep.principalAmount} {dep.asset}</span>
+                        <span className="text-[10px] text-slate-500 block">≈ {toPersianDigits(formatToman(principalToman, false))} ت</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block mb-0.5">سود زنده تجمیع‌شده:</span>
+                        <span className="text-emerald-400 font-black text-sm">+{dep.accruedYieldToken.toFixed(5)} {dep.asset}</span>
+                        <span className="text-[10px] text-emerald-500 block">≈ +{toPersianDigits(formatToman(yieldToman, false))} ت</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2">
+                    <button
+                      onClick={() => handleClaimYield(dep.id, dep.asset, dep.accruedYieldToken)}
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-all cursor-pointer active:scale-95"
+                    >
+                      {isFa ? 'برداشت سود تجمیع‌شده (Claim)' : 'Claim Yield'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        playClickSound();
+                        alert(isFa ? 'درخواست برداشت اصل سپرده ثبت شد و ظرف ۲ ساعت به ولت شما واریز می‌گردد.' : 'Unstake request initiated.');
+                      }}
+                      className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      {isFa ? 'خروج از استخر' : 'Unstake'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 2: EXPLORE VAULTS & CALCULATOR */}
+      {earnSubTab === 'vaults' && (
+        <>
+          {/* Interactive Yield Calculator Banner */}
+          <div className={`p-6 md:p-8 rounded-3xl border shadow-2xl mb-8 relative overflow-hidden transition-all ${
+            isDarkMode 
+              ? 'cyber-gradient-card border-purple-500/35 neon-glow-purple' 
+              : 'glass-panel-light border-purple-200'
+          }`}>
+            {/* Top Laser Accent Line */}
+            <div className="laser-line -mx-6 md:-mx-8 -mt-6 md:-mt-8 mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
           <div className="md:col-span-7 space-y-4">
@@ -431,6 +592,8 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
           </div>
         ))}
       </div>
+      </>
+      )}
 
       {/* Sharia & Halal DeFi Guidance Notice */}
       <div className={`p-5 rounded-3xl border mb-6 text-right space-y-2 transition-all ${
