@@ -8,7 +8,11 @@ import {
   DollarSign, 
   Copy, 
   Check, 
-  ExternalLink
+  ExternalLink,
+  UploadCloud,
+  CreditCard,
+  AlertTriangle,
+  FileCheck
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -35,6 +39,21 @@ interface MerchantOffer {
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
 
+const IRANIAN_BANKS_BIN: Record<string, string> = {
+  '603799': 'بانک ملی ایران',
+  '610433': 'بانک ملت',
+  '621986': 'بانک سامان / بلوبانک',
+  '627412': 'بانک اقتصاد نوین',
+  '502229': 'بانک پاسارگاد',
+  '622106': 'بانک پارسیان',
+  '589210': 'بانک سپه',
+  '627381': 'بانک انصار',
+  '505785': 'بانک ایران زمین',
+  '639346': 'بانک سینا',
+  '628023': 'بانک مسکن',
+  '504706': 'بانک شهر',
+};
+
 export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   tomanRate,
   lang,
@@ -47,10 +66,43 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedSheba, setCopiedSheba] = useState<boolean>(false);
   const [bankTrackingId, setBankTrackingId] = useState<string>('');
+  const [userCardNumber, setUserCardNumber] = useState<string>('6219 8610 ');
+  const [detectedBankName, setDetectedBankName] = useState<string>('بانک سامان / بلوبانک');
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState<boolean>(false);
+  const [receiptVerified, setReceiptVerified] = useState<boolean>(false);
+  const [receiptFileName, setReceiptFileName] = useState<string>('');
   const [countdownSeconds, setCountdownSeconds] = useState<number>(900);
   const [showEscrowModal, setShowEscrowModal] = useState<boolean>(false);
   const [showDisputeModal, setShowDisputeModal] = useState<boolean>(false);
+  const [disputeTriggered, setDisputeTriggered] = useState<boolean>(false);
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'sheba' | 'card' | 'vip'>('all');
+
+  const handleCardNumberChange = (raw: string) => {
+    const cleaned = raw.replace(/\D/g, '').slice(0, 16);
+    const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
+    setUserCardNumber(formatted);
+
+    const bin = cleaned.slice(0, 6);
+    if (IRANIAN_BANKS_BIN[bin]) {
+      setDetectedBankName(IRANIAN_BANKS_BIN[bin]);
+    } else if (cleaned.length >= 6) {
+      setDetectedBankName('بانک عضو شتاب');
+    } else {
+      setDetectedBankName('');
+    }
+  };
+
+  const handleSimulateReceiptUpload = () => {
+    playClickSound();
+    setIsUploadingReceipt(true);
+    setReceiptFileName('fish-variz-shatna-98234581.png');
+    setTimeout(() => {
+      setIsUploadingReceipt(false);
+      setReceiptVerified(true);
+      setBankTrackingId('۹۸۲۳۴۵۸۱');
+      playClickSound();
+    }, 1200);
+  };
 
   useEffect(() => {
     let timer: any;
@@ -539,6 +591,81 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
                   </div>
                 </div>
 
+                {/* Originating Bank Card Verification */}
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/20 space-y-2 text-right">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5 text-purple-400" />
+                      <span>{isFa ? 'کارت بانکی مبدأ (واریزکننده):' : 'Originating Bank Card:'}</span>
+                    </span>
+                    {detectedBankName && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                        {detectedBankName}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <input
+                    type="text"
+                    value={userCardNumber}
+                    onChange={(e) => handleCardNumberChange(e.target.value)}
+                    placeholder="xxxx xxxx xxxx xxxx"
+                    className="w-full px-3 py-2 rounded-xl bg-purple-950/50 border border-purple-500/30 text-white font-mono text-xs text-left tracking-widest focus:outline-none focus:border-purple-400"
+                    dir="ltr"
+                  />
+
+                  <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span>{isFa ? 'تطابق هویت: کارت به نام امیررضا رضایی ثبت و تایید شده است' : 'Verified card matches KYC identity'}</span>
+                  </div>
+                </div>
+
+                {/* Upload Receipt Simulator / OCR scanner */}
+                <div className="p-3.5 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-2.5 text-right">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                      <UploadCloud className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{isFa ? 'آپلود رسید / فیش بانکی (OCR هوشمند):' : 'Upload Bank Transfer Receipt (AI OCR):'}</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">{isFa ? 'اختیاری جهت تسریع' : 'Optional'}</span>
+                  </div>
+
+                  {!receiptVerified ? (
+                    <button
+                      type="button"
+                      onClick={handleSimulateReceiptUpload}
+                      disabled={isUploadingReceipt}
+                      className="w-full py-3 px-4 rounded-xl border border-dashed border-purple-500/40 hover:border-amber-400/60 bg-black/20 hover:bg-purple-950/40 transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer text-slate-300 group"
+                    >
+                      {isUploadingReceipt ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-xs text-amber-300 font-bold">{isFa ? 'در حال اسکن OCR رسید بانکی...' : 'Scanning receipt OCR...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="w-5 h-5 text-purple-400 group-hover:text-amber-400 transition-colors" />
+                          <span className="text-xs font-semibold">{isFa ? 'انتخاب یا رها کردن تصویر فیش واریز' : 'Upload receipt file (PNG, JPG, PDF)'}</span>
+                          <span className="text-[10px] text-slate-500">{isFa ? 'شناسایی خودکار کد پیگیری و مبالغ واریز شده' : 'Auto-extracts transaction ID and amounts'}</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+                      <div className="flex items-center gap-2">
+                        <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <div>
+                          <span className="font-bold block">{receiptFileName}</span>
+                          <span className="text-[10px] text-emerald-400/80">{isFa ? 'رسید معتبر تایید شد • کد رهگیری: ۹۸۲۳۴۵۸۱' : 'Receipt verified • Tx ID: 98234581'}</span>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">
+                        {isFa ? '۱۰۰٪ تطابق' : '100% Match'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Iranian Bank Tracking Code Input */}
                 <div className="space-y-1.5 text-right">
                   <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
@@ -558,7 +685,7 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
                 <button
                   onClick={handleNextStep}
                   disabled={bankTrackingId.trim().length < 4}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-purple-950 font-black text-xs shadow-md shadow-amber-500/30 hover:opacity-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-purple-950 font-black text-xs shadow-md shadow-amber-500/30 hover:opacity-95 transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                   {isFa ? 'تایید واریز و آزادسازی تتر توسط اسکرو' : 'Submit Bank Tx ID & Release Escrow'}
                 </button>
@@ -668,6 +795,45 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
               </div>
             </div>
 
+            {/* Active Dispute Status or Trigger Button */}
+            {disputeTriggered ? (
+              <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-200 space-y-2 mb-4 animate-fade-in font-mono">
+                <div className="flex justify-between items-center text-amber-300 font-sans font-bold">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 animate-spin text-amber-400" />
+                    <span>{isFa ? 'پرونده داوری اضطراری فعال شد' : 'Emergency Arbitration Active'}</span>
+                  </span>
+                  <span>کد: #ARB-9481</span>
+                </div>
+                <div className="flex justify-between text-[11px] font-sans text-slate-300">
+                  <span>{isFa ? 'داور منصوب:' : 'Arbitrator:'}</span>
+                  <span className="text-white font-bold">{isFa ? 'شورای چندامضایی گریفین (۲ از ۳)' : 'Griffin Multi-Sig (2-of-3)'}</span>
+                </div>
+                <div className="flex justify-between text-[11px] font-sans text-slate-300">
+                  <span>{isFa ? 'زمان باقیمانده رسیدگی:' : 'Est. Time:'}</span>
+                  <span className="text-emerald-400 font-bold">۱۲ دقیقه</span>
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-400 pt-1 border-t border-purple-500/20">
+                  <span>هش آن‌چین:</span>
+                  <span>0x8b3f491c...21c9a4</span>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setDisputeTriggered(true);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 hover:opacity-95 text-purple-950 font-black text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>{isFa ? 'ثبت درخواست داوری اضطراری با گریفی 🛡️' : 'Request Emergency Arbitration 🛡️'}</span>
+                </button>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={() => {
@@ -676,7 +842,7 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
               }}
               className="w-full py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
             >
-              {isFa ? 'متوجه شدم (بازگشت به فهرست معامله‌گران)' : 'Understood'}
+              {isFa ? 'بستن پنجره داوری' : 'Close'}
             </button>
           </div>
         </div>
