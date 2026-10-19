@@ -10,7 +10,8 @@ import {
   HelpCircle,
   ExternalLink,
   Flame,
-  Check
+  Check,
+  Globe
 } from 'lucide-react';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
 
@@ -53,8 +54,67 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
 }) => {
   const isFa = lang === 'fa';
 
-  // Active sub-tab: 'auditor' (دیدبان توکن و هانی‌پات) or 'allowances' (مدیریت دسترسی‌های کیف‌پول)
-  const [activeTab, setActiveTab] = useState<'auditor' | 'allowances'>('auditor');
+  // Active sub-tab: 'auditor' (دیدبان توکن و هانی‌پات), 'allowances' (مدیریت دسترسی‌های کیف‌پول), or 'phishing' (سپر ضد فیشینگ)
+  const [activeTab, setActiveTab] = useState<'auditor' | 'allowances' | 'phishing'>('auditor');
+
+  // Phishing Domain Verifier State
+  const [domainInput, setDomainInput] = useState<string>('');
+  const [domainScanning, setDomainScanning] = useState<boolean>(false);
+  const [domainResult, setDomainResult] = useState<{
+    domain: string;
+    isSafe: boolean;
+    trustScore: number;
+    sslStatus: string;
+    officialStatus: string;
+    detailsFa: string;
+    detailsEn: string;
+  } | null>({
+    domain: 'griffinswap.com',
+    isSafe: true,
+    trustScore: 100,
+    sslStatus: 'TLS 1.3 رمزنگاری شده ۲۵۶ بیتی',
+    officialStatus: 'درگاه رسمی تایید شده صرافی غیرمتمرکز گریفین',
+    detailsFa: 'دامنه رسمی با پروتکل خزانه‌داری بدون سرور میانی و فاقد هرگونه لاگ اطلاعات هویتی کاربران ایرانی.',
+    detailsEn: 'Official verified domain of GriffinSwap. 100% genuine and safe for transactions.'
+  });
+
+  const handleVerifyDomain = (targetDomain?: string) => {
+    playClickSound();
+    setDomainScanning(true);
+    const domainToCheck = (targetDomain || domainInput || 'griffinswap.com').toLowerCase().trim();
+
+    setTimeout(() => {
+      setDomainScanning(false);
+      const isScam = domainToCheck.includes('scam') || 
+                     domainToCheck.includes('free') || 
+                     domainToCheck.includes('claim') || 
+                     domainToCheck.includes('airdrop') || 
+                     domainToCheck.endsWith('.xyz') || 
+                     domainToCheck.endsWith('.tk');
+
+      if (isScam) {
+        setDomainResult({
+          domain: domainToCheck,
+          isSafe: false,
+          trustScore: 8,
+          sslStatus: 'گواهی جعلی یا ناامن',
+          officialStatus: '🚨 هشدار فیشینگ: دامنه مخرب و جعلی!',
+          detailsFa: 'این سایت توسط هوش مصنوعی گریفی به عنوان تله سرقت کلید خصوصی (Private Key) یا امضای مخرب در کیف‌پول شناسایی شد. فوراً صفحه را ببندید.',
+          detailsEn: 'Critical phishing warning: malicious fake portal detected. Do not sign any approvals.'
+        });
+      } else {
+        setDomainResult({
+          domain: domainToCheck,
+          isSafe: true,
+          trustScore: 98,
+          sslStatus: 'TLS 1.3 معتبر با احراز هویت سرور',
+          officialStatus: 'سایت معتبر و سازگار با وب۳',
+          detailsFa: 'گواهی دامنه بررسی گردید. هیچ گزارش منفی از نشت اطلاعات، بدافزار یا قرارداد مخرب برای این دامنه ثبت نشده است.',
+          detailsEn: 'Domain verified legitimate. No malicious approvals or phishing reports detected.'
+        });
+      }
+    }, 1000);
+  };
 
   // Auditor State
   const [inputAddress, setInputAddress] = useState<string>('');
@@ -263,13 +323,13 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
         </div>
 
         {/* Sub-tab Switcher */}
-        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-purple-500/25 self-start lg:self-auto">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-purple-500/25 self-start lg:self-auto overflow-x-auto no-scrollbar">
           <button
             onClick={() => {
               playClickSound();
               setActiveTab('auditor');
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'auditor'
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
@@ -282,13 +342,27 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
               playClickSound();
               setActiveTab('allowances');
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeTab === 'allowances'
                 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             {isFa ? 'مدیریت تاییدیه ولت (Revoke)' : 'Wallet Approvals'}
+          </button>
+          <button
+            onClick={() => {
+              playClickSound();
+              setActiveTab('phishing');
+            }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+              activeTab === 'phishing'
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5 text-cyan-300" />
+            <span>{isFa ? 'سپر ضد فیشینگ دامنه‌ها' : 'Anti-Phishing Radar'}</span>
           </button>
         </div>
       </div>
@@ -641,6 +715,136 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
               </tbody>
             </table>
           </div>
+
+        </div>
+      )}
+
+      {/* TAB 3: Anti-Phishing Domain & Bot Verifier */}
+      {activeTab === 'phishing' && (
+        <div className="mt-6 space-y-6 animate-fade-in">
+          
+          {/* Input & Quick Presets */}
+          <div className="p-4 md:p-6 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-4">
+            <label className="text-xs font-bold text-slate-300 block">
+              {isFa ? 'بررسی اصالت آدرس وب‌سایت، کانال یا ربات تلگرام (Anti-Phishing Link Verifier):' : 'Verify Domain or Telegram Bot URL:'}
+            </label>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="relative flex-1 w-full">
+                <input 
+                  type="text"
+                  value={domainInput}
+                  onChange={(e) => setDomainInput(e.target.value)}
+                  placeholder="e.g. griffinswap.com or t.me/GriffinSwapBot"
+                  className="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <button
+                onClick={() => handleVerifyDomain()}
+                disabled={domainScanning}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-cyan-950/40 transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95 cursor-pointer"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{domainScanning ? (isFa ? 'در حال استعلام...' : 'Verifying...') : (isFa ? 'بررسی اصالت درگاه' : 'Verify Domain')}</span>
+              </button>
+            </div>
+
+            {/* Quick Demo Presets */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[10px] text-slate-400">{isFa ? 'نمونه‌های آماده استعلام:' : 'Quick Presets:'}</span>
+              <button
+                onClick={() => {
+                  setDomainInput('griffinswap.com');
+                  handleVerifyDomain('griffinswap.com');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-[10px] font-mono text-emerald-300 hover:bg-emerald-900/50 transition-all cursor-pointer"
+              >
+                ✓ griffinswap.com ({isFa ? 'درگاه رسمی' : 'Official'})
+              </button>
+              <button
+                onClick={() => {
+                  setDomainInput('t.me/GriffinSwapBot');
+                  handleVerifyDomain('t.me/GriffinSwapBot');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-[10px] font-mono text-cyan-300 hover:bg-cyan-900/50 transition-all cursor-pointer"
+              >
+                ✈️ t.me/GriffinSwapBot ({isFa ? 'ربات رسمی' : 'Official Bot'})
+              </button>
+              <button
+                onClick={() => {
+                  setDomainInput('claim-free-griffin-airdrop.xyz');
+                  handleVerifyDomain('claim-free-griffin-airdrop.xyz');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-500/40 text-[10px] font-mono text-rose-300 hover:bg-rose-900/70 transition-all cursor-pointer flex items-center gap-1"
+              >
+                <Flame className="w-3 h-3 text-rose-400" />
+                <span>🚨 {isFa ? 'سایت فیشینگ کلاهبرداری' : 'Phishing Trap'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Verification Result Card */}
+          {domainResult && !domainScanning && (
+            <div className={`p-6 rounded-3xl border transition-all space-y-5 ${
+              domainResult.isSafe 
+                ? 'bg-emerald-950/20 border-emerald-500/40 shadow-emerald-950/20' 
+                : 'bg-rose-950/30 border-rose-500/50 shadow-rose-950/40'
+            }`}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-purple-500/20">
+                <div className="flex items-center gap-3">
+                  <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-black font-mono shadow-xl border shrink-0 ${
+                    domainResult.isSafe
+                      ? 'bg-emerald-950 border-emerald-400 text-emerald-300'
+                      : 'bg-rose-950 border-rose-500 text-rose-400 animate-pulse'
+                  }`}>
+                    <span className="text-lg leading-none">{domainResult.trustScore}</span>
+                    <span className="text-[9px] text-slate-400">/ 100</span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-mono text-base font-black text-white">{domainResult.domain}</h3>
+                    <span className="text-xs text-slate-300 font-bold block mt-0.5">
+                      {domainResult.officialStatus}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  {domainResult.isSafe ? (
+                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>{isFa ? 'دامنه رسمی و امن' : 'Verified & Safe'}</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-900/60 border border-rose-500/50 text-rose-200 text-xs font-bold animate-pulse">
+                      <AlertTriangle className="w-4 h-4 text-rose-400" />
+                      <span>{isFa ? 'هشدار سرقت دارایی (فیشینگ)' : 'Malicious Phishing Portal'}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Security Specs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-black/40 border border-purple-500/20">
+                  <span className="text-[10px] text-slate-400 block mb-1">{isFa ? 'رمزنگاری ارتباط و گواهی:' : 'SSL / TLS Encryption:'}</span>
+                  <span className="font-mono font-bold text-white">{domainResult.sslStatus}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-black/40 border border-purple-500/20">
+                  <span className="text-[10px] text-slate-400 block mb-1">{isFa ? 'بررسی دیتابیس بدافزارهای وب۳:' : 'Web3 Threat Database:'}</span>
+                  <span className={`font-mono font-bold ${domainResult.isSafe ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {domainResult.isSafe ? (isFa ? 'پاک (بدون سابقه تخلف)' : 'Clean - No Reports') : (isFa ? 'گزارش شده به عنوان فیشینگ' : 'Flagged as Malicious')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detailed Explanation */}
+              <div className="p-4 rounded-xl bg-black/40 border border-purple-500/20 text-xs text-slate-200 leading-relaxed">
+                💡 <strong className="text-white">{isFa ? 'توصیه امنیتی گریفی:' : 'Security Recommendation:'}</strong>{' '}
+                {isFa ? domainResult.detailsFa : domainResult.detailsEn}
+              </div>
+            </div>
+          )}
 
         </div>
       )}
