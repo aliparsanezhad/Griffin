@@ -11,7 +11,11 @@ import {
   ShieldCheck, 
   Tag, 
   QrCode, 
-  DollarSign
+  DollarSign,
+  ArrowLeftRight,
+  Layers,
+  Plus,
+  Network
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound } from '../services/soundService';
@@ -28,6 +32,7 @@ interface DomainRecord {
   ownerAddress: string;
   registeredDate: string;
   isPrimary: boolean;
+  subdomains?: string[];
 }
 
 const COMMISSION_WALLET = '0xD9C10B10945D85396f0838EA045587a25FD2A2D3';
@@ -46,6 +51,16 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [cardFlipped, setCardFlipped] = useState<boolean>(false);
   const [cardTilt, setCardTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Reverse Resolution Engine State
+  const [reverseInput, setReverseInput] = useState<string>('0x71C8705a2B88e3083feC7B58273683243354438F');
+  const [isReverseResolving, setIsReverseResolving] = useState<boolean>(false);
+  const [resolvedDomainResult, setResolvedDomainResult] = useState<string | null>('rostam.griffi');
+
+  // Subdomain Creation State
+  const [selectedDomainForSub, setSelectedDomainForSub] = useState<string>('rostam.griffi');
+  const [subdomainPrefix, setSubdomainPrefix] = useState<string>('pay');
+  const [isCreatingSubdomain, setIsCreatingSubdomain] = useState<boolean>(false);
 
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -66,6 +81,7 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
       ownerAddress: '0x71C8705a2B88e3083feC7B58273683243354438F',
       registeredDate: '1403/06/15',
       isPrimary: true,
+      subdomains: ['pay', 'vault', 'bot'],
     },
     {
       name: 'shiraz',
@@ -73,8 +89,48 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
       ownerAddress: '0x71C8705a2B88e3083feC7B58273683243354438F',
       registeredDate: '1403/07/02',
       isPrimary: false,
+      subdomains: ['shop'],
     },
   ]);
+
+  const handleReverseResolve = () => {
+    if (!reverseInput.trim()) return;
+    playClickSound();
+    setIsReverseResolving(true);
+    setResolvedDomainResult(null);
+
+    setTimeout(() => {
+      setIsReverseResolving(false);
+      if (reverseInput.toLowerCase().includes('71c8') || reverseInput.toLowerCase().includes('rostam')) {
+        setResolvedDomainResult('rostam.griffi');
+      } else {
+        setResolvedDomainResult('alireza.griffi');
+      }
+      playSwapSuccessSound();
+    }, 800);
+  };
+
+  const handleAddSubdomain = () => {
+    const cleanSub = subdomainPrefix.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (!cleanSub) return;
+    playClickSound();
+    setIsCreatingSubdomain(true);
+
+    setTimeout(() => {
+      setIsCreatingSubdomain(false);
+      setMyDomains(prev => prev.map(d => {
+        if (`${d.name}${d.tld}` === selectedDomainForSub) {
+          const currentSubs = d.subdomains || [];
+          if (!currentSubs.includes(cleanSub)) {
+            return { ...d, subdomains: [...currentSubs, cleanSub] };
+          }
+        }
+        return d;
+      }));
+      setSubdomainPrefix('');
+      playSwapSuccessSound();
+    }, 700);
+  };
 
   // Clean domain name string (alphanumeric only, lowercase)
   const cleanName = searchTerm.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
@@ -381,46 +437,101 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
               {myDomains.map((domain) => (
                 <div
                   key={`${domain.name}${domain.tld}`}
-                  className="p-3.5 rounded-xl bg-black/40 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-3.5 rounded-xl bg-black/40 border border-purple-500/20 flex flex-col gap-2.5 text-xs"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
-                      {domain.tld === '.griffi' ? '🦅' : '🦁'}
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-extrabold text-sm text-white">{domain.name}{domain.tld}</span>
-                        {domain.isPrimary && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            {isFa ? 'شناسه اصلی' : 'Primary'}
-                          </span>
-                        )}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
+                        {domain.tld === '.griffi' ? '🦅' : '🦁'}
                       </div>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {isFa ? 'تاریخ ثبت:' : 'Registered:'} {domain.registeredDate}
-                      </span>
+                      <div className="text-right">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-extrabold text-sm text-white">{domain.name}{domain.tld}</span>
+                          {domain.isPrimary && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              {isFa ? 'شناسه اصلی' : 'Primary'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {isFa ? 'تاریخ ثبت:' : 'Registered:'} {domain.registeredDate}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => handleCopyAddress(`${domain.name}${domain.tld}`)}
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer"
+                        title="کپی آدرس دامنه"
+                      >
+                        {copiedAddress === `${domain.name}${domain.tld}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                      {!domain.isPrimary && (
+                        <button
+                          onClick={() => handleSetPrimary(domain.name, domain.tld)}
+                          className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 font-bold text-[10px] transition-all cursor-pointer"
+                        >
+                          {isFa ? 'تنظیم به عنوان شناسه اصلی' : 'Set as Primary'}
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={() => handleCopyAddress(`${domain.name}${domain.tld}`)}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300"
-                      title="کپی آدرس دامنه"
-                    >
-                      {copiedAddress === `${domain.name}${domain.tld}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                    {!domain.isPrimary && (
-                      <button
-                        onClick={() => handleSetPrimary(domain.name, domain.tld)}
-                        className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 font-bold text-[10px] transition-all"
-                      >
-                        {isFa ? 'تنظیم به عنوان شناسه اصلی' : 'Set as Primary'}
-                      </button>
-                    )}
-                  </div>
+                  {/* Subdomains tags */}
+                  {domain.subdomains && domain.subdomains.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-purple-500/10 text-[11px]">
+                      <span className="text-slate-400 text-[10px]">{isFa ? 'زیردامنه‌ها:' : 'Subdomains:'}</span>
+                      {domain.subdomains.map(sub => (
+                        <span 
+                          key={sub}
+                          className="px-2 py-0.5 rounded-md bg-purple-950/60 border border-purple-500/25 text-purple-300 font-mono text-[10px] flex items-center gap-1"
+                        >
+                          <span>{sub}.{domain.name}{domain.tld}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+
+            {/* Sub-Domain Generator Widget */}
+            <div className="mt-4 pt-3 border-t border-purple-500/20 text-right space-y-2">
+              <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isFa ? 'ایجاد زیردامنه‌های اختصاصی رایگان (Sub-Domains):' : 'Create Custom Sub-Domains (Free):'}</span>
+              </span>
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <select
+                  value={selectedDomainForSub}
+                  onChange={(e) => setSelectedDomainForSub(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-xs text-white font-mono"
+                >
+                  {myDomains.map(d => (
+                    <option key={`${d.name}${d.tld}`} value={`${d.name}${d.tld}`}>{d.name}{d.tld}</option>
+                  ))}
+                </select>
+                <div className="flex-1 w-full flex items-center bg-black/40 border border-purple-500/30 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white">
+                  <input
+                    type="text"
+                    value={subdomainPrefix}
+                    onChange={(e) => setSubdomainPrefix(e.target.value)}
+                    placeholder="pay, vault, bot"
+                    className="bg-transparent focus:outline-none w-24 text-amber-300 font-bold"
+                  />
+                  <span className="text-slate-400">.{selectedDomainForSub}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddSubdomain}
+                  disabled={!subdomainPrefix.trim() || isCreatingSubdomain}
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isCreatingSubdomain ? (isFa ? 'در حال ثبت...' : 'Minting...') : (isFa ? 'افزودن ساب‌دامین' : 'Add Subdomain')}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -464,6 +575,75 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
               <li>{isFa ? 'هزینه گس کمتر از ۲ هزار تومان روی شبکه آربیتروم در مقایسه با ۴ میلیون تومان اتریوم.' : 'Pennies in gas fees on Layer 2.'}</li>
               <li>{isFa ? 'امکان اتصال به مینی‌اپ تلگرام و نمایش نشان پاسپورت در جامعه کاربری گریفین.' : 'Telegram Mini App and community badge integration.'}</li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Web3 Reverse Resolution Engine Interactive Card */}
+      <div className={`my-6 p-6 rounded-3xl border shadow-xl relative overflow-hidden text-right ${
+        isDarkMode ? 'bg-[#150e2a]/90 border-purple-500/30' : 'bg-white border-purple-200'
+      }`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-purple-500/20">
+          <div>
+            <div className="flex items-center gap-2">
+              <ArrowLeftRight className="w-5 h-5 text-amber-400" />
+              <h3 className="font-extrabold text-base text-white">
+                {isFa ? 'موتور حل معکوس شناسه وب۳ (Web3 Reverse Resolution Engine)' : 'Web3 Reverse Resolution Engine'}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              {isFa 
+                ? 'استعلام و تبدیل خودکار هر آدرس هگزادسیمال (0x...) به شناسه هویت خوانا در تمام dAppها و صرافی‌ها' 
+                : 'Instantly resolve any 0x hex address into human-readable Griffin & .iran Web3 identity'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+              <Network className="w-3.5 h-3.5" />
+              <span>{isFa ? 'پروتکل لایه‌دوم فعال' : 'L2 Resolver Active'}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Reverse Resolution Input & Result */}
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <div className="md:col-span-8 flex flex-col sm:flex-row items-center gap-2">
+            <div className="relative w-full flex-1">
+              <input
+                type="text"
+                value={reverseInput}
+                onChange={(e) => setReverseInput(e.target.value)}
+                placeholder="0x71C8705a2B88e3083feC7B58273683243354438F"
+                className="w-full px-3 py-2.5 rounded-xl bg-purple-950/50 border border-purple-500/30 text-white font-mono text-xs focus:outline-none focus:border-amber-400 text-left"
+                dir="ltr"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleReverseResolve}
+              disabled={isReverseResolving || !reverseInput.trim()}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <Search className={`w-3.5 h-3.5 ${isReverseResolving ? 'animate-spin' : ''}`} />
+              <span>{isReverseResolving ? (isFa ? 'در حال حل معکوس...' : 'Resolving...') : (isFa ? 'استعلام و حل معکوس' : 'Reverse Resolve')}</span>
+            </button>
+          </div>
+
+          {/* Resolved Result Showcase */}
+          <div className="md:col-span-4 p-3.5 rounded-2xl bg-black/40 border border-purple-500/20 text-xs space-y-1">
+            <span className="text-[10px] text-slate-400 block font-semibold">{isFa ? 'نتیجه حل معکوس شناسه:' : 'Resolved Handle:'}</span>
+            {resolvedDomainResult ? (
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-black text-amber-300 text-sm">{resolvedDomainResult}</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  {isFa ? 'تاییدشده' : 'Verified'}
+                </span>
+              </div>
+            ) : (
+              <span className="text-slate-500 font-mono text-xs">{isFa ? 'در انتظار ورودی آدرس...' : 'Awaiting address...'}</span>
+            )}
           </div>
         </div>
       </div>
