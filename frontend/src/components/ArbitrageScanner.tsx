@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -12,7 +12,10 @@ import {
   Coins,
   DollarSign,
   Zap,
-  ArrowRight
+  ArrowRight,
+  RefreshCw,
+  Clock,
+  Layers
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
@@ -46,11 +49,29 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
   onNavigateSwap
 }) => {
   const isFa = lang === 'fa';
-  const [selectedAsset, setSelectedAsset] = useState<'usdt' | 'paxg'>('usdt');
+  const [selectedAsset, setSelectedAsset] = useState<'usdt' | 'paxg' | 'btc' | 'eth'>('usdt');
   const [calcAmount, setCalcAmount] = useState<number>(1000);
   const [copiedWallet, setCopiedWallet] = useState(false);
+  const [secondsToRefresh, setSecondsToRefresh] = useState<number>(8);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsToRefresh(prev => (prev <= 1 ? 8 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleManualRefresh = () => {
+    playClickSound();
+    setIsRefreshing(true);
+    setSecondsToRefresh(8);
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   const paxgBaseToman = Math.round(tomanRate * 2720); // PAXG ~ $2,720
+  const btcBaseToman = Math.round(tomanRate * 68000);
+  const ethBaseToman = Math.round(tomanRate * 3450);
 
   // Live and simulated rates across major Iranian platforms for USDT
   const usdtExchanges: ExchangeRate[] = [
@@ -156,7 +177,93 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
     }
   ];
 
-  const currentExchanges = selectedAsset === 'usdt' ? usdtExchanges : paxgExchanges;
+  // Bitcoin Rates
+  const btcExchanges: ExchangeRate[] = [
+    {
+      id: 'griffin-btc',
+      name: 'گریفین سواپ (WBTC آربیتروم)',
+      nameEn: 'GriffinSwap (WBTC)',
+      buyRate: btcBaseToman,
+      sellRate: btcBaseToman,
+      feePercent: '0.5%',
+      kycRequired: false,
+      status: 'active',
+      logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+      withdrawalFeeUsd: 0.15
+    },
+    {
+      id: 'nobitex-btc',
+      name: 'نوبیتکس (بازار بیت‌کوین/تومان)',
+      nameEn: 'Nobitex BTC/IRT',
+      buyRate: Math.round(btcBaseToman * 1.008),
+      sellRate: Math.round(btcBaseToman * 0.994),
+      feePercent: '۰.۳۵٪',
+      kycRequired: true,
+      status: 'active',
+      logo: 'https://cdn.nobitex.ir/static/img/favicon.ico',
+      withdrawalFeeUsd: 12.00
+    },
+    {
+      id: 'wallex-btc',
+      name: 'والکس (بازار حرفه‌ای BTC)',
+      nameEn: 'Wallex BTC',
+      buyRate: Math.round(btcBaseToman * 1.011),
+      sellRate: Math.round(btcBaseToman * 0.992),
+      feePercent: '۰.۴٪',
+      kycRequired: true,
+      status: 'active',
+      logo: 'https://wallex.ir/favicon.ico',
+      withdrawalFeeUsd: 14.00
+    }
+  ];
+
+  // Ethereum Rates
+  const ethExchanges: ExchangeRate[] = [
+    {
+      id: 'griffin-eth',
+      name: 'گریفین سواپ (WETH آربیتروم)',
+      nameEn: 'GriffinSwap (ETH)',
+      buyRate: ethBaseToman,
+      sellRate: ethBaseToman,
+      feePercent: '0.5%',
+      kycRequired: false,
+      status: 'active',
+      logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
+      withdrawalFeeUsd: 0.08
+    },
+    {
+      id: 'nobitex-eth',
+      name: 'نوبیتکس (ETH/تومان)',
+      nameEn: 'Nobitex ETH',
+      buyRate: Math.round(ethBaseToman * 1.007),
+      sellRate: Math.round(ethBaseToman * 0.993),
+      feePercent: '۰.۳۵٪',
+      kycRequired: true,
+      status: 'active',
+      logo: 'https://cdn.nobitex.ir/static/img/favicon.ico',
+      withdrawalFeeUsd: 4.50
+    },
+    {
+      id: 'wallex-eth',
+      name: 'والکس (ETH/تومان)',
+      nameEn: 'Wallex ETH',
+      buyRate: Math.round(ethBaseToman * 1.009),
+      sellRate: Math.round(ethBaseToman * 0.991),
+      feePercent: '۰.۴٪',
+      kycRequired: true,
+      status: 'active',
+      logo: 'https://wallex.ir/favicon.ico',
+      withdrawalFeeUsd: 5.00
+    }
+  ];
+
+  const currentExchanges = selectedAsset === 'usdt' 
+    ? usdtExchanges 
+    : selectedAsset === 'paxg' 
+      ? paxgExchanges 
+      : selectedAsset === 'btc' 
+        ? btcExchanges 
+        : ethExchanges;
 
   // Best rates
   const lowestBuy = Math.min(...currentExchanges.map(e => e.buyRate));
@@ -172,7 +279,11 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
 
   const estimatedSavingsToman = selectedAsset === 'usdt'
     ? Math.round(calcAmount * 420 + 1.5 * tomanRate)
-    : Math.round(calcAmount * (paxgBaseToman * 0.12));
+    : selectedAsset === 'paxg'
+      ? Math.round(calcAmount * (paxgBaseToman * 0.012 + 10 * tomanRate))
+      : selectedAsset === 'btc'
+        ? Math.round(calcAmount * (btcBaseToman * 0.014 + 14 * tomanRate))
+        : Math.round(calcAmount * (ethBaseToman * 0.012 + 5 * tomanRate));
 
   return (
     <div className={`w-full max-w-6xl mx-auto space-y-6 text-right animate-fade-in ${
@@ -196,7 +307,7 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
                 <span>{isFa ? 'دیدبان آربیتراژ و تحلیل هم‌زمان بازارهای داخلی' : 'Iranian P2P & CEX Arbitrage Radar'}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black text-white drop-shadow">
-                {isFa ? 'رادار قیمت لحظه‌ای تتر و طلای دیجیتال' : 'Live Rate Radar & CEX Arbitrage'}
+                {isFa ? 'رادار قیمت و آربیتراژ تتر، طلا، بیت‌کوین و اتریوم' : 'Live Rate Radar & Multi-Asset CEX Arbitrage'}
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 max-w-xl mt-1">
                 {isFa 
@@ -234,21 +345,21 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b border-purple-500/20">
           
           {/* Asset Selector Switcher */}
-          <div className="inline-flex p-1 rounded-2xl bg-purple-950/60 border border-purple-500/30">
+          <div className="flex flex-wrap items-center p-1 rounded-2xl bg-purple-950/60 border border-purple-500/30 gap-1">
             <button
               onClick={() => {
                 playClickSound();
                 setSelectedAsset('usdt');
                 setCalcAmount(1000);
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedAsset === 'usdt'
                   ? 'bg-purple-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
               <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isFa ? 'تتر (USDT / تومان)' : 'USDT / Toman'}</span>
+              <span>{isFa ? 'تتر (USDT)' : 'USDT'}</span>
             </button>
             <button
               onClick={() => {
@@ -256,29 +367,79 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
                 setSelectedAsset('paxg');
                 setCalcAmount(1);
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedAsset === 'paxg'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
               <Coins className="w-3.5 h-3.5 text-amber-300" />
-              <span>{isFa ? 'طلای دیجیتال (PAXG / سکه)' : 'PAXG Gold vs Coin'}</span>
+              <span>{isFa ? 'طلای دیجیتال (PAXG)' : 'PAXG Gold'}</span>
+            </button>
+            <button
+              onClick={() => {
+                playClickSound();
+                setSelectedAsset('btc');
+                setCalcAmount(0.1);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                selectedAsset === 'btc'
+                  ? 'bg-amber-600 text-white shadow-md font-black'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'بیت‌کوین (BTC)' : 'Bitcoin'}</span>
+            </button>
+            <button
+              onClick={() => {
+                playClickSound();
+                setSelectedAsset('eth');
+                setCalcAmount(1);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                selectedAsset === 'eth'
+                  ? 'bg-indigo-600 text-white shadow-md font-black'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5 text-cyan-300" />
+              <span>{isFa ? 'اتریوم (ETH)' : 'Ethereum'}</span>
             </button>
           </div>
 
-          {/* Spread Highlight Pill */}
-          <div className="p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <TrendingUp className="w-5 h-5" />
+          {/* Controls: Spread & Refresh Timer */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-xs">
+              <Clock className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-[11px] text-slate-400">
+                {isFa ? 'به‌روزرسانی:' : 'Refresh:'}
+              </span>
+              <span className="font-mono font-bold text-amber-300">
+                {isFa ? `${toPersianDigits(secondsToRefresh)}ث` : `${secondsToRefresh}s`}
+              </span>
+              <button
+                onClick={handleManualRefresh}
+                title={isFa ? 'تازه‌سازی نرخ‌ها' : 'Refresh rates'}
+                className="p-1 rounded-lg hover:bg-purple-800/50 text-slate-300 hover:text-white transition-all cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
+              </button>
             </div>
-            <div className="text-right">
-              <span className="text-[11px] text-slate-400 block">
-                {isFa ? 'حداکثر اختلاف نرخ در بازار:' : 'Max Market Spread:'}
-              </span>
-              <span className="text-sm font-bold text-emerald-400 font-mono">
-                {isFa ? `${toPersianDigits(formatToman(spreadToman, false))} تومان` : `${formatToman(spreadToman, false)} Toman`}
-              </span>
+
+            {/* Spread Highlight Pill */}
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30 flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div className="text-right">
+                <span className="text-[11px] text-slate-400 block">
+                  {isFa ? 'حداکثر اختلاف نرخ در بازار:' : 'Max Market Spread:'}
+                </span>
+                <span className="text-sm font-bold text-emerald-400 font-mono">
+                  {isFa ? `${toPersianDigits(formatToman(spreadToman, false))} تومان` : `${formatToman(spreadToman, false)} Toman`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -419,14 +580,23 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
               <Percent className="w-4 h-4 text-amber-400" />
               <span>
                 {isFa 
-                  ? `ماشین‌حساب سود و صرفه‌جویی گریفین‌سواپ (${selectedAsset === 'usdt' ? 'تتر' : 'طلای PAXG'}):` 
+                  ? `ماشین‌حساب سود و صرفه‌جویی گریفین‌سواپ (${
+                      selectedAsset === 'usdt' ? 'تتر' : 
+                      selectedAsset === 'paxg' ? 'طلای PAXG' : 
+                      selectedAsset === 'btc' ? 'بیت‌کوین' : 'اتریوم'
+                    }):` 
                   : 'Fee Savings & Net Profit Calculator:'}
               </span>
             </h4>
 
             {/* Quick Amount Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto">
-              {(selectedAsset === 'usdt' ? [250, 500, 1000, 5000, 10000] : [0.5, 1, 2, 5, 10]).map((preset) => (
+              {(
+                selectedAsset === 'usdt' ? [250, 500, 1000, 5000, 10000] :
+                selectedAsset === 'paxg' ? [0.5, 1, 2, 5, 10] :
+                selectedAsset === 'btc' ? [0.05, 0.1, 0.25, 0.5, 1] :
+                [0.25, 0.5, 1, 2.5, 5]
+              ).map((preset) => (
                 <button
                   key={preset}
                   onClick={() => {
@@ -439,7 +609,7 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
                       : 'bg-purple-900/40 text-purple-300 hover:bg-purple-800/50'
                   }`}
                 >
-                  {preset} {selectedAsset === 'usdt' ? '$' : 'PAXG'}
+                  {preset} {selectedAsset.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -449,7 +619,11 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
             <div>
               <label className="text-[11px] text-slate-400 block mb-1">
                 {isFa 
-                  ? `مبلغ مبادله (${selectedAsset === 'usdt' ? 'تتر' : 'اونس طلای دیجیتال'}):` 
+                  ? `مبلغ مبادله (${
+                      selectedAsset === 'usdt' ? 'تتر' : 
+                      selectedAsset === 'paxg' ? 'اونس طلای PAXG' : 
+                      selectedAsset === 'btc' ? 'واحد BTC' : 'واحد ETH'
+                    }):` 
                   : 'Trade Amount:'}
               </label>
               <input 
