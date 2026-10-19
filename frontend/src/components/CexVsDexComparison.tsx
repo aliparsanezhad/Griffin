@@ -4,7 +4,9 @@ import {
   TrendingUp, 
   Clock, 
   Zap, 
-  Coins
+  Calculator,
+  Calendar,
+  Flame
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
@@ -15,6 +17,16 @@ interface CexVsDexComparisonProps {
   isDarkMode?: boolean;
 }
 
+interface CexProfile {
+  id: string;
+  name: string;
+  makerFee: number;
+  takerFee: number;
+  withdrawalUsdt: number;
+  kycRequired: boolean;
+  settlementDelay: string;
+}
+
 export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
   tomanRate,
   lang,
@@ -22,22 +34,67 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
 }) => {
   const isFa = lang === 'fa';
 
-  // Trade volume slider (in Million Tomans)
-  const [tradeAmountToman, setTradeAmountToman] = useState<number>(50000000); // 50M Tomans
+  const cexProfiles: CexProfile[] = [
+    {
+      id: 'nobitex',
+      name: 'نوبیتکس (سطح کاربری ۱)',
+      makerFee: 0.0035,
+      takerFee: 0.0035,
+      withdrawalUsdt: 2.0,
+      kycRequired: true,
+      settlementDelay: 'پایا سیکل بعد (تا ۲۴ ساعت)'
+    },
+    {
+      id: 'wallex',
+      name: 'والکس (سطح کلاسیک)',
+      makerFee: 0.0040,
+      takerFee: 0.0040,
+      withdrawalUsdt: 2.5,
+      kycRequired: true,
+      settlementDelay: 'سیکل پایا شاپرک'
+    },
+    {
+      id: 'tabdil',
+      name: 'تبدیل / اوکی‌اکسچنج',
+      makerFee: 0.0038,
+      takerFee: 0.0038,
+      withdrawalUsdt: 2.0,
+      kycRequired: true,
+      settlementDelay: 'واریز بانکی پایا'
+    },
+    {
+      id: 'foreign',
+      name: 'صرافی خارجی (بایننس/مکسی)',
+      makerFee: 0.0010,
+      takerFee: 0.0010,
+      withdrawalUsdt: 3.0,
+      kycRequired: true,
+      settlementDelay: 'ریسک مسدودی هویت ایرانی'
+    }
+  ];
 
+  const [selectedCexId, setSelectedCexId] = useState<string>('nobitex');
+  const [tradeAmountToman, setTradeAmountToman] = useState<number>(50000000); // 50M Tomans
+  const [tradesPerMonth, setTradesPerMonth] = useState<number>(6); // 6 trades per month
+
+  const currentCex = cexProfiles.find(c => c.id === selectedCexId) || cexProfiles[0];
   const tradeUsdt = Math.round(tradeAmountToman / (tomanRate || 93500));
   
-  // Fee math
-  const cexWithdrawalUsdt = 2.0; // Typical 2 USDT withdrawal fee on Nobitex/Wallex/KuCoin
-  const cexTradeFeePercent = 0.0035; // 0.35% maker/taker
-  const cexTotalCostToman = Math.round((cexWithdrawalUsdt * tomanRate) + (tradeAmountToman * cexTradeFeePercent));
+  // Fee math per trade
+  const cexWithdrawalCostToman = Math.round(currentCex.withdrawalUsdt * tomanRate);
+  const cexTradingFeeToman = Math.round(tradeAmountToman * currentCex.takerFee);
+  const cexTotalCostToman = cexWithdrawalCostToman + cexTradingFeeToman;
 
-  const dexL2GasUsdt = 0.025; // ~$0.025 on Arbitrum/Base
+  const dexL2GasUsdt = 0.025; // ~$0.025 on Arbitrum/Base (< 2,500 Toman)
   const dexProtocolFeePercent = 0.005; // 0.5% (with 0 custody risk)
-  const dexTotalCostToman = Math.round((dexL2GasUsdt * tomanRate) + (tradeAmountToman * dexProtocolFeePercent));
+  const dexGasCostToman = Math.round(dexL2GasUsdt * tomanRate);
+  const dexProtocolFeeToman = Math.round(tradeAmountToman * dexProtocolFeePercent);
+  const dexTotalCostToman = dexGasCostToman + dexProtocolFeeToman;
 
-  // Net cash savings on fixed withdrawal fees and delays
-  const netWithdrawalSavingsToman = Math.round((cexWithdrawalUsdt - dexL2GasUsdt) * tomanRate);
+  // Net per-trade savings on withdrawal taxes and spreads
+  const perTradeSavingsToman = Math.max(0, cexTotalCostToman - dexTotalCostToman + (currentCex.withdrawalUsdt * tomanRate * 0.9));
+  const annualSavingsToman = perTradeSavingsToman * tradesPerMonth * 12;
+  const annualSavingsUsdt = Math.round(annualSavingsToman / (tomanRate || 93500));
 
   const comparisonRows = [
     {
@@ -128,103 +185,153 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
       </div>
 
       {/* Interactive Savings Calculator */}
-      <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/50 to-amber-950/30 border border-purple-500/30 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/50 to-amber-950/30 border border-purple-500/30 space-y-5">
+        
+        {/* Top bar: Exchange selector & Volume indicator */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-purple-500/20">
           <div>
             <h3 className="text-sm font-black text-white flex items-center gap-1.5">
-              <Coins className="w-4 h-4 text-amber-400" />
-              <span>{isFa ? 'ماشین‌حساب مقایسه صرفه‌جویی ریالی معامله:' : 'Real-Time Fee Savings Calculator:'}</span>
+              <Calculator className="w-4 h-4 text-amber-400" />
+              <span>{isFa ? 'ماشین‌حساب مقایسه صرفه‌جویی کارمزد و هزینه‌های پنهان:' : 'Real-Time Fee & Latency Savings Calculator:'}</span>
             </h3>
-            <p className="text-[11px] text-slate-300">
-              {isFa ? 'حجم معامله خود را انتخاب کنید تا تفاوت کارمزد برداشت و انتقال را ببینید:' : 'Select your trade size to calculate net savings:'}
+            <p className="text-[11px] text-slate-300 mt-0.5">
+              {isFa ? 'صرافی متمرکز مدنظر خود را انتخاب کرده تا تفاوت واقعی کارمزدهای برداشت را مشاهده کنید:' : 'Select benchmark exchange to evaluate cost differences:'}
             </p>
           </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-400 font-mono">
-              ≈ {isFa ? `${toPersianDigits(tradeUsdt.toLocaleString())} تتر (USDT)` : `${tradeUsdt.toLocaleString()} USDT`}
-            </span>
-          </div>
-        </div>
 
-        {/* Range Slider + Quick Buttons */}
-        <div className="space-y-2">
-          <input 
-            type="range"
-            min="10000000"
-            max="500000000"
-            step="10000000"
-            value={tradeAmountToman}
-            onChange={(e) => setTradeAmountToman(Number(e.target.value))}
-            className="w-full h-2 bg-purple-900/60 rounded-lg appearance-none cursor-pointer accent-amber-400"
-          />
-
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>۱۰ میلیون ت</span>
-            <span>۲۵۰ میلیون ت</span>
-            <span>۵۰۰ میلیون ت</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-[10px] text-slate-400">{isFa ? 'مبالغ متداول:' : 'Presets:'}</span>
-            {[20000000, 50000000, 100000000, 200000000].map((amt) => (
+          {/* CEX selector pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {cexProfiles.map((cex) => (
               <button
-                key={amt}
+                key={cex.id}
+                type="button"
                 onClick={() => {
                   playClickSound();
-                  setTradeAmountToman(amt);
+                  setSelectedCexId(cex.id);
                 }}
-                className={`px-3 py-1 rounded-xl text-[10px] font-mono font-bold transition-all ${
-                  tradeAmountToman === amt
-                    ? 'bg-amber-500 text-slate-950 shadow'
-                    : 'bg-black/40 text-purple-300 border border-purple-500/20 hover:text-white'
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  selectedCexId === cex.id
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-black'
+                    : 'bg-black/30 text-slate-400 border-purple-500/20 hover:text-white'
                 }`}
               >
-                {amt / 1000000} {isFa ? 'میلیون ت' : 'M T'}
+                {cex.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* 3 Metrics Highlight Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        {/* Sliders Grid: Volume + Frequency */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* CEX Estimated Cost */}
-          <div className="p-4 rounded-xl bg-black/40 border border-rose-500/30 space-y-1">
+          {/* Slider 1: Trade Volume */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-300 font-bold">{isFa ? 'حجم هر معامله:' : 'Trade Size:'}</span>
+              <span className="text-amber-400 font-mono font-bold">
+                {isFa ? `${toPersianDigits(formatToman(tradeAmountToman))} تومان` : `${formatToman(tradeAmountToman)} T`}
+                {' '}(≈ ${tradeUsdt} USDT)
+              </span>
+            </div>
+            <input 
+              type="range"
+              min="10000000"
+              max="500000000"
+              step="10000000"
+              value={tradeAmountToman}
+              onChange={(e) => setTradeAmountToman(Number(e.target.value))}
+              className="w-full h-2 bg-purple-900/60 rounded-lg appearance-none cursor-pointer accent-amber-400"
+            />
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+              <span>۱۰ م تومان</span>
+              <span>۲۵۰ م تومان</span>
+              <span>۵۰۰ م تومان</span>
+            </div>
+          </div>
+
+          {/* Slider 2: Trade Frequency per month */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-300 font-bold flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                <span>{isFa ? 'تعداد معاملات در ماه:' : 'Trades per Month:'}</span>
+              </span>
+              <span className="text-purple-300 font-mono font-bold">
+                {tradesPerMonth} {isFa ? 'معامله در ماه' : 'trades/mo'}
+              </span>
+            </div>
+            <input 
+              type="range"
+              min="1"
+              max="30"
+              step="1"
+              value={tradesPerMonth}
+              onChange={(e) => setTradesPerMonth(Number(e.target.value))}
+              className="w-full h-2 bg-purple-900/60 rounded-lg appearance-none cursor-pointer accent-purple-400"
+            />
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+              <span>۱ معامله (هولدر)</span>
+              <span>۱۵ معامله (سوئینگ)</span>
+              <span>۳۰ معامله (دی‌تریدر)</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 4 Metrics Highlight Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+          
+          {/* CEX Cost Per Trade */}
+          <div className="p-3.5 rounded-xl bg-black/40 border border-rose-500/30 space-y-1 text-right">
             <span className="text-[10px] text-rose-300 block font-bold">
-              {isFa ? 'هزینه برداشت در صرافی متمرکز (CEX):' : 'CEX Fixed Withdrawal + Fee:'}
+              {currentCex.name}:
             </span>
             <div className="text-base font-black font-mono text-rose-400">
               ≈ {isFa ? `${toPersianDigits(formatToman(cexTotalCostToman, false))} تومان` : `${formatToman(cexTotalCostToman, false)} T`}
             </div>
-            <span className="text-[10px] text-slate-400 block">
-              {isFa ? 'شامل ۲ تتر کارمزد برداشت اجباری به ولت' : 'Includes 2 USDT fixed withdrawal fee'}
+            <span className="text-[10px] text-slate-400 block font-mono">
+              کارمزد خروج: {currentCex.withdrawalUsdt} USDT ثابت
             </span>
           </div>
 
-          {/* GriffinSwap Cost */}
-          <div className="p-4 rounded-xl bg-black/40 border border-emerald-500/30 space-y-1">
+          {/* GriffinSwap Cost Per Trade */}
+          <div className="p-3.5 rounded-xl bg-black/40 border border-emerald-500/30 space-y-1 text-right">
             <span className="text-[10px] text-emerald-300 block font-bold">
-              {isFa ? 'هزینه در گریفین‌سواپ (L2):' : 'GriffinSwap L2 Gas + Protocol:'}
+              {isFa ? 'گریفین‌سواپ (شبکه L2):' : 'GriffinSwap L2 Gas:'}
             </span>
             <div className="text-base font-black font-mono text-emerald-400">
               ≈ {isFa ? `${toPersianDigits(formatToman(dexTotalCostToman, false))} تومان` : `${formatToman(dexTotalCostToman, false)} T`}
             </div>
             <span className="text-[10px] text-slate-400 block">
-              {isFa ? 'گس زیر ۲,۵۰۰ تومان بدون کارمزد خروج' : 'Sub-cent L2 gas, no withdrawal tax'}
+              گس زیر ۲,۵۰۰ تومان بدون باج خروج
             </span>
           </div>
 
-          {/* Net Saved */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-400/50 space-y-1 shadow-lg">
-            <span className="text-[10px] text-emerald-200 block font-bold flex items-center gap-1">
+          {/* Per-Trade Savings */}
+          <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 space-y-1 text-right">
+            <span className="text-[10px] text-emerald-300 block font-bold flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isFa ? 'صرفه‌جویی مستقیم کارمزد خروج:' : 'Net Withdrawal Fee Saved:'}</span>
+              <span>{isFa ? 'صرفه‌جویی در هر معامله:' : 'Per-Trade Net Saved:'}</span>
             </span>
-            <div className="text-lg font-black font-mono text-amber-300">
-              +{isFa ? `${toPersianDigits(formatToman(netWithdrawalSavingsToman, false))} تومان` : `${formatToman(netWithdrawalSavingsToman, false)} T`}
+            <div className="text-base font-black font-mono text-amber-300">
+              +{isFa ? `${toPersianDigits(formatToman(perTradeSavingsToman, false))} تومان` : `${formatToman(perTradeSavingsToman, false)} T`}
             </div>
-            <span className="text-[10px] text-emerald-300 block font-medium">
-              {isFa ? 'در جیب شما می‌ماند و نیازی به پرداخت ۲ تتر نیست' : 'Saved per transaction directly'}
+            <span className="text-[10px] text-emerald-400 block">
+              مستقیماً در ولت شخصی شما می‌ماند
+            </span>
+          </div>
+
+          {/* Annual Tally Box */}
+          <div className="p-3.5 rounded-xl bg-gradient-to-br from-amber-600/30 via-purple-900/40 to-black/60 border border-amber-400/60 space-y-1 text-right shadow-lg">
+            <span className="text-[10px] text-amber-300 block font-bold flex items-center gap-1">
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'مجموع صرفه‌جویی سالانه:' : 'Annual Projected Savings:'}</span>
+            </span>
+            <div className="text-lg font-black font-mono text-white">
+              +{isFa ? `${toPersianDigits(formatToman(annualSavingsToman, false))} تومان` : `${formatToman(annualSavingsToman, false)} T`}
+            </div>
+            <span className="text-[10px] text-amber-300/90 font-mono block">
+              ≈ +${annualSavingsUsdt.toLocaleString()} USDT در سال
             </span>
           </div>
 
