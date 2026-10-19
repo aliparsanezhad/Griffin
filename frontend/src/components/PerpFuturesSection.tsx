@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Sliders, 
   AlertTriangle, 
@@ -14,7 +14,9 @@ import {
   ArrowDownRight,
   Share2,
   X,
-  Sparkles
+  Sparkles,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound, playSwapSuccessSound, playFuturesLeverageTick } from '../services/soundService';
@@ -102,6 +104,75 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
       openedAt: '1403/07/21 11:10',
     },
   ]);
+
+  // Right Column Sub-Navigation: 'positions' | 'orderbook' | 'trades'
+  const [rightTab, setRightTab] = useState<'positions' | 'orderbook' | 'trades'>('positions');
+
+  // Simulated Live Recent Trades
+  interface MarketTrade {
+    id: string;
+    side: 'buy' | 'sell';
+    price: number;
+    amount: number;
+    totalUsd: number;
+    time: string;
+  }
+
+  const [recentTrades, setRecentTrades] = useState<MarketTrade[]>([
+    { id: 'tr-1', side: 'buy', price: selectedPair.price * 1.0002, amount: 0.45, totalUsd: Math.round(selectedPair.price * 0.45), time: 'هم‌اکنون' },
+    { id: 'tr-2', side: 'sell', price: selectedPair.price * 0.9998, amount: 1.20, totalUsd: Math.round(selectedPair.price * 1.20), time: '۳ ثانیه پیش' },
+    { id: 'tr-3', side: 'buy', price: selectedPair.price * 1.0005, amount: 0.88, totalUsd: Math.round(selectedPair.price * 0.88), time: '۷ ثانیه پیش' },
+    { id: 'tr-4', side: 'buy', price: selectedPair.price * 1.0001, amount: 2.15, totalUsd: Math.round(selectedPair.price * 2.15), time: '۱۲ ثانیه پیش' },
+    { id: 'tr-5', side: 'sell', price: selectedPair.price * 0.9995, amount: 0.32, totalUsd: Math.round(selectedPair.price * 0.32), time: '۱۸ ثانیه پیش' }
+  ]);
+
+  // Periodic new trade simulator
+  useEffect(() => {
+    const tradeInterval = setInterval(() => {
+      const isBuy = Math.random() > 0.45;
+      const priceOffset = (Math.random() - 0.48) * (selectedPair.price * 0.0015);
+      const tradePrice = Number((selectedPair.price + priceOffset).toFixed(2));
+      const amount = Number((Math.random() * (selectedPair.price > 1000 ? 1.5 : 25) + 0.05).toFixed(3));
+      const totalUsd = Math.round(tradePrice * amount);
+
+      const newTrade: MarketTrade = {
+        id: `tr-${Date.now()}`,
+        side: isBuy ? 'buy' : 'sell',
+        price: tradePrice,
+        amount,
+        totalUsd,
+        time: 'هم‌اکنون'
+      };
+
+      setRecentTrades(prev => [newTrade, ...prev.slice(0, 9)]);
+    }, 2800);
+
+    return () => clearInterval(tradeInterval);
+  }, [selectedPair]);
+
+  // Dynamic Order Book generator
+  const orderBookData = useMemo(() => {
+    const baseP = selectedPair.price;
+    const step = baseP > 1000 ? 6 : baseP > 50 ? 0.25 : 0.005;
+
+    const asks = [
+      { price: baseP + step * 5, size: (0.95 + Math.random() * 0.4).toFixed(3), total: (4.8 + Math.random()).toFixed(3), depth: 95 },
+      { price: baseP + step * 4, size: (0.75 + Math.random() * 0.3).toFixed(3), total: (3.8 + Math.random()).toFixed(3), depth: 78 },
+      { price: baseP + step * 3, size: (1.20 + Math.random() * 0.5).toFixed(3), total: (3.1 + Math.random()).toFixed(3), depth: 62 },
+      { price: baseP + step * 2, size: (0.65 + Math.random() * 0.2).toFixed(3), total: (1.9 + Math.random()).toFixed(3), depth: 40 },
+      { price: baseP + step * 1, size: (1.25 + Math.random() * 0.4).toFixed(3), total: (1.25).toFixed(3), depth: 22 },
+    ];
+
+    const bids = [
+      { price: baseP - step * 1, size: (1.10 + Math.random() * 0.3).toFixed(3), total: (1.10).toFixed(3), depth: 24 },
+      { price: baseP - step * 2, size: (0.85 + Math.random() * 0.4).toFixed(3), total: (1.95).toFixed(3), depth: 42 },
+      { price: baseP - step * 3, size: (1.45 + Math.random() * 0.5).toFixed(3), total: (3.40).toFixed(3), depth: 65 },
+      { price: baseP - step * 4, size: (0.70 + Math.random() * 0.3).toFixed(3), total: (4.10).toFixed(3), depth: 80 },
+      { price: baseP - step * 5, size: (1.60 + Math.random() * 0.6).toFixed(3), total: (5.70).toFixed(3), depth: 100 },
+    ];
+
+    return { asks, bids, spread: (step * 2).toFixed(2) };
+  }, [selectedPair]);
 
   // Dynamic countdown simulator
   useEffect(() => {
@@ -597,145 +668,334 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
           </button>
         </div>
 
-        {/* Right: Active Positions & Educational Cockpit (7 Cols) */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Right: Active Positions, Order Book & Recent Trades Cockpit (7 Cols) */}
+        <div className="lg:col-span-7 space-y-5">
           
-          {/* Active Open Positions List */}
-          <div className={`p-5 rounded-2xl border ${
-            isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
-          }`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-purple-400" />
-                <h3 className="font-black text-sm text-white">
-                  {isFa ? 'پوزیشن‌های فعال زنجیره‌ای شما' : 'Active On-Chain Positions'}
-                </h3>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 font-bold">
-                {positions.length} {isFa ? 'پوزیشن باز' : 'Open'}
-              </span>
-            </div>
+          {/* Sub-Navigation Tabs */}
+          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/40 border border-purple-500/25">
+            <button
+              onClick={() => {
+                playClickSound();
+                setRightTab('positions');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                rightTab === 'positions'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{isFa ? `پوزیشن‌های باز (${positions.length})` : `Open Positions (${positions.length})`}</span>
+            </button>
 
-            {/* Closed Position Settlement Confirmation Toast */}
-            {closedPositionToast && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between animate-fade-in shadow-lg">
+            <button
+              onClick={() => {
+                playClickSound();
+                setRightTab('orderbook');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                rightTab === 'orderbook'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{isFa ? 'دفتر سفارشات زنده (Depth)' : 'Order Book Depth'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                playClickSound();
+                setRightTab('trades');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                rightTab === 'trades'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <span>{isFa ? 'معاملات زنده بازار' : 'Market Trades'}</span>
+            </button>
+          </div>
+
+          {/* TAB 1: Active Open Positions */}
+          {rightTab === 'positions' && (
+            <div className={`p-5 rounded-2xl border animate-fade-in ${
+              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
+            }`}>
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {isFa 
-                      ? `پوزیشن ${closedPositionToast.symbol} با موفقیت بسته شد. سود و اصل مارجین به کیف‌پول شما تسویه گردید.` 
-                      : `Position ${closedPositionToast.symbol} closed. P&L settled to self-custody wallet.`}
-                  </span>
+                  <ShieldCheck className="w-5 h-5 text-purple-400" />
+                  <h3 className="font-black text-sm text-white">
+                    {isFa ? 'پوزیشن‌های فعال زنجیره‌ای شما' : 'Active On-Chain Positions'}
+                  </h3>
                 </div>
-                <span dir="ltr" className={`font-mono font-bold shrink-0 ${closedPositionToast.pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {closedPositionToast.pnlUsd >= 0 ? `+${closedPositionToast.pnlUsd.toFixed(2)}` : closedPositionToast.pnlUsd.toFixed(2)} USD
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 font-bold">
+                  {positions.length} {isFa ? 'پوزیشن باز' : 'Open'}
                 </span>
               </div>
-            )}
 
-            {positions.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-xs">
-                {isFa ? 'در حال حاضر هیچ پوزیشن فعالی ندارید.' : 'No active positions.'}
+              {/* Closed Position Settlement Confirmation Toast */}
+              {closedPositionToast && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between animate-fade-in shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>
+                      {isFa 
+                        ? `پوزیشن ${closedPositionToast.symbol} با موفقیت بسته شد. سود و اصل مارجین به کیف‌پول شما تسویه گردید.` 
+                        : `Position ${closedPositionToast.symbol} closed. P&L settled to self-custody wallet.`}
+                    </span>
+                  </div>
+                  <span dir="ltr" className={`font-mono font-bold shrink-0 ${closedPositionToast.pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {closedPositionToast.pnlUsd >= 0 ? `+${closedPositionToast.pnlUsd.toFixed(2)}` : closedPositionToast.pnlUsd.toFixed(2)} USD
+                  </span>
+                </div>
+              )}
+
+              {positions.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-xs">
+                  {isFa ? 'در حال حاضر هیچ پوزیشن فعالی ندارید.' : 'No active positions.'}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {positions.map((pos) => {
+                    const currentPair = FUTURES_PAIRS.find(p => p.id === pos.pairId) || selectedPair;
+                    const priceDiff = pos.side === 'long'
+                      ? (currentPair.price - pos.entryPrice)
+                      : (pos.entryPrice - currentPair.price);
+                    const pnlPercent = (priceDiff / pos.entryPrice) * pos.leverage * 100;
+                    const pnlUsd = (pos.marginUsd * pnlPercent) / 100;
+                    const pnlToman = usdToToman(pnlUsd, tomanRate);
+
+                    return (
+                      <div 
+                        key={pos.id}
+                        className={`p-4 rounded-xl border text-right space-y-3 text-xs ${
+                          isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200 shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                              pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 border border-rose-500/30'
+                            }`}>
+                              {pos.side.toUpperCase()} {pos.leverage}x
+                            </span>
+                            <span className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{pos.symbol}</span>
+                            <span className={`text-[10px] font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>({pos.openedAt})</span>
+                          </div>
+
+                          {/* PnL Display with BiDi LTR fix */}
+                          <div className="text-left font-mono">
+                            <span dir="ltr" className={`text-sm font-black inline-block ${pnlUsd >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              {pnlUsd >= 0 ? `+${pnlUsd.toFixed(2)}` : pnlUsd.toFixed(2)} USD ({pnlPercent >= 0 ? `+${pnlPercent.toFixed(1)}%` : `${pnlPercent.toFixed(1)}%`})
+                            </span>
+                            <span className={`block text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                              {isFa ? toPersianDigits(formatToman(pnlToman)) : formatToman(pnlToman)} ت
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Specs Grid */}
+                        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono ${
+                          isDarkMode ? 'text-slate-300' : 'text-slate-700'
+                        }`}>
+                          <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                            <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'قیمت ورود' : 'Entry Price'}</span>
+                            <span>${pos.entryPrice.toLocaleString()}</span>
+                          </div>
+                          <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                            <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'مارجین' : 'Margin'}</span>
+                            <span>${pos.marginUsd}</span>
+                          </div>
+                          <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
+                            <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'حجم کل' : 'Size'}</span>
+                            <span>${pos.sizeUsd.toLocaleString()}</span>
+                          </div>
+                          <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                            <span className="block text-[9px]">{isFa ? 'قیمت لیکوئید' : 'Liq. Price'}</span>
+                            <span>${Math.round(pos.liquidationPrice).toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playClickSound();
+                              setSharingPosition({
+                                pos,
+                                currentPair,
+                                pnlPercent,
+                                pnlUsd,
+                                pnlToman,
+                              });
+                            }}
+                            className="px-3 py-1.5 rounded-xl border font-bold text-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>{isFa ? 'کارت اشتراک سود 📸' : 'Share PnL 📸'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleClosePosition(pos.id, pos.symbol, pnlUsd)}
+                            className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
+                              isDarkMode 
+                                ? 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-500/30' 
+                                : 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                            }`}
+                          >
+                            {isFa ? 'بستن پوزیشن و تسویه' : 'Close Position'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: Dynamic Live Order Book Depth */}
+          {rightTab === 'orderbook' && (
+            <div className={`p-5 rounded-2xl border animate-fade-in ${
+              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
+            }`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-purple-400" />
+                  <h3 className="font-black text-sm text-white">
+                    {isFa ? `دفترچه سفارشات زنده ${selectedPair.symbol}` : `Live Order Book (${selectedPair.symbol})`}
+                  </h3>
+                </div>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Spread: ${orderBookData.spread}
+                </span>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {positions.map((pos) => {
-                  const currentPair = FUTURES_PAIRS.find(p => p.id === pos.pairId) || selectedPair;
-                  const priceDiff = pos.side === 'long'
-                    ? (currentPair.price - pos.entryPrice)
-                    : (pos.entryPrice - currentPair.price);
-                  const pnlPercent = (priceDiff / pos.entryPrice) * pos.leverage * 100;
-                  const pnlUsd = (pos.marginUsd * pnlPercent) / 100;
-                  const pnlToman = usdToToman(pnlUsd, tomanRate);
 
-                  return (
+              {/* Table Headers */}
+              <div className="grid grid-cols-3 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono">
+                <span className="text-right">{isFa ? 'قیمت (USD)' : 'Price (USD)'}</span>
+                <span className="text-center">{isFa ? 'حجم' : 'Size'}</span>
+                <span className="text-left">{isFa ? 'عمق تجمیعی' : 'Cumulative'}</span>
+              </div>
+
+              {/* Asks (Sell Orders - Red) */}
+              <div className="space-y-1">
+                {orderBookData.asks.map((ask, idx) => (
+                  <div
+                    key={`ask-${idx}`}
+                    onClick={() => {
+                      playClickSound();
+                      setTakeProfitPrice(ask.price.toFixed(2));
+                    }}
+                    className="relative grid grid-cols-3 text-xs font-mono py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
+                  >
                     <div 
-                      key={pos.id}
-                      className={`p-4 rounded-xl border text-right space-y-3 text-xs ${
-                        isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200 shadow-sm'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                            pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 border border-rose-500/30'
-                          }`}>
-                            {pos.side.toUpperCase()} {pos.leverage}x
-                          </span>
-                          <span className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{pos.symbol}</span>
-                          <span className={`text-[10px] font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>({pos.openedAt})</span>
-                        </div>
-
-                        {/* PnL Display with BiDi LTR fix */}
-                        <div className="text-left font-mono">
-                          <span dir="ltr" className={`text-sm font-black inline-block ${pnlUsd >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                            {pnlUsd >= 0 ? `+${pnlUsd.toFixed(2)}` : pnlUsd.toFixed(2)} USD ({pnlPercent >= 0 ? `+${pnlPercent.toFixed(1)}%` : `${pnlPercent.toFixed(1)}%`})
-                          </span>
-                          <span className={`block text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                            {isFa ? toPersianDigits(formatToman(pnlToman)) : formatToman(pnlToman)} ت
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Specs Grid */}
-                      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
-                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
-                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'قیمت ورود' : 'Entry Price'}</span>
-                          <span>${pos.entryPrice.toLocaleString()}</span>
-                        </div>
-                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
-                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'مارجین' : 'Margin'}</span>
-                          <span>${pos.marginUsd}</span>
-                        </div>
-                        <div className={`p-1.5 rounded-lg ${isDarkMode ? 'bg-white/5' : 'bg-purple-50/70 border border-purple-100'}`}>
-                          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 block text-[9px]'}>{isFa ? 'حجم کل' : 'Size'}</span>
-                          <span>${pos.sizeUsd.toLocaleString()}</span>
-                        </div>
-                        <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
-                          <span className="block text-[9px]">{isFa ? 'قیمت لیکوئید' : 'Liq. Price'}</span>
-                          <span>${Math.round(pos.liquidationPrice).toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="flex justify-end gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            playClickSound();
-                            setSharingPosition({
-                              pos,
-                              currentPair,
-                              pnlPercent,
-                              pnlUsd,
-                              pnlToman,
-                            });
-                          }}
-                          className="px-3 py-1.5 rounded-xl border font-bold text-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>{isFa ? 'کارت اشتراک سود 📸' : 'Share PnL 📸'}</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleClosePosition(pos.id, pos.symbol, pnlUsd)}
-                          className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
-                            isDarkMode 
-                              ? 'bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-500/30' 
-                              : 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
-                          }`}
-                        >
-                          {isFa ? 'بستن پوزیشن و تسویه' : 'Close Position'}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                      className="absolute inset-y-0 right-0 bg-rose-500/15 rounded pointer-events-none"
+                      style={{ width: `${ask.depth}%` }}
+                    />
+                    <span className="text-right text-rose-400 font-bold z-10">${ask.price.toLocaleString()}</span>
+                    <span className="text-center text-slate-300 z-10">{ask.size}</span>
+                    <span className="text-left text-slate-400 z-10">{ask.total}</span>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+
+              {/* Middle: Live Mark Price Indicator */}
+              <div className="my-2.5 py-2 px-3 rounded-xl bg-black/60 border border-purple-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono font-black text-sm text-emerald-400">
+                    ${selectedPair.price.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-slate-400">Mark Price</span>
+                </div>
+                <span className="text-[11px] font-mono text-purple-300">
+                  {isFa ? toPersianDigits(formatToman(usdToToman(selectedPair.price, tomanRate))) : formatToman(usdToToman(selectedPair.price, tomanRate))} ت
+                </span>
+              </div>
+
+              {/* Bids (Buy Orders - Green) */}
+              <div className="space-y-1">
+                {orderBookData.bids.map((bid, idx) => (
+                  <div
+                    key={`bid-${idx}`}
+                    onClick={() => {
+                      playClickSound();
+                      setStopLossPrice(bid.price.toFixed(2));
+                    }}
+                    className="relative grid grid-cols-3 text-xs font-mono py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
+                  >
+                    <div 
+                      className="absolute inset-y-0 right-0 bg-emerald-500/15 rounded pointer-events-none"
+                      style={{ width: `${bid.depth}%` }}
+                    />
+                    <span className="text-right text-emerald-400 font-bold z-10">${bid.price.toLocaleString()}</span>
+                    <span className="text-center text-slate-300 z-10">{bid.size}</span>
+                    <span className="text-left text-slate-400 z-10">{bid.total}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 pt-2 border-t border-purple-500/15 text-[10px] text-slate-400 text-right">
+                💡 {isFa ? 'کلیک روی هر سطح قیمت، آن را به عنوان تارگت در فرم معامله تنظیم می‌کند.' : 'Clicking any price level fills it into the order form.'}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: Live Recent Market Trades Tape */}
+          {rightTab === 'trades' && (
+            <div className={`p-5 rounded-2xl border animate-fade-in ${
+              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
+            }`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                  <h3 className="font-black text-sm text-white">
+                    {isFa ? `جریان لحظه‌ای معاملات بازار (${selectedPair.symbol})` : `Real-Time Market Trades (${selectedPair.symbol})`}
+                  </h3>
+                </div>
+                <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  Live Feed
+                </span>
+              </div>
+
+              {/* Table Headers */}
+              <div className="grid grid-cols-4 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono">
+                <span className="text-right">{isFa ? 'قیمت' : 'Price'}</span>
+                <span className="text-center">{isFa ? 'حجم' : 'Amount'}</span>
+                <span className="text-center">{isFa ? 'ارزش (تومان)' : 'Value (IRT)'}</span>
+                <span className="text-left">{isFa ? 'زمان' : 'Time'}</span>
+              </div>
+
+              {/* Trades Stream Rows */}
+              <div className="space-y-1.5 max-h-[340px] overflow-y-auto no-scrollbar">
+                {recentTrades.map((tr) => (
+                  <div 
+                    key={tr.id}
+                    className="grid grid-cols-4 text-xs font-mono py-1.5 px-2 rounded-xl bg-black/30 border border-purple-500/10 items-center hover:bg-black/50 transition-colors"
+                  >
+                    <span className={`text-right font-bold ${tr.side === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      ${tr.price.toLocaleString()}
+                    </span>
+                    <span className="text-center text-slate-300">
+                      {tr.amount}
+                    </span>
+                    <span className="text-center text-purple-300 text-[11px]">
+                      {isFa ? toPersianDigits(formatToman(usdToToman(tr.totalUsd, tomanRate))) : formatToman(usdToToman(tr.totalUsd, tomanRate))} ت
+                    </span>
+                    <span className="text-left text-slate-400 text-[10px]">
+                      {tr.time}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Persian Web3 Advantage FAQ Card */}
           <div className={`p-5 rounded-2xl border text-right space-y-2.5 ${
