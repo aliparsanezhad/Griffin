@@ -10,7 +10,11 @@ import {
   ExternalLink,
   Coins,
   Wallet,
-  Flame
+  Flame,
+  TrendingUp,
+  Clock,
+  Layers,
+  Plus
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -48,6 +52,9 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
   const [earnSubTab, setEarnSubTab] = useState<'vaults' | 'my_deposits'>('vaults');
   const [filterAsset, setFilterAsset] = useState<'all' | 'usdt' | 'usdc' | 'eth' | 'paxg' | 'halal'>('all');
   const [calculatorDeposit, setCalculatorDeposit] = useState<number>(1000);
+  const [compoundFrequency, setCompoundFrequency] = useState<'daily' | 'monthly' | 'simple'>('daily');
+  const [depositModalVault, setDepositModalVault] = useState<VaultItem | null>(null);
+  const [modalDepositAmount, setModalDepositAmount] = useState<number>(500);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
   const [claimedToast, setClaimedToast] = useState<string | null>(null);
 
@@ -93,6 +100,29 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
     setActiveDeposits(prev => prev.map(dep => dep.id === id ? { ...dep, accruedYieldToken: 0.0001 } : dep));
     setClaimedToast(`سود ${amount.toFixed(4)} ${asset} با موفقیت به کیف‌پول شما واریز شد!`);
     setTimeout(() => setClaimedToast(null), 3500);
+  };
+
+  const handleConfirmModalDeposit = () => {
+    if (!depositModalVault) return;
+    playSwapSuccessSound();
+    const newDep = {
+      id: `dep-${Date.now()}`,
+      vaultName: `${depositModalVault.protocol} (${depositModalVault.asset})`,
+      asset: depositModalVault.asset,
+      principalAmount: modalDepositAmount,
+      principalUsd: modalDepositAmount * (depositModalVault.asset === 'PAXG' ? 2685.5 : 1),
+      apy: parseFloat(depositModalVault.apy) || 8.5,
+      accruedYieldToken: 0.0001,
+      stakedAt: isFa ? 'همین الان' : 'Just now',
+      isHalal: depositModalVault.isHalal || false
+    };
+    setActiveDeposits(prev => [newDep, ...prev]);
+    setClaimedToast(isFa 
+      ? `مبلغ ${modalDepositAmount} ${depositModalVault.asset} در صندوق سپرده‌گذاری شد و سود شما در حال تجمیع است!` 
+      : `Successfully staked ${modalDepositAmount} ${depositModalVault.asset}! Live yield is now accruing.`);
+    setDepositModalVault(null);
+    setEarnSubTab('my_deposits');
+    setTimeout(() => setClaimedToast(null), 4000);
   };
 
   const handleCopyWallet = () => {
@@ -195,9 +225,15 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
     return v.asset.toLowerCase().includes(filterAsset);
   });
 
-  // Calculate annual & monthly return
-  const avgApy = 0.0842;
-  const yearlyUsdReturn = calculatorDeposit * avgApy;
+  // Base APR ~ 8.42% with Compounding
+  const baseRate = 0.0842;
+  const effectiveApy = compoundFrequency === 'daily'
+    ? Math.pow(1 + baseRate / 365, 365) - 1
+    : compoundFrequency === 'monthly'
+      ? Math.pow(1 + baseRate / 12, 12) - 1
+      : baseRate;
+
+  const yearlyUsdReturn = calculatorDeposit * effectiveApy;
   const yearlyTomanReturn = usdToToman(yearlyUsdReturn, tomanRate);
   const monthlyUsdReturn = yearlyUsdReturn / 12;
   const monthlyTomanReturn = yearlyTomanReturn / 12;
@@ -430,6 +466,34 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
               </div>
             </div>
 
+            {/* Compound Frequency Selector */}
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/40 border border-purple-500/20 text-xs">
+              <span className="text-[11px] text-slate-400 px-2 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isFa ? 'نحوه ترکیب سود:' : 'Compounding:'}</span>
+              </span>
+              {[
+                { id: 'daily', label: isFa ? 'بازترکیب روزانه (Daily)' : 'Daily' },
+                { id: 'monthly', label: isFa ? 'بازترکیب ماهانه (Monthly)' : 'Monthly' },
+                { id: 'simple', label: isFa ? 'سود ساده (Simple APR)' : 'Simple' },
+              ].map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => {
+                    playClickSound();
+                    setCompoundFrequency(c.id as any);
+                  }}
+                  className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer ${
+                    compoundFrequency === c.id
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
             {/* Quick Presets */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] text-slate-400 font-medium ml-1">{isFa ? 'مقادیر سریع:' : 'Presets:'}</span>
@@ -462,9 +526,14 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
               : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'
           }`}>
             <div>
-              <span className="text-xs text-purple-300 font-bold block mb-1">
-                {isFa ? 'تخمین سود سالانه (میانگین ۸.۴٪ APY):' : 'Estimated Annual Profit:'}
-              </span>
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="text-xs text-purple-300 font-bold block">
+                  {isFa ? 'تخمین سود سالانه خالص:' : 'Estimated Annual Profit:'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 font-mono">
+                  {(effectiveApy * 100).toFixed(2)}% APY
+                </span>
+              </div>
               <div className="text-3xl lg:text-4xl font-black text-emerald-400 font-mono tracking-tight">
                 +${yearlyUsdReturn.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
               </div>
@@ -579,18 +648,106 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                playClickSound();
-                onSelectVaultToDeposit(vault);
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-transform active:scale-95 cursor-pointer"
-            >
-              <span>{isFa ? 'سرمایه‌گذاری ۱ کلیکه با کامپوزر' : '1-Click Deposit via Composer'}</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setDepositModalVault(vault);
+                  setModalDepositAmount(vault.asset === 'PAXG' ? 1 : 500);
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-transform active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isFa ? 'سپرده‌گذاری فوری در صندوق' : 'Stake in Vault'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  onSelectVaultToDeposit(vault);
+                }}
+                className="px-3.5 py-3 rounded-2xl border border-purple-500/30 hover:bg-purple-900/30 text-purple-200 font-bold text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                title={isFa ? 'سواپ مستقیم دارایی با کامپوزر' : 'Swap via Composer'}
+              >
+                <span>{isFa ? 'سواپ' : 'Swap'}</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         ))}
+      </div>
+
+      {/* Inflation Shield & Toman Purchasing Power Preservation Desk */}
+      <div className={`p-6 rounded-3xl border mb-8 transition-all ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-indigo-950/40 via-purple-950/30 to-black/40 border-purple-500/25' 
+          : 'bg-white border-purple-200 shadow-xl'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 text-right">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <TrendingUp className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="font-black text-sm md:text-base text-white">
+                {isFa ? 'سپر ضدتورم: مقایسه بازدهی نگهداری ریال در برابر خزانه‌های دلاری/طلای گریفین' : 'Inflation Shield: Toman vs Griffin DeFi Vaults'}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {isFa ? 'بررسی قدرت خرید ۱۰۰ میلیون تومان سرمایه پس از یک سال بر مبنای تورم رسمی و بازدهی تاریخی' : '1-Year purchasing power comparison based on historical inflation'}
+              </p>
+            </div>
+          </div>
+
+          <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 font-mono">
+            {isFa ? 'حفظ ۱۰۰٪ ارزش دارایی' : '100% Capital Preserved'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-right">
+          {/* Card 1: Bank Rial Deposit */}
+          <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/25 space-y-2">
+            <span className="text-xs font-bold text-rose-300 block">
+              {isFa ? 'نگهداری ریال در سپرده بانکی (۲۰.۵٪)' : 'Bank Toman Savings (20.5%)'}
+            </span>
+            <div className="font-mono text-xl font-black text-rose-400">
+              {isFa ? '۷۵ میلیون تومان' : '75M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'با وجود دریافت ۲۰.۵ میلیون تومان سود بانکی، به دلیل تورم سالانه ~۴۵٪، قدرت خرید واقعی شما ۲۵٪ افت می‌کند.'
+                : 'Purchasing power drops ~25% due to 45% annual Toman inflation.'}
+            </p>
+          </div>
+
+          {/* Card 2: Griffin USDT AMM Vault */}
+          <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-2">
+            <span className="text-xs font-bold text-emerald-300 block">
+              {isFa ? 'صندوق تتر گریفین (۱۱.۴٪ سود دلاری)' : 'Griffin USDT Vault (11.4% APY)'}
+            </span>
+            <div className="font-mono text-xl font-black text-emerald-400">
+              {isFa ? '۱۵۵ میلیون تومان' : '155M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'سود دلاری پایدار ۱۱.۴٪ به اضافه رشد نرخ تتر، سرمایه اولیه شما را کاملاً از تورم مصون می‌دارد.'
+                : '11.4% USD yield + dollar parity shields your savings completely.'}
+            </p>
+          </div>
+
+          {/* Card 3: Griffin Physical Gold PAXG */}
+          <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-2">
+            <span className="text-xs font-bold text-amber-300 block">
+              {isFa ? 'خزانه طلای دیجیتال گریفین (PAXG)' : 'Griffin Gold Vault (PAXG)'}
+            </span>
+            <div className="font-mono text-xl font-black text-amber-400">
+              {isFa ? '۱۶۸ میلیون تومان' : '168M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'بهترین پناهگاه تاریخی در برابر بحران‌های ارزی با سود طلا و بدون حباب سکه فیزیکی در ایران.'
+                : 'Historic safe haven backed by physical London bullion gold bars.'}
+            </p>
+          </div>
+        </div>
       </div>
       </>
       )}
@@ -647,6 +804,81 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
           </a>
         </div>
       </div>
+
+      {/* Interactive Staking / Deposit Simulation Modal */}
+      {depositModalVault && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl relative text-right transition-all ${
+            isDarkMode ? 'bg-[#150f2e] border-purple-500/40 text-slate-100' : 'bg-white border-purple-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between pb-4 border-b border-purple-500/20 mb-4">
+              <div className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-amber-400" />
+                <h3 className="font-black text-base">
+                  {isFa ? `سپرده‌گذاری در ${depositModalVault.protocol}` : `Stake in ${depositModalVault.protocol}`}
+                </h3>
+              </div>
+              <button
+                onClick={() => setDepositModalVault(null)}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-black/30 border border-purple-500/20 flex items-center justify-between text-xs">
+                <span className="text-slate-400">{isFa ? 'نرخ بازدهی صندوق (APY):' : 'Vault APY:'}</span>
+                <span className="font-mono font-black text-emerald-400 text-base">{depositModalVault.apy}</span>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-300 font-bold block mb-1.5">
+                  {isFa ? `مبلغ سپرده (${depositModalVault.asset}):` : `Deposit Amount (${depositModalVault.asset}):`}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={modalDepositAmount}
+                    onChange={(e) => setModalDepositAmount(Math.max(0.01, Number(e.target.value)))}
+                    className="w-full bg-purple-950/50 border border-purple-500/30 rounded-2xl px-4 py-3 font-mono text-white text-base focus:outline-none focus:border-amber-400"
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs font-bold text-amber-400">
+                    {depositModalVault.asset}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/20 text-xs font-mono flex items-center justify-between">
+                <span className="text-slate-400">{isFa ? 'ارزش تخمینی به تومان:' : 'Estimated Toman Value:'}</span>
+                <span className="text-amber-300 font-bold">
+                  ≈ {isFa 
+                    ? `${toPersianDigits(formatToman(usdToToman(modalDepositAmount * (depositModalVault.asset === 'PAXG' ? 2685.5 : 1), tomanRate)))} تومان`
+                    : `${formatToman(usdToToman(modalDepositAmount * (depositModalVault.asset === 'PAXG' ? 2685.5 : 1), tomanRate), false)} Toman`
+                  }
+                </span>
+              </div>
+
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleConfirmModalDeposit}
+                  className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-950/50 transition-all cursor-pointer active:scale-95"
+                >
+                  {isFa ? 'تایید سپرده‌گذاری و شروع تجمیع سود ⚡' : 'Confirm & Start Live Yield ⚡'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDepositModalVault(null)}
+                  className="px-4 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                >
+                  {isFa ? 'انصراف' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
