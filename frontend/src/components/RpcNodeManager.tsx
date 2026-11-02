@@ -432,7 +432,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
             value={customRpcUrl}
             onChange={(e) => setCustomRpcUrl(e.target.value)}
             placeholder="https://your-custom-rpc-endpoint.com"
-            className="flex-1 w-full bg-black/40 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+            className="flex-1 w-full dex-input-box rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
           />
           <button
             onClick={handleTestCustomRpc}

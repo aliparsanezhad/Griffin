@@ -264,11 +264,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Verified Protocol Treasury Transparency Card */}
-        <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all ${
-          isDarkMode 
-            ? 'bg-purple-950/30 border-purple-500/25 text-slate-300' 
-            : 'bg-purple-50/80 border-purple-200 text-slate-700'
-        }`}>
+        <div className="p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all dex-card">
           <div className="flex items-center gap-3 text-right">
             <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
               <DollarSign className="w-4 h-4" />
@@ -330,11 +326,7 @@ export const Footer: React.FC<FooterProps> = ({
       {/* About Modal */}
       {showAboutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in text-right">
-          <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative transition-all ${
-            isDarkMode 
-              ? 'bg-[#120c24] border-purple-500/30 text-slate-200 shadow-purple-950/60' 
-              : 'bg-white border-purple-200 text-slate-800'
-          }`}>
+          <div className="w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative transition-all dex-card">
             <button 
               onClick={() => {
                 playClickSound();

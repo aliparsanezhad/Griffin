@@ -471,7 +471,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </div>
 
           {/* Interactive Monthly Spending Limit Slider */}
-          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/25 space-y-3">
+          <div className="p-4 rounded-2xl dex-card space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-white flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-amber-400" />
@@ -501,9 +501,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </div>
 
           {/* Pricing & Checkout Summary */}
-          <div className={`p-5 rounded-2xl border text-right space-y-4 ${
-            isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-          }`}>
+          <div className="p-5 rounded-2xl border text-right space-y-4 dex-card">
             <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
               <span className="text-xs text-slate-300 font-bold">{isFa ? 'مورد انتخابی:' : 'Selected:'}</span>
               <span className="text-xs font-black text-white">{isFa ? selectedVoucher.nameFa : selectedVoucher.name}</span>
@@ -657,7 +655,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </div>
 
           {/* Categorized Expense Allocation visual chart */}
-          <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-3">
+          <div className="p-4 rounded-2xl dex-card space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-white flex items-center gap-1.5">
                 <PieChart className="w-3.5 h-3.5 text-pink-400" />
@@ -696,9 +694,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
           </div>
 
           {/* Privacy & Anti-Sanctions Notice Box */}
-          <div className={`p-4 rounded-2xl border text-right space-y-1.5 ${
-            isDarkMode ? 'bg-purple-950/20 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-          }`}>
+          <div className="p-4 rounded-2xl border text-right space-y-1.5 dex-card">
             <span className="text-xs font-bold text-pink-300 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-pink-400" />
               {isFa ? 'ضمانت اصالت و امنیت کارت‌های گریفین سواپ:' : 'Guaranteed Security & Delivery:'}
@@ -713,9 +709,7 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs dex-card">
         <div className="flex items-center gap-2 text-right">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>

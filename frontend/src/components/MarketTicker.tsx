@@ -120,10 +120,10 @@ export const MarketTicker: React.FC<MarketTickerProps> = ({
               <span className="text-slate-400 group-hover:text-purple-300 transition-colors">
                 {isFa ? item.labelFa : item.labelEn}:
               </span>
-              <span className="font-bold font-mono text-white">
+              <span className="font-bold font-mono font-tabular text-white">
                 {item.value}
               </span>
-              <span className={`inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
+              <span className={`inline-flex items-center gap-0.5 text-[10px] font-mono font-tabular font-bold px-1.5 py-0.2 rounded ${
                 item.isPositive 
                   ? 'text-emerald-400 bg-emerald-500/10' 
                   : 'text-rose-400 bg-rose-500/10'

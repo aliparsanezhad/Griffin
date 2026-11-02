@@ -420,11 +420,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 placeholder={isFa ? 'جستجوی نماد یا نام توکن...' : 'Search symbol or name...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pr-9 pl-3 py-2 rounded-2xl text-xs border focus:outline-none transition-all ${
-                  isDarkMode 
-                    ? 'bg-purple-950/40 border-purple-500/30 text-white focus:border-amber-400' 
-                    : 'bg-white border-purple-200 text-slate-900 focus:border-purple-500'
-                }`}
+                className="w-full pr-9 pl-3 py-2 rounded-2xl text-xs border focus:outline-none transition-all dex-input-box focus:border-amber-400 text-white"
               />
             </div>
           </div>
@@ -521,9 +517,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
         {/* Right Column: Live Trading, Interactive Bonding Curve & Recent Trades (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           
-          <div className={`p-5 rounded-3xl border sticky top-20 overflow-hidden relative ${
-            isDarkMode ? 'cyber-gradient-card border-purple-500/35 backdrop-blur-xl neon-glow-purple shadow-2xl' : 'bg-white border-purple-200 shadow-xl'
-          }`}>
+          <div className="p-5 rounded-3xl border sticky top-20 overflow-hidden relative dex-card">
             {/* Top Laser Accent Line */}
             <div className="laser-line -mx-5 -mt-5 mb-4" />
             
@@ -852,9 +846,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
       {/* Modal: Create New Token */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className={`w-full max-w-lg p-6 rounded-3xl border shadow-2xl relative ${
-            isDarkMode ? 'bg-[#150e2e] border-purple-500/40' : 'bg-white border-purple-200'
-          }`}>
+          <div className="w-full max-w-lg p-6 rounded-3xl border shadow-2xl relative dex-card">
             
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-purple-500/20">
               <div className="flex items-center gap-2">
@@ -882,7 +874,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="مثال: پرسپولیس وب۳"
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
+                  className="w-full dex-input-box rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
                 />
               </div>
 
@@ -897,7 +889,7 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   value={newSymbol}
                   onChange={(e) => setNewSymbol(e.target.value.toUpperCase())}
                   placeholder="SHIRDAL"
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono uppercase focus:outline-none focus:border-amber-400"
+                  className="w-full dex-input-box rounded-xl px-3 py-2 text-white font-mono uppercase focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -936,11 +928,11 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 <select
                   value={newChain}
                   onChange={(e) => setNewChain(e.target.value)}
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
+                  className="w-full dex-input-box rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-right"
                 >
-                  <option value="Arbitrum One">Arbitrum One (کمترین کارمزد - پیشنهادی)</option>
-                  <option value="Base">Base (کوین‌بیس)</option>
-                  <option value="Polygon">Polygon (پالیگان)</option>
+                  <option value="Arbitrum One" className="bg-[#150e2e] text-white">Arbitrum One (کمترین کارمزد - پیشنهادی)</option>
+                  <option value="Base" className="bg-[#150e2e] text-white">Base (کوین‌بیس)</option>
+                  <option value="Polygon" className="bg-[#150e2e] text-white">Polygon (پالیگان)</option>
                 </select>
               </div>
 
@@ -953,12 +945,12 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   value={newDescFa}
                   onChange={(e) => setNewDescFa(e.target.value)}
                   placeholder="درباره ایده، اعضای کامیونیتی و کاربرد توکن خود بنویسید..."
-                  className="w-full bg-purple-950/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 leading-relaxed text-right"
+                  className="w-full dex-input-box rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 leading-relaxed text-right"
                 />
               </div>
 
               {/* Anti-Rug & Commission Note */}
-              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed space-y-1.5 text-right">
+              <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-[11px] leading-relaxed space-y-1.5 text-right dex-card">
                 <div className="flex items-center justify-between font-bold">
                   <span>{isFa ? 'ضمانت راستی‌آزمایی و خزانه‌داری:' : 'Griffin Assurance & Treasury:'}</span>
                   <span className="font-mono text-emerald-400">{isFa ? 'گس تخمینی: < $0.05' : 'Gas: < $0.05'}</span>

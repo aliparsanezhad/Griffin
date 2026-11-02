@@ -154,7 +154,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
               onChange={(e) => setInputPhrase(e.target.value)}
               placeholder="مثلاً: شیردال زرین وب۳"
               maxLength={30}
-              className="w-full bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2 text-white font-bold text-xs focus:outline-none focus:border-emerald-400"
+              className="w-full dex-input-box rounded-xl px-4 py-2 text-white font-bold text-xs focus:outline-none focus:border-emerald-400"
             />
 
             <button

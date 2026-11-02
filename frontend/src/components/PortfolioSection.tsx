@@ -310,7 +310,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
               value={searchAddress}
               onChange={(e) => setSearchAddress(e.target.value)}
               placeholder={isFa ? "جستجوی آدرس کیف پول..." : "Search wallet address..."}
-              className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 pl-8 text-xs text-white font-mono focus:outline-none focus:border-purple-400 placeholder:text-slate-500"
+              className="w-full dex-input-box rounded-xl px-3 py-2 pl-8 text-xs text-white font-mono focus:outline-none focus:border-amber-400 placeholder:text-slate-500"
             />
             <Search className="w-3.5 h-3.5 text-purple-400 absolute left-2.5 top-2.5" />
           </div>

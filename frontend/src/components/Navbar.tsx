@@ -277,11 +277,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Mega Dropdown Panel */}
               {moreMenuOpen && (
-                <div className={`absolute top-full mt-2 left-0 right-auto md:right-0 md:left-auto w-[680px] p-4 rounded-3xl border shadow-2xl backdrop-blur-2xl z-50 animate-fade-in ${
-                  isDarkMode 
-                    ? 'bg-[#150e2e]/95 border-purple-500/40 shadow-purple-950/60 text-white' 
-                    : 'bg-white/95 border-purple-200 shadow-xl text-slate-900'
-                }`}>
+                <div className="absolute top-full mt-2 left-0 right-auto md:right-0 md:left-auto w-[680px] p-4 rounded-3xl border shadow-2xl backdrop-blur-2xl z-50 animate-fade-in dex-card">
                   <div className="grid grid-cols-3 gap-4">
                     {moreCategories.map((cat, idx) => (
                       <div key={idx} className="space-y-2">
@@ -559,9 +555,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Wallet Details Modal */}
       {showWalletModal && walletAddress && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className={`w-full max-w-sm p-6 rounded-3xl border shadow-2xl space-y-4 ${
-            isDarkMode ? 'bg-[#150d2a] border-purple-500/30 text-white' : 'bg-white border-purple-200 text-slate-900'
-          }`}>
+          <div className="w-full max-w-sm p-6 rounded-3xl border shadow-2xl space-y-4 dex-card">
             <div className="flex justify-between items-center pb-2 border-b border-purple-500/20">
               <span className="font-extrabold text-sm">{isFa ? 'کیف پول متصل' : 'Connected Wallet'}</span>
               <button onClick={() => setShowWalletModal(false)} className="text-slate-400 hover:text-white">✕</button>

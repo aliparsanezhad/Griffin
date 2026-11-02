@@ -449,7 +449,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                       step={frequency === 'daily' ? '50000' : '500000'}
                       value={installmentToman}
                       onChange={(e) => setInstallmentToman(Math.max(50000, Number(e.target.value) || 0))}
-                      className="w-full bg-purple-900/40 border border-purple-500/30 rounded-xl px-3 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-400"
+                      className="w-full dex-input-box rounded-xl px-3 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-400"
                     />
                     
                     {/* Quick Presets tailored to frequency */}

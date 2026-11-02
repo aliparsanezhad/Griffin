@@ -445,11 +445,7 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
                   type="number"
                   value={calculatorDeposit || ''}
                   onChange={(e) => setCalculatorDeposit(Math.max(0, Number(e.target.value)))}
-                  className={`w-full rounded-2xl px-4 py-3 text-base font-black font-mono border focus:outline-none transition-all ${
-                    isDarkMode 
-                      ? 'bg-purple-950/60 border-purple-500/30 text-white focus:border-amber-400' 
-                      : 'bg-white border-purple-200 text-slate-900 focus:border-purple-500'
-                  }`}
+                  className="w-full dex-input-box rounded-2xl px-4 py-3 text-base font-black font-mono focus:outline-none focus:border-amber-400 text-white"
                   placeholder="1000"
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-400 font-mono">
@@ -842,7 +838,7 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
                     type="number"
                     value={modalDepositAmount}
                     onChange={(e) => setModalDepositAmount(Math.max(0.01, Number(e.target.value)))}
-                    className="w-full bg-purple-950/50 border border-purple-500/30 rounded-2xl px-4 py-3 font-mono text-white text-base focus:outline-none focus:border-amber-400"
+                    className="w-full dex-input-box rounded-2xl px-4 py-3 font-mono text-white text-base focus:outline-none focus:border-amber-400"
                   />
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs font-bold text-amber-400">
                     {depositModalVault.asset}

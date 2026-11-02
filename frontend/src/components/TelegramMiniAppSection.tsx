@@ -241,7 +241,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
             </div>
 
             {/* Input TON Ecosystem Asset */}
-            <div className="p-4 rounded-xl bg-black/50 border border-cyan-500/20 space-y-2">
+            <div className="p-4 rounded-xl dex-input-box space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">
                   {selectedDirection === 'ton-to-evm' ? (isFa ? `موجودی ارسالی از Tonkeeper (${selectedToken.name}):` : 'Send from Tonkeeper:') : (isFa ? 'پرداخت از متامسک / ربی:' : 'Send from EVM Wallet:')}
@@ -273,7 +273,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
             </div>
 
             {/* Output EVM Asset */}
-            <div className="p-4 rounded-xl bg-black/50 border border-purple-500/20 space-y-2">
+            <div className="p-4 rounded-xl dex-input-box space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">
                   {selectedDirection === 'ton-to-evm' ? (isFa ? 'دریافت روی شبکه آربیتروم (EVM):' : 'Receive on Arbitrum:') : (isFa ? `دریافت روی شبکه تون (${selectedToken.name}):` : 'Receive on TON:')}

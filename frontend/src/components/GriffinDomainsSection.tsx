@@ -530,7 +530,7 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
                     <option key={`${d.name}${d.tld}`} value={`${d.name}${d.tld}`}>{d.name}{d.tld}</option>
                   ))}
                 </select>
-                <div className="flex-1 w-full flex items-center bg-black/40 border border-purple-500/30 rounded-xl px-2.5 py-1.5 text-xs font-mono text-white">
+                <div className="flex-1 w-full flex items-center dex-input-box rounded-xl px-2.5 py-1.5 text-xs font-mono text-white">
                   <input
                     type="text"
                     value={subdomainPrefix}
@@ -633,7 +633,7 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
                 value={reverseInput}
                 onChange={(e) => setReverseInput(e.target.value)}
                 placeholder="0x71C8705a2B88e3083feC7B58273683243354438F"
-                className="w-full px-3 py-2.5 rounded-xl bg-purple-950/50 border border-purple-500/30 text-white font-mono text-xs focus:outline-none focus:border-amber-400 text-left"
+                className="w-full px-3 py-2.5 rounded-xl dex-input-box text-white font-mono text-xs focus:outline-none focus:border-amber-400 text-left"
                 dir="ltr"
               />
             </div>

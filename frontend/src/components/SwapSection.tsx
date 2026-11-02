@@ -203,9 +203,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const renderCompanionDesk = () => {
     if (companionView === 'none') return null;
     return (
-      <div className={`w-full rounded-3xl p-4 md:p-5 border shadow-2xl animate-fade-in space-y-4 dex-card ${
-        !isDarkMode ? 'glass-panel-light border-purple-200 shadow-purple-100' : 'border-purple-500/30'
-      }`}>
+      <div className="w-full rounded-3xl p-4 md:p-5 border shadow-2xl animate-fade-in space-y-4 dex-card">
         {/* Tab Switcher & Minimize Button */}
         <div className="flex items-center justify-between border-b border-purple-500/20 pb-3 gap-2">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 flex-1">
@@ -521,11 +519,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {/* MODE 1: Griffin Native Fast Swap Engine */}
         {swapEngine === 'native' && (
-          <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all overflow-hidden dex-card ${
-            isDarkMode 
-              ? 'border-purple-500/35 shadow-purple-950/60 neon-glow-purple backdrop-blur-2xl' 
-              : 'glass-panel-light border-purple-200 shadow-purple-100'
-          }`}>
+          <div className="w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all overflow-hidden dex-card">
             {/* Top Laser Accent Line */}
             <div className="laser-line -mx-5 md:-mx-6 -mt-5 md:-mt-6 mb-4" />
 
