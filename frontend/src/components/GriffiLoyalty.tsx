@@ -265,11 +265,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
   const filteredTasks = tasks.filter(t => selectedCategory === 'all' || t.category === selectedCategory);
 
   return (
-    <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all relative ${
-      isDarkMode 
-        ? 'bg-[#100b24]/90 border-purple-500/25 text-slate-100 shadow-purple-950/30' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-6 border shadow-2xl transition-all relative dex-card">
       {/* Toast notification banner */}
       {toastMessage && (
         <div className="fixed bottom-20 right-6 z-50 p-4 rounded-2xl bg-amber-500 text-purple-950 font-black text-xs shadow-2xl border-2 border-white flex items-center gap-2 animate-bounce">
@@ -326,7 +322,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       </div>
 
       {/* 7-Day Interactive Streak Calendar Card */}
-      <div className="my-6 p-5 rounded-2xl bg-purple-950/40 border border-purple-500/25">
+      <div className="my-6 p-5 rounded-2xl dex-card">
         <div className="flex items-center justify-between mb-3 text-right">
           <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
             <Flame className="w-4 h-4 text-amber-400" />
@@ -387,7 +383,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       </div>
 
       {/* Hero Level & Points Progression Card */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-6 p-5 rounded-2xl bg-purple-950/40 border border-purple-500/20">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-6 p-5 rounded-2xl dex-card">
         
         {/* Mascot Avatar for Current Rank */}
         <div className="md:col-span-4 flex items-center gap-4">
@@ -576,7 +572,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       </div>
 
       {/* Referral Program Banner */}
-      <div className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-amber-900/20 border border-purple-500/30">
+      <div className="mt-8 p-4 rounded-2xl dex-card">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5 mb-1">
@@ -604,7 +600,7 @@ export const GriffiLoyalty: React.FC<GriffiLoyaltyProps> = ({
       </div>
 
       {/* Verified Protocol Treasury Fee Guarantee */}
-      <div className="mt-6 p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="mt-6 p-4 rounded-2xl dex-card flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5 text-right">
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-slate-300">

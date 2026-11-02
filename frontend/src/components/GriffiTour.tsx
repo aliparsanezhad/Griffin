@@ -45,7 +45,7 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
   isOpen,
   onClose,
   lang,
-  isDarkMode,
+  isDarkMode: _isDarkMode,
   onCompleteTour,
 }) => {
   const isFa = lang === 'fa';
@@ -356,11 +356,7 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in text-right">
       <div 
-        className={`w-full max-w-xl rounded-3xl p-6 sm:p-7 border shadow-2xl relative overflow-hidden transition-all ${
-          isDarkMode 
-            ? 'bg-[#150f2f] border-purple-500/40 text-slate-100 shadow-purple-900/50' 
-            : 'bg-white border-purple-200 text-slate-800 shadow-2xl'
-        }`}
+        className="w-full max-w-xl rounded-3xl p-6 sm:p-7 border shadow-2xl relative overflow-hidden transition-all dex-card"
       >
         {/* Ambient Glows */}
         <div className="absolute -top-24 -left-24 w-52 h-52 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
@@ -432,7 +428,7 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
 
         {/* Golden Tip Box */}
         {current.tipFa && (
-          <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-xs text-amber-200 mb-4 flex items-start gap-2">
+          <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-xs text-amber-200 mb-4 flex items-start gap-2 dex-card">
             <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <span className="leading-snug font-medium">
               {isFa ? current.tipFa : current.tipEn}
@@ -442,7 +438,7 @@ export const GriffiTour: React.FC<GriffiTourProps> = ({
 
         {/* Transparency callout on final step */}
         {isLast && (
-          <div className="p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30 mb-4 flex items-center justify-between text-xs">
+          <div className="p-3 rounded-2xl mb-4 flex items-center justify-between text-xs dex-card">
             <div className="flex items-center gap-1.5 text-slate-300">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>{isFa ? 'آدرس خزانه کارمزدها:' : 'Treasury Wallet:'}</span>
