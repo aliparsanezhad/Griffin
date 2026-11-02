@@ -23,7 +23,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
   isOpen,
   onClose,
   lang,
-  isDarkMode = true,
+  isDarkMode: _isDarkMode = true,
   onSavePhrase
 }) => {
   const isFa = lang === 'fa';
@@ -72,11 +72,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in text-right">
-      <div className={`w-full max-w-xl rounded-3xl p-6 md:p-8 border shadow-2xl relative overflow-hidden transition-all max-h-[90vh] overflow-y-auto ${
-        isDarkMode 
-          ? 'bg-[#120d2d] border-purple-500/30 text-slate-100 shadow-purple-950/70' 
-          : 'bg-white border-purple-200 text-slate-800 shadow-2xl'
-      }`}>
+      <div className="w-full max-w-xl rounded-3xl p-6 md:p-8 dex-card relative overflow-hidden transition-all max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button 
@@ -102,6 +98,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-1">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>{isFa ? 'سپر ضد فیشینگ و راستی‌آزمایی اصالت دامنه' : 'Anti-Phishing & Domain Verifier'}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
             </div>
             <h3 className="text-lg md:text-xl font-black text-white">
               {isFa ? 'امنیت ۱۰۰٪ در برابر سایت‌ها و ربات‌های جعلی' : 'Guard Against Phishing & Fake Clones'}
@@ -115,7 +112,7 @@ export const AntiPhishingModal: React.FC<AntiPhishingModalProps> = ({
         </div>
 
         {/* Feature 1: Personal Anti-Phishing Phrase Configuration */}
-        <div className="mt-5 p-5 rounded-2xl bg-purple-950/40 border border-purple-500/25 space-y-3">
+        <div className="mt-5 p-5 rounded-2xl dex-card space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-white flex items-center gap-1.5">
               <Key className="w-4 h-4 text-amber-400" />

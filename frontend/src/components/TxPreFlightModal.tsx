@@ -43,7 +43,7 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
   slippage,
   tomanRate,
   lang,
-  isDarkMode = true
+  isDarkMode: _isDarkMode = true
 }) => {
   const isFa = lang === 'fa';
 
@@ -83,11 +83,7 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in text-right">
-      <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all ${
-        isDarkMode 
-          ? 'bg-[#130d2c] border-purple-500/30 text-slate-100 shadow-purple-950/60' 
-          : 'bg-white border-purple-200 text-slate-800 shadow-2xl'
-      }`}>
+      <div className="w-full max-w-lg rounded-3xl p-6 dex-card relative overflow-hidden transition-all">
         
         {/* Close Button */}
         <button 
@@ -144,7 +140,7 @@ export const TxPreFlightModal: React.FC<TxPreFlightModalProps> = ({
             </div>
 
             {/* Token Flow Card */}
-            <div className="p-4 rounded-2xl bg-black/50 border border-purple-500/20 space-y-3">
+            <div className="p-4 rounded-2xl dex-card space-y-3">
               
               {/* Sending */}
               <div className="flex items-center justify-between">
