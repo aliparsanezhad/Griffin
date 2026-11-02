@@ -46,11 +46,15 @@ export function App() {
   // Sync theme
   useEffect(() => {
     if (isDarkMode) {
-      document.body.classList.remove('bg-slate-100', 'text-slate-900');
-      document.body.classList.add('bg-[#0b0817]', 'text-slate-100');
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      document.body.classList.remove('bg-slate-100', 'text-slate-900', 'light');
+      document.body.classList.add('bg-[#0b0817]', 'text-slate-100', 'dark');
     } else {
-      document.body.classList.remove('bg-[#0b0817]', 'text-slate-100');
-      document.body.classList.add('bg-slate-100', 'text-slate-900');
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      document.body.classList.remove('bg-[#0b0817]', 'text-slate-100', 'dark');
+      document.body.classList.add('bg-slate-100', 'text-slate-900', 'light');
     }
   }, [isDarkMode]);
 

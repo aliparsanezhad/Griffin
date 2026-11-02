@@ -148,6 +148,15 @@
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 35px -5px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.light .dex-card,
+body.light .dex-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.92) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 0 15px 35px -10px rgba(112, 26, 219, 0.1), 0 0 25px -5px rgba(168, 85, 247, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
+  color: #0f172a;
 }
 
 .dex-input-box {
@@ -156,15 +165,34 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html.light .dex-input-box,
+body.light .dex-input-box {
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+}
+
 .dex-input-box:hover {
   border-color: rgba(168, 85, 247, 0.38);
   background: rgba(13, 8, 30, 0.75);
+}
+
+html.light .dex-input-box:hover,
+body.light .dex-input-box:hover {
+  background: #ffffff;
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
 .dex-input-box:focus-within {
   border-color: rgba(168, 85, 247, 0.7);
   box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.25);
   background: rgba(15, 9, 34, 0.85);
+}
+
+html.light .dex-input-box:focus-within,
+body.light .dex-input-box:focus-within {
+  border-color: rgba(147, 51, 234, 0.8);
+  box-shadow: 0 0 20px -3px rgba(147, 51, 234, 0.25);
+  background: #ffffff;
 }
 
 .dex-button-primary {
