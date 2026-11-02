@@ -147,11 +147,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-5 md:p-8 border shadow-2xl transition-all ${
-      isDarkMode 
-        ? 'bg-[#100b24]/95 border-purple-500/25 text-slate-100 shadow-purple-950/40' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-5 md:p-8 dex-card transition-all">
       
       {/* Top Banner with Griffi Telegram 3D Mascot */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pb-6 border-b border-purple-500/20">
@@ -203,7 +199,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
         {/* Left: TON <-> EVM Bridge Converter (7 cols) */}
         <div className="lg:col-span-7 space-y-5">
           
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-indigo-950/40 to-cyan-950/40 border border-cyan-500/25 space-y-4">
+          <div className="dex-card p-5 space-y-4">
             
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-white flex items-center gap-2">
@@ -326,7 +322,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
           </div>
 
           {/* Telegram Smart Price Alerts Configuration */}
-          <div className="p-5 rounded-2xl bg-purple-950/40 border border-purple-500/20 space-y-3">
+          <div className="dex-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-white flex items-center gap-2">
                 <Bell className="w-4 h-4 text-amber-400" />
@@ -545,9 +541,7 @@ export const TelegramMiniAppSection: React.FC<TelegramMiniAppSectionProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-6 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="dex-card mt-6 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 text-right">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
