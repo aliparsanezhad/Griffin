@@ -19,7 +19,8 @@ import {
   Zap,
   CheckCircle2,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
 import { playClickSound } from '../services/soundService';
@@ -73,12 +74,34 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
   const [rebalanceStrategy, setRebalanceStrategy] = useState<'balanced' | 'gold_hedge' | 'growth'>('gold_hedge');
   const [isRebalanceExecuting, setIsRebalanceExecuting] = useState<boolean>(false);
   const [rebalanceSuccess, setRebalanceSuccess] = useState<boolean>(false);
+  const [csvExportToast, setCsvExportToast] = useState<boolean>(false);
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
     setCopiedWallet(true);
     playClickSound();
     setTimeout(() => setCopiedWallet(false), 2000);
+  };
+
+  const handleExportCsv = () => {
+    playClickSound();
+    const headers = "Asset,Chain,Balance,PriceUSD,ValueUSD,ValueToman\n";
+    const rows = tokens.map(t => {
+      const valUsd = t.balance * t.priceUsd;
+      const valToman = usdToToman(valUsd, tomanRate);
+      return `"${t.symbol}","${t.chain}",${t.balance},${t.priceUsd},${valUsd.toFixed(2)},${valToman}`;
+    }).join("\n");
+    const blob = new Blob(["\uFEFF" + headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `GriffinSwap_Portfolio_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setCsvExportToast(true);
+    setTimeout(() => setCsvExportToast(false), 3000);
   };
 
   const currentAddress = searchAddress || walletAddress || '0x71C8705a2B88e3083feC7B58273683243354438F';
@@ -301,6 +324,15 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
           </button>
 
           <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-950/60 hover:bg-purple-900/60 text-purple-300 hover:text-white border border-purple-500/30 font-bold text-xs shadow-md transition-transform active:scale-95 cursor-pointer backdrop-blur-md"
+            title={isFa ? 'خروجی اکسل / CSV سبد دارایی‌ها' : 'Export Portfolio CSV'}
+          >
+            <Download className="w-3.5 h-3.5 text-purple-400" />
+            <span>{isFa ? 'خروجی اکسل' : 'Export CSV'}</span>
+          </button>
+
+          <button
             onClick={() => {
               playClickSound();
               setShowTaxModal(true);
@@ -331,7 +363,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Main Net Worth & Donut Allocation Card (7 Cols) */}
-        <div className="lg:col-span-7 glass-panel p-6 rounded-3xl border border-purple-500/25 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-7 dex-card p-6 relative overflow-hidden flex flex-col justify-between">
           <div className="space-y-4">
             
             {/* Top row: Net worth metrics & address */}
@@ -497,7 +529,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
         </div>
 
         {/* Historical Net Worth PnL Sparkline Card (5 Cols) */}
-        <div className="lg:col-span-5 glass-panel p-6 rounded-3xl border border-purple-500/25 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-5 dex-card p-6 relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-purple-500/20">
               <div className="flex items-center gap-2">
@@ -656,7 +688,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
 
       {/* Tokens Table */}
       {activeTab === 'tokens' && (
-        <div className="glass-panel rounded-2xl border border-purple-500/20 overflow-hidden shadow-xl">
+        <div className="dex-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-purple-950/40 text-purple-300 font-bold border-b border-purple-500/20">
@@ -712,7 +744,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
 
       {/* Transactions Table */}
       {activeTab === 'transactions' && (
-        <div className="glass-panel rounded-2xl border border-purple-500/20 overflow-hidden shadow-xl">
+        <div className="dex-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-purple-950/40 text-purple-300 font-bold border-b border-purple-500/20">
@@ -756,7 +788,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
 
       {/* Rebalance Tab Content */}
       {activeTab === 'rebalance' && (
-        <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 shadow-xl space-y-6">
+        <div className="dex-card p-6 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-purple-500/20">
             <div>
               <div className="flex items-center gap-2">
@@ -988,7 +1020,7 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
       )}
 
       {/* Verified Protocol Treasury Fee Guarantee */}
-      <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="dex-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5 text-right">
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-slate-300">
@@ -1020,6 +1052,14 @@ export const PortfolioSection: React.FC<PortfolioProps> = ({
           </a>
         </div>
       </div>
+
+      {/* CSV Export Success Toast */}
+      {csvExportToast && (
+        <div className="fixed bottom-6 left-6 z-50 p-4 rounded-2xl bg-emerald-950/90 border border-emerald-500/40 shadow-2xl backdrop-blur-md flex items-center gap-3 text-emerald-300 text-xs font-bold animate-slide-up">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{isFa ? 'فایل صورت‌وضعیت دارایی‌ها (CSV) با موفقیت دانلود شد 📊' : 'Portfolio statement (CSV) exported successfully 📊'}</span>
+        </div>
+      )}
 
       {/* Tax & Portfolio PnL Accounting Modal */}
       <TaxExportModal
