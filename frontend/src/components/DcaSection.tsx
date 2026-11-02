@@ -276,7 +276,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
     }`}>
       
       {/* Hero Banner with Griffi Financial Strategist Mascot */}
-      <div className="rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl group bg-[#110d29]">
+      <div className="dex-card overflow-hidden relative shadow-2xl group bg-[#110d29]">
         <div className="relative h-60 sm:h-64 w-full overflow-hidden">
           <img 
             src="/mascot/griffi-accountant.jpg" 
@@ -337,11 +337,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
       </div>
 
       {/* Main Container Card */}
-      <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all ${
-        isDarkMode 
-          ? 'bg-[#100b24]/90 border-purple-500/25 text-slate-100 shadow-purple-950/30' 
-          : 'bg-white border-purple-200 text-slate-800 shadow-xl'
-      }`}>
+      <div className="w-full rounded-3xl p-6 dex-card transition-all">
 
         {/* MODE 1: DCA Planner */}
         {activeMode === 'dca' && (
@@ -398,7 +394,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
               <div className="space-y-6">
 
                 {/* Frequency Selector Pills */}
-                <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="dex-card p-4 flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="text-right">
                     <span className="text-xs font-bold text-white block">
                       {isFa ? 'دوره تناوب خرید پله‌ای (DCA Frequency):' : 'Select DCA Frequency:'}
@@ -434,7 +430,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   
                   {/* Installment Amount Input */}
-                  <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
+                  <div className="dex-card p-4">
                     <label className="text-xs font-bold text-slate-300 block mb-2 flex items-center justify-between">
                       <span>
                         {frequency === 'daily' 
@@ -483,7 +479,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                   </div>
 
                   {/* Target Asset Selection */}
-                  <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
+                  <div className="dex-card p-4">
                     <label className="text-xs font-bold text-slate-300 block mb-2">
                       {isFa ? 'دارایی هدف برای خرید پله‌ای:' : 'Target Asset for DCA:'}
                     </label>
@@ -515,7 +511,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                   </div>
 
                   {/* Time Horizon Duration */}
-                  <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20">
+                  <div className="dex-card p-4">
                     <label className="text-xs font-bold text-slate-300 block mb-2">
                       {isFa ? 'افق زمانی پس‌انداز:' : 'Time Horizon:'}
                     </label>
@@ -551,7 +547,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                 </div>
 
                 {/* Results Comparison Box */}
-                <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-amber-950/40 border border-purple-500/30">
+                <div className="dex-card p-6 bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-amber-950/40">
                   <h4 className="text-sm font-bold text-white mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -697,7 +693,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                 </div>
 
                 {/* Historical Backtest Section */}
-                <div className="p-5 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-4">
+                <div className="dex-card p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <History className="w-4 h-4 text-amber-400" />
@@ -874,7 +870,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
             )}
 
             {/* Verified Protocol Treasury Fee Guarantee */}
-            <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="dex-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2.5 text-right">
                 <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span className="text-slate-300">
