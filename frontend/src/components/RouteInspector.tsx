@@ -242,7 +242,7 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
     <div className={`w-full py-6 px-4 max-w-6xl mx-auto animate-fade-in text-right ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
       
       {/* Header Banner with Mascot Navigator */}
-      <div className="rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl mb-8 group bg-[#110d29]">
+      <div className="dex-card rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl mb-8 group">
         <div className="relative h-56 sm:h-64 w-full overflow-hidden">
           <img 
             src="/mascot/griffi-navigator.jpg" 
@@ -379,8 +379,8 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
                   }}
                   className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-gradient-to-br from-purple-900/50 via-[#1a113d] to-indigo-950/60 border-purple-400 ring-2 ring-purple-500/50 shadow-xl shadow-purple-900/30'
-                      : 'glass-panel border-purple-500/20 hover:border-purple-400/40 hover:bg-purple-950/30'
+                      ? 'dex-card border-purple-400 ring-2 ring-purple-500/50 shadow-xl shadow-purple-900/30'
+                      : 'dex-card opacity-80 hover:opacity-100 hover:border-purple-400/40 hover:bg-purple-950/40'
                   }`}
                 >
                   <div>
@@ -461,7 +461,7 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
         </div>
 
         {/* Right 1 Col: Detailed Route Inspector & Simulator */}
-        <div className="glass-panel p-5 rounded-3xl border border-purple-500/30 flex flex-col justify-between">
+        <div className="dex-card p-5 rounded-3xl border border-purple-500/30 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-purple-500/20 pb-3">
               <h3 className="font-extrabold text-white text-sm flex items-center gap-1.5">

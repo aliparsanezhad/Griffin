@@ -145,10 +145,10 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
   ];
 
   return (
-    <div className={`w-full rounded-3xl p-5 md:p-8 border shadow-2xl transition-all ${
+    <div className={`w-full rounded-3xl p-5 md:p-8 transition-all ${
       isDarkMode 
-        ? 'bg-[#100b24]/95 border-purple-500/25 text-slate-100 shadow-purple-950/40' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       
       {/* Banner with Griffi Persian Guardian 3D Mascot */}
@@ -185,7 +185,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
       </div>
 
       {/* Interactive Savings Calculator */}
-      <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-purple-950/60 via-indigo-950/50 to-amber-950/30 border border-purple-500/30 space-y-5">
+      <div className="mt-6 p-6 rounded-2xl dex-card space-y-5">
         
         {/* Top bar: Exchange selector & Volume indicator */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-purple-500/20">
@@ -228,7 +228,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-300 font-bold">{isFa ? 'حجم هر معامله:' : 'Trade Size:'}</span>
-              <span className="text-amber-400 font-mono font-bold">
+              <span className="text-amber-400 font-mono font-bold font-tabular">
                 {isFa ? `${toPersianDigits(formatToman(tradeAmountToman))} تومان` : `${formatToman(tradeAmountToman)} T`}
                 {' '}(≈ ${tradeUsdt} USDT)
               </span>
@@ -256,7 +256,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
                 <Calendar className="w-3.5 h-3.5 text-purple-400" />
                 <span>{isFa ? 'تعداد معاملات در ماه:' : 'Trades per Month:'}</span>
               </span>
-              <span className="text-purple-300 font-mono font-bold">
+              <span className="text-purple-300 font-mono font-bold font-tabular">
                 {tradesPerMonth} {isFa ? 'معامله در ماه' : 'trades/mo'}
               </span>
             </div>
@@ -282,11 +282,11 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
           
           {/* CEX Cost Per Trade */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-rose-500/30 space-y-1 text-right">
+          <div className="p-3.5 rounded-xl dex-input-box space-y-1 text-right">
             <span className="text-[10px] text-rose-300 block font-bold">
               {currentCex.name}:
             </span>
-            <div className="text-base font-black font-mono text-rose-400">
+            <div className="text-base font-black font-mono text-rose-400 font-tabular">
               ≈ {isFa ? `${toPersianDigits(formatToman(cexTotalCostToman, false))} تومان` : `${formatToman(cexTotalCostToman, false)} T`}
             </div>
             <span className="text-[10px] text-slate-400 block font-mono">
@@ -295,11 +295,11 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
           </div>
 
           {/* GriffinSwap Cost Per Trade */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-emerald-500/30 space-y-1 text-right">
+          <div className="p-3.5 rounded-xl dex-input-box space-y-1 text-right">
             <span className="text-[10px] text-emerald-300 block font-bold">
               {isFa ? 'گریفین‌سواپ (شبکه L2):' : 'GriffinSwap L2 Gas:'}
             </span>
-            <div className="text-base font-black font-mono text-emerald-400">
+            <div className="text-base font-black font-mono text-emerald-400 font-tabular">
               ≈ {isFa ? `${toPersianDigits(formatToman(dexTotalCostToman, false))} تومان` : `${formatToman(dexTotalCostToman, false)} T`}
             </div>
             <span className="text-[10px] text-slate-400 block">
@@ -313,7 +313,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
               <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
               <span>{isFa ? 'صرفه‌جویی در هر معامله:' : 'Per-Trade Net Saved:'}</span>
             </span>
-            <div className="text-base font-black font-mono text-amber-300">
+            <div className="text-base font-black font-mono text-amber-300 font-tabular">
               +{isFa ? `${toPersianDigits(formatToman(perTradeSavingsToman, false))} تومان` : `${formatToman(perTradeSavingsToman, false)} T`}
             </div>
             <span className="text-[10px] text-emerald-400 block">
@@ -327,7 +327,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
               <Flame className="w-3.5 h-3.5 text-amber-400" />
               <span>{isFa ? 'مجموع صرفه‌جویی سالانه:' : 'Annual Projected Savings:'}</span>
             </span>
-            <div className="text-lg font-black font-mono text-white">
+            <div className="text-lg font-black font-mono text-white font-tabular">
               +{isFa ? `${toPersianDigits(formatToman(annualSavingsToman, false))} تومان` : `${formatToman(annualSavingsToman, false)} T`}
             </div>
             <span className="text-[10px] text-amber-300/90 font-mono block">
@@ -374,7 +374,7 @@ export const CexVsDexComparison: React.FC<CexVsDexComparisonProps> = ({
       </div>
 
       {/* Bottom Golden Rules Note */}
-      <div className="mt-6 p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+      <div className="mt-6 p-4 rounded-2xl dex-card flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-400 shrink-0" />
           <span>

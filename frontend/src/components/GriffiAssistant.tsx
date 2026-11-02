@@ -200,8 +200,8 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
           <div 
             className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all text-right max-h-[90vh] overflow-y-auto ${
               isDarkMode 
-                ? 'bg-[#150f2f]/95 border-purple-500/30 text-slate-100 shadow-purple-900/40' 
-                : 'bg-white/95 border-purple-200 text-slate-800 shadow-xl'
+                ? 'dex-card text-slate-100' 
+                : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
             }`}
           >
             {/* Ambient Background Aura */}
@@ -460,7 +460,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
             <div className="space-y-3.5 text-xs text-slate-300">
               
               {/* Official Commission Wallet */}
-              <div className="p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/30">
+              <div className="p-3.5 rounded-2xl dex-card">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-bold text-amber-300 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -479,7 +479,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
                   <span className="truncate">{commissionWallet}</span>
                   <button
                     onClick={handleCopy}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors shrink-0 flex items-center gap-1"
+                    className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
                     title={isFa ? 'کپی آدرس' : 'Copy Address'}
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -489,7 +489,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
               </div>
 
               {/* Safety & Anti-Censorship Tips from Griffi */}
-              <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/25 space-y-2">
+              <div className="p-3.5 rounded-2xl dex-input-box space-y-2">
                 <span className="font-bold text-white text-xs block">
                   {isFa ? '💡 ۳ نکته طلایی گریفی برای کاربران ایرانی:' : '💡 3 Key Tips for Iranian Users:'}
                 </span>

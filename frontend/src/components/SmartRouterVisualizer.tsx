@@ -89,10 +89,10 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
   const tradePresets = [1000, 5000, 10000, 25000, 50000, 100000];
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
+    <div className={`w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all ${
       isDarkMode 
-        ? 'bg-[#120c24]/90 border-purple-500/30' 
-        : 'bg-white/95 border-purple-200'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       {/* Decorative background glow */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
