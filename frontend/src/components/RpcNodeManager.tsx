@@ -256,9 +256,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
-    }`}>
+    <div className="w-full rounded-3xl p-6 lg:p-8 dex-card relative overflow-hidden transition-all text-right">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -415,9 +413,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
       </div>
 
       {/* Live Custom RPC Diagnostics & Firewall Latency Benchmarker */}
-      <div className={`p-5 rounded-2xl border my-6 ${
-        isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
-      }`}>
+      <div className="dex-card p-5 my-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 text-right">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-cyan-400" />
@@ -510,9 +506,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
       </div>
 
       {/* Manual Wallet Configuration Instructions */}
-      <div className={`p-5 rounded-2xl border ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/25' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="dex-card p-5 my-4">
         <h4 className="font-bold text-xs text-white mb-2 flex items-center gap-2">
           <Layers className="w-4 h-4 text-cyan-400" />
           <span>{isFa ? 'تنظیم دستی نود در متامسک یا تراست‌ولت (بدون نیاز به وی‌پی‌ان):' : 'Add custom RPC to MetaMask:'}</span>
@@ -557,9 +551,7 @@ export const RpcNodeManager: React.FC<RpcNodeManagerProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="dex-card mt-4 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 text-right">
           <Zap className="w-4 h-4 text-cyan-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
