@@ -76,6 +76,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
   const [stopLossPrice, setStopLossPrice] = useState<string>('');
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
   const [fundingCountdown, setFundingCountdown] = useState<string>('03:42:18');
+  const [fundingProgress, setFundingProgress] = useState<number>(55);
 
   // Stored active positions
   const [positions, setPositions] = useState<OpenPosition[]>([
@@ -184,6 +185,9 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
       setFundingCountdown(
         `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
       );
+      const totalSecsRemaining = hours * 3600 + mins * 60 + secs;
+      const progress = ((28800 - totalSecsRemaining) / 28800) * 100;
+      setFundingProgress(Math.min(100, Math.max(1, progress)));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -298,20 +302,48 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
           </div>
         </div>
 
-        {/* Funding Rate Clock */}
-        <div className={`p-3 rounded-2xl border flex items-center gap-3 ${
-          isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+        {/* Animated Funding Rate Clock Ring */}
+        <div className={`p-3 rounded-2xl border flex items-center gap-3 dex-card ${
+          isDarkMode ? 'border-purple-500/30' : 'bg-purple-50 border-purple-200'
         }`}>
-          <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300">
-            <Clock className="w-5 h-5" />
+          <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+            <svg className="w-11 h-11 -rotate-90 transform" viewBox="0 0 36 36">
+              <path
+                className="text-purple-900/40"
+                strokeWidth="3.5"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                className="text-amber-400 transition-all duration-1000 ease-linear"
+                strokeDasharray={`${fundingProgress}, 100`}
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <Clock className="w-4 h-4 text-amber-400 absolute" />
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-slate-400 block font-semibold">
-              {isFa ? 'فاندینگ ریت بعدی:' : 'Next Funding:'}
-            </span>
-            <span className="text-sm font-mono font-bold text-amber-400">
-              {fundingCountdown} ({selectedPair.fundingRate > 0 ? `+${selectedPair.fundingRate}%` : `${selectedPair.fundingRate}%`})
-            </span>
+            <div className="flex items-center gap-1.5 justify-end">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-[10px] text-slate-400 block font-semibold">
+                {isFa ? 'تسویه فاندینگ ۸ ساعته:' : '8h Funding Epoch:'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 font-mono font-tabular">
+              <span className="text-sm font-bold text-amber-400">
+                {fundingCountdown}
+              </span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
+                selectedPair.fundingRate >= 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+              }`}>
+                {selectedPair.fundingRate > 0 ? `+${selectedPair.fundingRate}%` : `${selectedPair.fundingRate}%`}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -581,49 +613,85 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               </div>
             </div>
 
-            {/* Liquidation Danger Zone Interactive Meter */}
-            <div className={`p-3 rounded-2xl border space-y-1.5 transition-all ${
+            {/* Liquidation Danger Zone Interactive Radar */}
+            <div className={`p-3.5 rounded-2xl border space-y-2.5 transition-all ${
               distanceToLiqPercent <= 4 
-                ? 'bg-rose-950/40 border-rose-500/40 shadow-lg shadow-rose-950/30' 
+                ? 'bg-rose-950/50 border-rose-500/50 shadow-lg shadow-rose-950/40 ring-1 ring-rose-500/30' 
                 : distanceToLiqPercent <= 10 
-                  ? 'bg-amber-950/30 border-amber-500/30' 
-                  : isDarkMode ? 'bg-black/40 border-purple-500/20' : 'bg-white border-purple-200'
+                  ? 'bg-amber-950/40 border-amber-500/30 ring-1 ring-amber-500/20' 
+                  : isDarkMode ? 'bg-black/40 border-purple-500/25' : 'bg-white border-purple-200'
             }`}>
               <div className="flex justify-between items-center text-[11px]">
                 <span className="flex items-center gap-1.5 font-bold">
-                  <AlertTriangle className={`w-3.5 h-3.5 ${
+                  <AlertTriangle className={`w-4 h-4 ${
                     distanceToLiqPercent <= 4 ? 'text-rose-400 animate-bounce' : distanceToLiqPercent <= 10 ? 'text-amber-400' : 'text-emerald-400'
                   }`} />
-                  <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
-                    {isFa ? 'حاشیه ایمنی فاصله تا لیکوئید:' : 'Liquidation Safety Buffer:'}
+                  <span className={isDarkMode ? 'text-slate-200' : 'text-slate-800'}>
+                    {isFa ? 'حاشیه ایمنی فاصله تا لیکوئید شدن:' : 'Liquidation Safety Distance:'}
                   </span>
                 </span>
-                <span dir="ltr" className={`font-mono font-black ${
+                <span dir="ltr" className={`font-mono font-black font-tabular text-xs ${
                   distanceToLiqPercent <= 4 ? 'text-rose-400' : distanceToLiqPercent <= 10 ? 'text-amber-400' : 'text-emerald-400'
                 }`}>
                   {distanceToLiqPercent.toFixed(1)}% (${Math.round(distanceToLiqUsd).toLocaleString()})
                 </span>
               </div>
 
-              {/* Meter progress bar */}
-              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden relative border border-white/5">
+              {/* Multi-segment Risk Spectrum Bar with Animated Indicator Marker */}
+              <div className="relative pt-1 pb-1">
+                <div className="w-full h-2.5 rounded-full bg-slate-900/90 overflow-hidden flex border border-white/10 shadow-inner">
+                  {/* Danger segment (0-20% width) */}
+                  <div className="w-[20%] h-full bg-rose-600/80" />
+                  {/* Caution segment (20-50% width) */}
+                  <div className="w-[30%] h-full bg-amber-500/80" />
+                  {/* Safe segment (50-100% width) */}
+                  <div className="w-[50%] h-full bg-emerald-500/80" />
+                </div>
+                {/* Pointer marker */}
                 <div 
-                  className={`h-full transition-all duration-300 rounded-full ${
-                    distanceToLiqPercent <= 4 
-                      ? 'bg-gradient-to-r from-rose-600 to-red-500 animate-pulse' 
-                      : distanceToLiqPercent <= 10 
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-400' 
-                        : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                  }`}
-                  style={{ width: `${Math.min(100, Math.max(6, distanceToLiqPercent * 4))}%` }}
-                />
+                  className="absolute top-0 w-3 h-4 -ml-1.5 transition-all duration-300 flex flex-col items-center pointer-events-none"
+                  style={{ left: `${Math.min(98, Math.max(2, distanceToLiqPercent * 4))}%` }}
+                >
+                  <div className={`w-2.5 h-2.5 rounded-full border-2 border-white shadow-md ${
+                    distanceToLiqPercent <= 4 ? 'bg-rose-500 animate-ping' : distanceToLiqPercent <= 10 ? 'bg-amber-400' : 'bg-emerald-400'
+                  }`} />
+                </div>
               </div>
 
-              <div className="flex justify-between text-[9px] font-mono text-slate-400 pt-0.5">
-                <span className="text-rose-400 font-bold">{isFa ? 'خطر شدید (<۴٪)' : 'High Risk (<4%)'}</span>
-                <span className="text-amber-400">{isFa ? 'احتیاط' : 'Caution'}</span>
-                <span className="text-emerald-400 font-bold">{isFa ? 'امن (>۱۰٪)' : 'Safe (>10%)'}</span>
+              <div className="flex justify-between items-center text-[10px] font-mono font-tabular pt-0.5">
+                <span className="text-rose-400 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  {isFa ? 'خطر لیکوئید (<۴٪)' : 'Danger (<4%)'}
+                </span>
+                <span className="text-amber-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  {isFa ? 'هشدار (۴-۱۰٪)' : 'Caution (4-10%)'}
+                </span>
+                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {isFa ? 'حاشیه امن (>۱۰٪)' : 'Safe (>10%)'}
+                </span>
               </div>
+
+              {/* 1-Tap Auto-Safety Rebalancing Button */}
+              {distanceToLiqPercent <= 10 && (
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] text-amber-300/90">
+                    {isFa ? 'فاصله تا لیکوئید کم است. مارجین را افزایش دهید:' : 'Close to liquidation. Boost collateral:'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      const current = parseFloat(marginInput) || 0;
+                      setMarginInput((current + 50).toString());
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+                  >
+                    {isFa ? 'افزایش ایمنی مارجین (+۵۰$)' : 'Boost Buffer (+$50)'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
