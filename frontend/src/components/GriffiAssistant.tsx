@@ -30,7 +30,7 @@ type GriffiPose =
   | 'cards'
   | 'domains';
 
-export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode, onStartTour }) => {
+export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMode: _isDarkMode, onStartTour }) => {
   const isFa = lang === 'fa';
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -198,11 +198,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div 
-            className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all text-right max-h-[90vh] overflow-y-auto ${
-              isDarkMode 
-                ? 'dex-card text-slate-100' 
-                : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
-            }`}
+            className="w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all text-right max-h-[90vh] overflow-y-auto dex-card"
           >
             {/* Ambient Background Aura */}
             <div className="absolute -top-20 -left-20 w-44 h-44 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
@@ -244,7 +240,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
 
             {/* Interactive Guided Tour Banner Button */}
             {onStartTour && (
-              <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-600/20 to-indigo-600/20 border border-amber-400/40 flex items-center justify-between gap-3">
+              <div className="mb-4 p-3 rounded-2xl border flex items-center justify-between gap-3 dex-card">
                 <div className="flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
                   <span className="text-xs font-bold text-white">
@@ -438,7 +434,7 @@ export const GriffiAssistant: React.FC<GriffiAssistantProps> = ({ lang, isDarkMo
             </div>
 
             {/* Dynamic Griffi Speech Bubble with Persian Voice Readout */}
-            <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/60 via-indigo-950/60 to-purple-950/60 border border-purple-400/30 text-xs text-purple-100 leading-relaxed shadow-lg">
+            <div className="mb-4 p-3.5 rounded-2xl dex-card text-xs text-purple-100 leading-relaxed shadow-lg">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-bold text-amber-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />

@@ -445,7 +445,7 @@ export const ArbitrageScanner: React.FC<ArbitrageScannerProps> = ({
         </div>
 
         {/* Live Golden Arbitrage Opportunity Banner */}
-        <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-purple-900/30 to-emerald-500/15 border border-amber-400/40 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-5 p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 dex-card">
           <div className="flex items-center gap-3 text-right">
             <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 ring-1 ring-amber-400/40 shrink-0 animate-pulse">
               <Zap className="w-5 h-5 text-amber-400" />

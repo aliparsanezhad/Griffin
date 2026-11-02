@@ -141,7 +141,7 @@ interface Candle {
 export const PriceChart: React.FC<PriceChartProps> = ({
   tomanRate,
   lang,
-  isDarkMode,
+  isDarkMode: _isDarkMode,
   onTradePair
 }) => {
   const isFa = lang === 'fa';
@@ -268,11 +268,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const candleBarWidth = Math.max(4, Math.min(18, (chartWidth / candleCount) * 0.65));
 
   return (
-    <div className={`w-full rounded-3xl p-6 transition-all relative overflow-hidden ${
-      isDarkMode 
-        ? 'dex-card text-slate-100' 
-        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-6 transition-all relative overflow-hidden dex-card">
       {/* Top Header: Pair Selector, Chart Modes, Timeframes */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-purple-500/20">
         
@@ -367,7 +363,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             {isFa ? 'نرخ لحظه‌ای' : 'Current Price'}
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl md:text-3xl font-black font-mono tracking-tight text-white">
+            <span className="text-2xl md:text-3xl font-black font-mono font-tabular tracking-tight text-white">
               {selectedPairId === 'usdt-irt' 
                 ? (isFa ? `${toPersianDigits(formatToman(activePrice, false))} تومان` : `${formatToman(activePrice, false)} Toman`)
                 : `$${activePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: activePrice < 0.01 ? 6 : 3 })}`

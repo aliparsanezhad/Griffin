@@ -89,11 +89,7 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
   const tradePresets = [1000, 5000, 10000, 25000, 50000, 100000];
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all ${
-      isDarkMode 
-        ? 'dex-card text-slate-100' 
-        : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all dex-card">
       {/* Decorative background glow */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -164,9 +160,7 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
         
         {/* Left Column: Volume Slider & Presets */}
-        <div className={`p-5 rounded-2xl border flex flex-col justify-between ${
-          isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
-        }`}>
+        <div className="p-5 rounded-2xl border flex flex-col justify-between dex-card">
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -242,9 +236,7 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
         </div>
 
         {/* Center & Right: Dynamic Routing Visual Tree */}
-        <div className={`lg:col-span-2 p-5 rounded-2xl border flex flex-col justify-between ${
-          isDarkMode ? 'bg-purple-950/20 border-purple-500/20' : 'bg-white border-purple-200'
-        }`}>
+        <div className="lg:col-span-2 p-5 rounded-2xl border flex flex-col justify-between dex-card">
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -404,9 +396,7 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs dex-card">
         <div className="flex items-center gap-2 text-right">
           <Layers className="w-4 h-4 text-purple-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>

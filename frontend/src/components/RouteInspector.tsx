@@ -434,7 +434,7 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
           </div>
 
           {/* Savings Callout compared to Iranian Centralized Exchange */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-teal-950/40 to-purple-950/40 border border-emerald-500/30 flex items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl border flex items-center justify-between gap-4 dex-card">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
                 <Zap className="w-5 h-5 text-emerald-400" />
@@ -596,7 +596,7 @@ export const RouteInspector: React.FC<RouteInspectorProps> = ({
       </div>
 
       {/* Guide Note Box for Iranian Users */}
-      <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 text-xs text-slate-300 flex items-start gap-3">
+      <div className="p-4 rounded-2xl border text-xs text-slate-300 flex items-start gap-3 dex-card">
         <Info className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <h4 className="font-bold text-white text-xs">

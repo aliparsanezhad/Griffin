@@ -254,9 +254,7 @@ export const MarketSentimentGauge: React.FC<MarketSentimentGaugeProps> = ({
   const areaD = `${pathD} L ${points[points.length - 1].x} ${svgHeight - padding} L ${points[0].x} ${svgHeight - padding} Z`;
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all ${
-      isDarkMode ? 'dex-card text-slate-100' : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all dex-card">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none -z-10" />
