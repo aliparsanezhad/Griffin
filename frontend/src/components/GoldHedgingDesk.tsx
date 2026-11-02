@@ -123,8 +123,8 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
+    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all dex-card ${
+      isDarkMode ? 'border-purple-500/30' : 'bg-white/95 border-purple-200'
     }`}>
       {/* Background ambient gold lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -231,13 +231,50 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
               </span>
             </div>
 
-            <div className="space-y-1 mb-3">
+            <div className="space-y-1 mb-2">
               <span className="text-xl font-black text-white font-mono block">
                 {isFa ? `${toPersianDigits(formatToman(sekeEmamiToman))} ت` : `${formatToman(sekeEmamiToman)} T`}
               </span>
               <span className="text-xs text-rose-400 font-mono block">
                 {isFa ? `حباب سکه: ${toPersianDigits(formatToman(sekeBubbleToman))} تومان` : `Bubble: ${formatToman(sekeBubbleToman)} T`}
               </span>
+            </div>
+
+            {/* Animated Seke Bubble Ring Gauge */}
+            <div className="my-2.5 p-2 rounded-xl bg-black/40 border border-rose-500/20 flex items-center justify-between">
+              <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                <svg className="w-10 h-10 -rotate-90 transform" viewBox="0 0 36 36">
+                  <path
+                    className="text-slate-800"
+                    strokeWidth="3.5"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="text-rose-500 animate-pulse"
+                    strokeDasharray={`${sekeBubblePercent}, 100`}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <span className="text-[9px] font-mono font-black text-rose-300 absolute">
+                  {sekeBubblePercent}%
+                </span>
+              </div>
+              <div className="text-right text-[10px] space-y-0.5">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400">{isFa ? 'ارزش طلای واقعی:' : 'Real Gold Value:'}</span>
+                  <span className="font-mono text-slate-200 font-bold">{toPersianDigits(formatToman(sekeRawToman, false))} ت</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-rose-400">{isFa ? 'حباب سوختنی:' : 'Bubble Premium:'}</span>
+                  <span className="font-mono text-rose-400 font-bold">+{toPersianDigits(formatToman(sekeBubbleToman, false))} ت</span>
+                </div>
+              </div>
             </div>
 
             <p className="text-[11px] text-slate-300 leading-relaxed text-right">
@@ -389,6 +426,36 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
                   {amt} {calcUnit === 'usdt' ? '$' : ''}
                 </button>
               ))}
+            </div>
+
+            {/* 1-Tap Quick Gold Ounce Presets */}
+            <div className="mt-3 pt-3 border-t border-purple-500/20">
+              <span className="text-[10px] text-slate-400 block mb-1.5 font-bold">
+                {isFa ? 'تبدیل سریع بر مبنای اونس جهانی طلا (PAXG):' : 'Quick Troy Ounce Conversion Presets:'}
+              </span>
+              <div className="grid grid-cols-4 gap-1.5 font-mono text-[10px]">
+                {[
+                  { label: '0.1 oz', usdt: Math.round(ounceUsd * 0.1), sekeEquivalent: '0.38' },
+                  { label: '0.25 oz', usdt: Math.round(ounceUsd * 0.25), sekeEquivalent: '0.96' },
+                  { label: '0.5 oz', usdt: Math.round(ounceUsd * 0.5), sekeEquivalent: '1.91' },
+                  { label: '1.0 oz', usdt: Math.round(ounceUsd * 1.0), sekeEquivalent: '3.82' },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      setCalcUnit('usdt');
+                      setUnitAmount(preset.usdt);
+                    }}
+                    className="p-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/25 text-amber-300 text-center transition-all cursor-pointer"
+                    title={isFa ? `معادل ${preset.sekeEquivalent} عدد سکه امامی` : `Equivalent to ${preset.sekeEquivalent} Seke coins`}
+                  >
+                    <span className="font-bold block text-[11px]">{preset.label}</span>
+                    <span className="text-[9px] text-slate-400 block">≈ {preset.sekeEquivalent} {isFa ? 'سکه' : 'coin'}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
