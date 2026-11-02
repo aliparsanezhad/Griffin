@@ -304,9 +304,9 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
     <div className="w-full space-y-6">
       
       {/* Hero Banner: Griffi Token Alchemist & Blacksmith */}
-      <div className={`relative overflow-hidden rounded-3xl border p-6 md:p-8 ${
+      <div className={`relative overflow-hidden rounded-3xl border p-6 md:p-8 dex-card ${
         isDarkMode 
-          ? 'bg-gradient-to-br from-[#1b1035] via-[#150d2e] to-[#0d081f] border-purple-500/30' 
+          ? 'border-purple-500/30 shadow-2xl' 
           : 'bg-gradient-to-br from-purple-100 via-amber-50 to-indigo-100 border-purple-200'
       }`}>
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
@@ -720,14 +720,14 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                 <label className="text-xs text-slate-300 block mb-1">
                   {isFa ? 'مقدار پرداختی (تتر USDT):' : 'Amount (USDT):'}
                 </label>
-                <div className="relative">
+                <div className="relative dex-input-box rounded-xl p-1">
                   <input
                     type="number"
                     min="1"
                     step="any"
                     value={tradeAmountUsd}
                     onChange={(e) => setTradeAmountUsd(e.target.value)}
-                    className="w-full bg-purple-950/70 border border-purple-500/30 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-amber-400"
+                    className="w-full bg-transparent px-3 py-2 text-white font-mono text-sm focus:outline-none placeholder:text-slate-600"
                     placeholder="25"
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-300">
@@ -735,15 +735,18 @@ export const LaunchpadSection: React.FC<LaunchpadSectionProps> = ({
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-[11px] text-slate-400 mt-1 font-mono">
+                <div className="flex justify-between items-center text-[11px] text-slate-400 mt-1.5 font-mono">
                   <span>≈ {toPersianDigits(formatToman(tomanValue))} تومان</span>
                   <div className="flex gap-1">
-                    {['10', '25', '50', '100'].map((amt) => (
+                    {['10', '25', '50', '100', '250'].map((amt) => (
                       <button
                         key={amt}
                         type="button"
-                        onClick={() => setTradeAmountUsd(amt)}
-                        className="px-1.5 py-0.5 rounded bg-purple-900/40 text-[10px] hover:bg-purple-800 text-purple-200"
+                        onClick={() => {
+                          playClickSound();
+                          setTradeAmountUsd(amt);
+                        }}
+                        className="px-2 py-0.5 rounded-lg bg-purple-900/40 hover:bg-purple-800 text-[10px] text-purple-200 border border-purple-500/20 cursor-pointer transition-all active:scale-95"
                       >
                         ${amt}
                       </button>
