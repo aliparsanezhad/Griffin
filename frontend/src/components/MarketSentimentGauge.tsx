@@ -12,7 +12,9 @@ import {
   TrendingUp,
   Clock,
   Layers,
-  Zap
+  Zap,
+  RotateCcw,
+  Sliders
 } from 'lucide-react';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
 import { toPersianDigits, formatToman } from '../services/tomanService';
@@ -53,9 +55,64 @@ export const MarketSentimentGauge: React.FC<MarketSentimentGaugeProps> = ({
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const isFa = lang === 'fa';
 
-  const score = 78; // Extreme Greed
-  const scoreLabelFa = 'طمع شدید (Extreme Greed)';
-  const scoreLabelEn = 'Extreme Greed';
+  // Live vs Simulated Score State
+  const LIVE_SCORE = 78;
+  const [activeScore, setActiveScore] = useState<number>(LIVE_SCORE);
+  const [isSimulated, setIsSimulated] = useState<boolean>(false);
+
+  const getScoreInfo = (s: number) => {
+    if (s <= 25) {
+      return {
+        labelFa: 'ترس شدید (Extreme Fear)',
+        labelEn: 'Extreme Fear',
+        color: 'text-rose-400',
+        bgColor: 'bg-rose-500/20 border-rose-500/30 text-rose-300',
+        adviceFa: '🚨 شرایط ترس شدید! شاخص نشان‌دهنده تسلیم فروشندگان است. بر اساس تجربه تاریخی، بهترین زمان برای فعال‌سازی خرید پله‌ای (DCA) در کف قیمتی است.',
+        adviceEn: 'Extreme Fear detected. Historical data shows this is the optimal accumulation zone via DCA.'
+      };
+    }
+    if (s <= 45) {
+      return {
+        labelFa: 'ترس ملایم (Fear)',
+        labelEn: 'Fear',
+        color: 'text-orange-400',
+        bgColor: 'bg-orange-500/20 border-orange-500/30 text-orange-300',
+        adviceFa: '📉 بازار در حالت ترس و عدم‌قطعیت است. انباشت آرام در دارایی‌های بنیادین (BTC و ETH) با ریسک پایین انجام می‌شود.',
+        adviceEn: 'Fear in the market. Steady accumulation of blue-chips is favored.'
+      };
+    }
+    if (s <= 55) {
+      return {
+        labelFa: 'خنثی (Neutral)',
+        labelEn: 'Neutral',
+        color: 'text-amber-400',
+        bgColor: 'bg-amber-500/20 border-amber-500/30 text-amber-300',
+        adviceFa: '⚖️ بازار در حالت تعادل و خنثی است. کسب سود سالانه استیکینگ (APY) و پس‌انداز تتر بهترین گزینه است.',
+        adviceEn: 'Neutral market balance. Generating yield via staking vaults is optimal.'
+      };
+    }
+    if (s <= 75) {
+      return {
+        labelFa: 'طمع (Greed)',
+        labelEn: 'Greed',
+        color: 'text-teal-400',
+        bgColor: 'bg-teal-500/20 border-teal-500/30 text-teal-300',
+        adviceFa: '📈 طمع در بازار در حال شکل‌گیری است. روندها صعودی هستند؛ سفارشات لیمیت برای سیو پله‌ای سود تنظیم کنید.',
+        adviceEn: 'Greed is building up. Set limit take-profit orders at upcoming resistances.'
+      };
+    }
+    return {
+      labelFa: 'طمع شدید (Extreme Greed)',
+      labelEn: 'Extreme Greed',
+      color: 'text-emerald-400',
+      bgColor: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300',
+      adviceFa: '🔥 طمع شدید حاکم است! از فومو در سقف قیمت‌ها پرهیز کنید. بخشی از سود خود را به تتر (USDT) یا طلای دیجیتال (PAXG) منتقل کنید.',
+      adviceEn: 'Extreme Greed! Avoid FOMO at local peaks. Lock in gains into USDT or PAXG digital gold.'
+    };
+  };
+
+  const scoreInfo = getScoreInfo(activeScore);
+  const needleAngle = (activeScore / 100) * 180 - 90;
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(COMMISSION_WALLET);
@@ -240,11 +297,16 @@ export const MarketSentimentGauge: React.FC<MarketSentimentGaugeProps> = ({
             <Flame className="w-5 h-5" />
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-slate-400 block font-semibold">
-              {isFa ? 'شاخص فعلی:' : 'Current Index:'}
+            <span className="text-[10px] text-slate-400 block font-semibold flex items-center gap-1">
+              <span>{isFa ? 'شاخص فعلی:' : 'Current Index:'}</span>
+              {isSimulated && (
+                <span className="px-1.5 py-0.2 rounded bg-purple-500/30 text-purple-300 text-[9px] font-bold">
+                  {isFa ? 'شبیه‌سازی' : 'Sim'}
+                </span>
+              )}
             </span>
             <span className="text-base font-extrabold text-amber-400 font-mono">
-              {score} / 100
+              {activeScore} / 100
             </span>
           </div>
         </div>
@@ -257,26 +319,130 @@ export const MarketSentimentGauge: React.FC<MarketSentimentGaugeProps> = ({
         <div className={`lg:col-span-5 p-6 rounded-2xl border text-center flex flex-col justify-between items-center ${
           isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
         }`}>
-          <span className="text-xs font-bold text-slate-400 mb-2">
-            {isFa ? 'وضعیت احساسات کلی بازار:' : 'Market Sentiment State:'}
-          </span>
+          <div className="w-full flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-slate-400">
+              {isFa ? 'وضعیت احساسات کلی بازار:' : 'Market Sentiment State:'}
+            </span>
+            {isSimulated && (
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setActiveScore(LIVE_SCORE);
+                  setIsSimulated(false);
+                }}
+                className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 font-bold cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>{isFa ? 'بازگشت به زنده' : 'Reset to Live'}</span>
+              </button>
+            )}
+          </div>
 
-          {/* Speedometer Bar Visual */}
-          <div className="relative w-48 h-24 overflow-hidden my-3">
-            <div className="w-48 h-48 rounded-full border-[14px] border-slate-700/40 relative">
-              <div 
-                className="absolute inset-0 rounded-full border-[14px] border-transparent border-t-amber-400 border-r-emerald-400 border-l-rose-500 transition-all duration-700"
-                style={{ transform: 'rotate(45deg)' }}
+          {/* Real Curved SVG Speedometer Dial with Animated Needle */}
+          <div className="relative w-56 h-32 my-1 flex flex-col items-center justify-end">
+            <svg viewBox="0 0 200 115" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f43f5e" />
+                  <stop offset="25%" stopColor="#f97316" />
+                  <stop offset="50%" stopColor="#eab308" />
+                  <stop offset="75%" stopColor="#14b8a6" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+
+              {/* Background Arc Track */}
+              <path
+                d="M 25 105 A 75 75 0 0 1 175 105"
+                fill="none"
+                stroke="#1e1838"
+                strokeWidth="16"
+                strokeLinecap="round"
               />
+
+              {/* Colored Gauge Arc */}
+              <path
+                d="M 25 105 A 75 75 0 0 1 175 105"
+                fill="none"
+                stroke="url(#gaugeGrad)"
+                strokeWidth="14"
+                strokeLinecap="round"
+                strokeDasharray="235.6"
+                strokeDashoffset={235.6 * (1 - activeScore / 100)}
+                className="transition-all duration-700 ease-out"
+              />
+
+              {/* Center Needle */}
+              <g 
+                transform={`rotate(${needleAngle}, 100, 105)`}
+                className="transition-transform duration-700 ease-out"
+              >
+                <line 
+                  x1="100" 
+                  y1="105" 
+                  x2="100" 
+                  y2="38" 
+                  stroke="#ffffff" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  className="drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"
+                />
+                <circle cx="100" cy="105" r="7" fill="#fbbf24" stroke="#1e1838" strokeWidth="2" />
+                <circle cx="100" cy="105" r="3" fill="#ffffff" />
+              </g>
+
+              {/* Min and Max markers */}
+              <text x="22" y="115" fontSize="9" fill="#94a3b8" textAnchor="middle" fontFamily="monospace">0</text>
+              <text x="100" y="24" fontSize="9" fill="#eab308" textAnchor="middle" fontFamily="monospace">50</text>
+              <text x="178" y="115" fontSize="9" fill="#94a3b8" textAnchor="middle" fontFamily="monospace">100</text>
+            </svg>
+
+            {/* Score Display Tag */}
+            <div className="text-center mt-1">
+              <span className={`text-3xl font-black font-mono tracking-tight ${scoreInfo.color}`}>
+                {activeScore}
+              </span>
+              <span className="text-[11px] font-bold text-slate-300 block">
+                {isFa ? scoreInfo.labelFa : scoreInfo.labelEn}
+              </span>
             </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-              <span className="text-3xl font-black text-amber-400 font-mono tracking-tight">{score}</span>
-              <span className="text-[11px] font-bold text-slate-300">{isFa ? scoreLabelFa : scoreLabelEn}</span>
+          </div>
+
+          {/* Interactive Sentiment Simulator Presets */}
+          <div className="w-full mt-3 pt-2.5 border-t border-purple-500/20">
+            <span className="text-[10px] text-slate-400 block mb-1.5 flex items-center justify-center gap-1">
+              <Sliders className="w-3 h-3 text-purple-400" />
+              <span>{isFa ? 'شبیه‌ساز احساسات بازار (تست استراتژی):' : 'Sentiment Simulator:'}</span>
+            </span>
+            <div className="grid grid-cols-5 gap-1 text-[10px] font-bold">
+              {[
+                { score: 18, label: 'ترس شدید', color: 'bg-rose-950/60 text-rose-300 border-rose-500/30' },
+                { score: 35, label: 'ترس', color: 'bg-orange-950/60 text-orange-300 border-orange-500/30' },
+                { score: 50, label: 'خنثی', color: 'bg-amber-950/60 text-amber-300 border-amber-500/30' },
+                { score: 68, label: 'طمع', color: 'bg-teal-950/60 text-teal-300 border-teal-500/30' },
+                { score: 78, label: 'زنده ۷۸', color: 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30' }
+              ].map(item => (
+                <button
+                  key={item.score}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setActiveScore(item.score);
+                    setIsSimulated(item.score !== LIVE_SCORE);
+                  }}
+                  className={`py-1 rounded-lg border transition-all cursor-pointer ${item.color} ${
+                    activeScore === item.score ? 'ring-2 ring-purple-400 font-extrabold shadow-sm' : 'opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Historical comparison pills */}
-          <div className="grid grid-cols-3 gap-2 w-full mt-4 pt-3 border-t border-purple-500/20 text-xs">
+          <div className="grid grid-cols-3 gap-2 w-full mt-3 pt-2 border-t border-purple-500/20 text-xs">
             <div className="p-1.5 rounded-lg bg-black/20 text-center">
               <span className="text-[10px] text-slate-400 block">{isFa ? 'دیروز' : 'Yesterday'}</span>
               <span className="font-mono font-bold text-amber-300">75</span>
@@ -527,14 +693,17 @@ export const MarketSentimentGauge: React.FC<MarketSentimentGaugeProps> = ({
         isDarkMode ? 'bg-purple-950/40 border-purple-500/30' : 'bg-purple-50 border-purple-200'
       }`}>
         <div className="text-right space-y-1">
-          <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            {isFa ? 'استراتژی پیشنهادی گریفی در وضعیت فعلی:' : 'Griffi Recommended Action:'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              {isFa ? 'استراتژی پیشنهادی گریفی بر اساس شاخص:' : 'Griffi Recommended Action:'}
+            </span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${scoreInfo.bgColor}`}>
+              {isFa ? scoreInfo.labelFa : scoreInfo.labelEn}
+            </span>
+          </div>
           <p className="text-xs text-slate-200 leading-relaxed max-w-2xl">
-            {isFa
-              ? 'در شرایط طمع شدید، از خرید هیجانی در سقف قیمت‌ها پرهیز کنید. به جای آن، از خرید پله‌ای (DCA) استفاده کرده یا سودهای خود را در طلای دیجیتال (PAXG) و تتر ذخیره کنید.'
-              : 'Avoid FOMO during Extreme Greed. Consider DCA limit orders or securing profits in USDT/PAXG.'}
+            {isFa ? scoreInfo.adviceFa : scoreInfo.adviceEn}
           </p>
         </div>
 
