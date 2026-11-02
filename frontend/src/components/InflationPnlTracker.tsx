@@ -8,7 +8,10 @@ import {
   Scale, 
   Copy, 
   Check,
-  RotateCcw
+  RotateCcw,
+  BarChart3,
+  Landmark,
+  Banknote
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playCoinDingSound } from '../services/soundService';
@@ -123,6 +126,16 @@ export const InflationPnlTracker: React.FC<InflationPnlTrackerProps> = ({
   const initialSeke = initialCostToman / SEKE_PRICE_TOMAN;
   const currentSeke = currentValueToman / SEKE_PRICE_TOMAN;
 
+  // Multi-asset comparative returns
+  const goldEndToman = initialCostToman * (tomanRate / Math.max(historicalTomanRate, 1)) * (1 + 0.08 * (holdingMonths / 12));
+  const cashRealValueToman = initialCostToman * (historicalTomanRate / Math.max(tomanRate, 1));
+
+  const maxCompareToman = Math.max(currentValueToman, goldEndToman, bankTotalToman, initialCostToman, 1);
+  const cryptoBarWidth = Math.max(14, Math.min(100, (currentValueToman / maxCompareToman) * 100));
+  const goldBarWidth = Math.max(14, Math.min(100, (goldEndToman / maxCompareToman) * 100));
+  const bankBarWidth = Math.max(14, Math.min(100, (bankTotalToman / maxCompareToman) * 100));
+  const cashBarWidth = Math.max(14, Math.min(100, (cashRealValueToman / maxCompareToman) * 100));
+
   const handleCopySummary = () => {
     playClickSound();
     const text = isFa 
@@ -153,7 +166,7 @@ Calculated on GriffinSwap`;
     <div className={`w-full py-6 px-4 max-w-6xl mx-auto animate-fade-in text-right ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
       
       {/* Hero Banner with Mascot Analyst */}
-      <div className="rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl mb-8 group bg-[#110d29]">
+      <div className="dex-card overflow-hidden relative shadow-2xl mb-8 group bg-[#110d29]">
         <div className="relative h-60 sm:h-72 w-full overflow-hidden">
           <img 
             src="/mascot/griffi-analyst.jpg" 
@@ -181,7 +194,7 @@ Calculated on GriffinSwap`;
             <div className="flex items-center gap-2 self-start md:self-end">
               <button
                 onClick={handleReset}
-                className="p-2 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold backdrop-blur-md"
+                className="p-2.5 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-300 hover:text-white hover:border-purple-400 transition-all flex items-center gap-1.5 text-xs font-bold backdrop-blur-md shadow-lg"
                 title={isFa ? 'تنظیم مجدد' : 'Reset'}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -193,10 +206,10 @@ Calculated on GriffinSwap`;
       </div>
 
       {/* Preset Scenarios Selector */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/20 backdrop-blur-sm">
+      <div className="dex-card mb-6 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>{isFa ? 'سناریوهای واقعی و آماده:' : 'Real Preset Scenarios:'}</span>
+          <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+          <span>{isFa ? 'سناریوهای واقعی و آماده سرمایه‌گذاری:' : 'Real Preset Scenarios:'}</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -206,7 +219,7 @@ Calculated on GriffinSwap`;
               onClick={() => handleSelectScenario(idx)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 selectedScenarioIndex === idx
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-1 ring-purple-400'
                   : 'bg-purple-900/30 text-slate-400 hover:text-white hover:bg-purple-900/50'
               }`}
             >
@@ -220,21 +233,21 @@ Calculated on GriffinSwap`;
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
         
         {/* Left Column: Interactive Input Sliders & Fields (5 Cols) */}
-        <div className="lg:col-span-5 glass-panel p-6 rounded-3xl border border-purple-500/25 space-y-4">
+        <div className="lg:col-span-5 dex-card p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
             <h3 className="font-extrabold text-white text-sm flex items-center gap-2">
               <Calculator className="w-4 h-4 text-purple-400" />
               <span>{isFa ? 'تنظیم مقادیر سرمایه‌گذاری' : 'Investment Parameters'}</span>
             </h3>
-            <span className="text-xs font-mono font-bold text-amber-400">
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/30">
               {activeScenario.tokenSymbol}
             </span>
           </div>
 
           {/* Amount of Token */}
-          <div className="space-y-1.5">
+          <div className="dex-input-box p-3 space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400">{isFa ? 'مقدار رمزارز خریداری شده:' : 'Token Amount:'}</span>
+              <span className="text-slate-400 font-medium">{isFa ? 'مقدار رمزارز خریداری شده:' : 'Token Amount:'}</span>
               <span className="font-mono font-bold text-white">{tokenAmount} {activeScenario.tokenSymbol}</span>
             </div>
             <input 
@@ -242,28 +255,28 @@ Calculated on GriffinSwap`;
               value={tokenAmount}
               onChange={(e) => setTokenAmount(parseFloat(e.target.value) || 0)}
               step="any"
-              className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-400"
+              className="w-full bg-transparent border-none text-sm font-mono font-bold text-white focus:outline-none"
             />
           </div>
 
           {/* Buy Price USD */}
-          <div className="space-y-1.5">
+          <div className="dex-input-box p-3 space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400">{isFa ? 'قیمت خرید دلاری هر واحد:' : 'Buy Price (USD):'}</span>
+              <span className="text-slate-400 font-medium">{isFa ? 'قیمت خرید دلاری هر واحد:' : 'Buy Price (USD):'}</span>
               <span className="font-mono font-bold text-white">${buyPriceUsd.toLocaleString()}</span>
             </div>
             <input 
               type="number"
               value={buyPriceUsd}
               onChange={(e) => setBuyPriceUsd(parseFloat(e.target.value) || 0)}
-              className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-400"
+              className="w-full bg-transparent border-none text-sm font-mono font-bold text-white focus:outline-none"
             />
           </div>
 
           {/* Historical Toman Rate */}
-          <div className="space-y-1.5">
+          <div className="dex-input-box p-3 space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400">{isFa ? 'نرخ تتر در زمان خرید (تومان):' : 'USDT Rate at Purchase:'}</span>
+              <span className="text-slate-400 font-medium">{isFa ? 'نرخ تتر در زمان خرید (تومان):' : 'USDT Rate at Purchase:'}</span>
               <span className="font-mono font-bold text-amber-400">{toPersianDigits(formatToman(historicalTomanRate, false))} ت</span>
             </div>
             <input 
@@ -271,33 +284,33 @@ Calculated on GriffinSwap`;
               value={historicalTomanRate}
               onChange={(e) => setHistoricalTomanRate(parseFloat(e.target.value) || 0)}
               step="1000"
-              className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono text-amber-300 focus:outline-none focus:border-purple-400"
+              className="w-full bg-transparent border-none text-sm font-mono font-bold text-amber-300 focus:outline-none"
             />
           </div>
 
           {/* Current Price USD */}
-          <div className="space-y-1.5">
+          <div className="dex-input-box p-3 space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400">{isFa ? 'قیمت فعلی بازار (دلار):' : 'Current Market Price (USD):'}</span>
+              <span className="text-slate-400 font-medium">{isFa ? 'قیمت فعلی بازار (دلار):' : 'Current Market Price (USD):'}</span>
               <span className="font-mono font-bold text-emerald-400">${currentPriceUsd.toLocaleString()}</span>
             </div>
             <input 
               type="number"
               value={currentPriceUsd}
               onChange={(e) => setCurrentPriceUsd(parseFloat(e.target.value) || 0)}
-              className="w-full bg-purple-950/40 border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono text-emerald-300 focus:outline-none focus:border-purple-400"
+              className="w-full bg-transparent border-none text-sm font-mono font-bold text-emerald-300 focus:outline-none"
             />
           </div>
 
           {/* Current Live Toman Rate (Read-only oracle feed) */}
-          <div className="space-y-1.5">
+          <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20 space-y-1.5">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'نرخ زنده تتر امروز (اوراکل):' : 'Current Tether Rate (Live):'}</span>
               <span className="font-mono font-bold text-emerald-400">
                 {isFa ? `${toPersianDigits(formatToman(tomanRate, false))} تومان` : `${formatToman(tomanRate, false)} T`}
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/40 border border-purple-500/20 text-[11px] text-slate-300 flex justify-between items-center">
+            <div className="pt-1 border-t border-purple-500/10 flex justify-between items-center text-[11px] text-slate-300">
               <span>{isFa ? 'رشد نرخ ارز در این بازه:' : 'FX Devaluation Rate:'}</span>
               <span className="font-mono font-bold text-amber-300">
                 +{historicalTomanRate > 0 ? (((tomanRate - historicalTomanRate) / historicalTomanRate) * 100).toFixed(1) : 0}%
@@ -305,8 +318,8 @@ Calculated on GriffinSwap`;
             </div>
           </div>
 
-          {/* Holding duration slider */}
-          <div className="space-y-1.5 pt-2">
+          {/* Holding duration slider & 1-tap presets */}
+          <div className="space-y-2 pt-2">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400">{isFa ? 'مدت زمان نگهداری:' : 'Holding Period:'}</span>
               <span className="font-bold text-purple-300 font-mono">{holdingMonths} {isFa ? 'ماه' : 'months'}</span>
@@ -319,6 +332,22 @@ Calculated on GriffinSwap`;
               onChange={(e) => setHoldingMonths(parseInt(e.target.value, 10))}
               className="w-full accent-purple-500 cursor-pointer"
             />
+            {/* Quick Presets */}
+            <div className="flex items-center justify-between gap-1 pt-1">
+              {[3, 6, 12, 18, 24, 36].map((months) => (
+                <button
+                  key={months}
+                  onClick={() => setHoldingMonths(months)}
+                  className={`flex-1 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+                    holdingMonths === months
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'bg-purple-950/40 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {months}{isFa ? 'م' : 'M'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -326,13 +355,13 @@ Calculated on GriffinSwap`;
         <div className="lg:col-span-7 space-y-4">
           
           {/* Big Profit Hero Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-900/40 via-[#180f33] to-indigo-950/60 border border-purple-500/30 shadow-2xl relative overflow-hidden">
+          <div className="dex-card p-6 relative overflow-hidden bg-gradient-to-br from-purple-900/40 via-[#180f33] to-indigo-950/60 shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <div>
                 <span className="text-xs font-bold text-purple-300 uppercase tracking-wide block mb-1">
                   {isFa ? 'ارزش کنونی سرمایه شما' : 'Current Portfolio Value'}
                 </span>
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="text-2xl sm:text-4xl font-black text-white font-mono">
                     ${currentValueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
@@ -344,11 +373,11 @@ Calculated on GriffinSwap`;
 
               <button
                 onClick={handleCopySummary}
-                className="px-3 py-1.5 rounded-xl bg-purple-600/40 hover:bg-purple-600 text-white font-bold text-xs border border-purple-400/30 flex items-center gap-1.5 self-start sm:self-center transition-all"
+                className="px-3.5 py-2 rounded-xl bg-purple-600/50 hover:bg-purple-600 text-white font-bold text-xs border border-purple-400/30 flex items-center gap-1.5 self-start sm:self-center transition-all shadow-lg backdrop-blur-md"
                 title={isFa ? 'کپی گزارش بازدهی' : 'Copy Summary'}
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? (isFa ? 'کپی شد' : 'Copied') : (isFa ? 'اشتراک گزارش' : 'Share')}</span>
+                <span>{copied ? (isFa ? 'کپی شد ✅' : 'Copied') : (isFa ? 'اشتراک گزارش' : 'Share')}</span>
               </button>
             </div>
 
@@ -356,7 +385,7 @@ Calculated on GriffinSwap`;
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-purple-500/20">
               
               {/* Crypto pure USD gain */}
-              <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20">
+              <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/20">
                 <span className="text-[11px] text-slate-400 block mb-0.5">
                   {isFa ? 'سود ارزی خالص (Crypto P&L):' : 'Pure Crypto P&L:'}
                 </span>
@@ -371,7 +400,7 @@ Calculated on GriffinSwap`;
               </div>
 
               {/* Toman Total Gain */}
-              <div className="p-3 rounded-2xl bg-black/40 border border-purple-500/20">
+              <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/20">
                 <span className="text-[11px] text-slate-400 block mb-0.5">
                   {isFa ? 'سود کل تومانی (با احتساب تورم):' : 'Total Toman P&L:'}
                 </span>
@@ -388,11 +417,117 @@ Calculated on GriffinSwap`;
             </div>
           </div>
 
+          {/* Multi-Asset Purchasing Power Benchmark Meter */}
+          <div className="dex-card p-5 space-y-3.5">
+            <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-purple-400" />
+                <span className="font-extrabold text-xs text-white">
+                  {isFa ? 'رادار مقایسه حفظ ارزش در برابر ۴ بازار موازی' : 'Purchasing Power Benchmark vs 4 Asset Classes'}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-slate-400">
+                {isFa ? `در بازه ${holdingMonths} ماهه` : `${holdingMonths} Month Horizon`}
+              </span>
+            </div>
+
+            {/* Comparison Bars */}
+            <div className="space-y-3 pt-1">
+              {/* 1. Crypto Position */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="flex items-center gap-1.5 text-white">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span>{isFa ? `سبد کریپتو (${activeScenario.tokenSymbol})` : `Crypto (${activeScenario.tokenSymbol})`}</span>
+                  </span>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-emerald-400">{toPersianDigits(formatToman(currentValueToman, false))} ت</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                      {totalTomanProfitPercent >= 0 ? '+' : ''}{totalTomanProfitPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-purple-500/20">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 transition-all duration-700 shadow-sm shadow-emerald-500/50"
+                    style={{ width: `${cryptoBarWidth}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* 2. Gold Coin / PAXG */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="flex items-center gap-1.5 text-slate-300">
+                    <Coins className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{isFa ? 'طلای ۱۸ عیار / سکه بهار آزادی' : 'Gold Coin (Seke)'}</span>
+                  </span>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-amber-300">{toPersianDigits(formatToman(goldEndToman, false))} ت</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                      +{historicalTomanRate > 0 ? (((goldEndToman - initialCostToman) / initialCostToman) * 100).toFixed(1) : 0}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-amber-500/20">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-700"
+                    style={{ width: `${goldBarWidth}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* 3. Bank Deposit 22% */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="flex items-center gap-1.5 text-slate-300">
+                    <Landmark className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isFa ? 'سپرده بانکی بلندمدت (۲۲٪ سالانه)' : 'Bank Deposit (22% APR)'}</span>
+                  </span>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-cyan-300">{toPersianDigits(formatToman(bankTotalToman, false))} ت</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                      +{((0.22 * (holdingMonths / 12)) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-cyan-500/20">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-700"
+                    style={{ width: `${bankBarWidth}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* 4. Cash Toman Loss */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="flex items-center gap-1.5 text-slate-400">
+                    <Banknote className="w-3.5 h-3.5 text-rose-400" />
+                    <span>{isFa ? 'ارزش واقعی نقد ریالی (با کسر تورم)' : 'Cash Rial (Real Power)'}</span>
+                  </span>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-rose-400">{toPersianDigits(formatToman(cashRealValueToman, false))} ت</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300">
+                      -{tomanRate > 0 ? (((tomanRate - historicalTomanRate) / tomanRate) * 100).toFixed(1) : 0}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-rose-500/20">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-rose-600 to-rose-400 transition-all duration-700"
+                    style={{ width: `${cashBarWidth}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Devaluation Shield & Bank Comparison Matrix */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
             {/* Currency Devaluation Shield Card */}
-            <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 space-y-2">
+            <div className="dex-card p-4 space-y-2 border-indigo-500/30">
               <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>{isFa ? 'سپر ضد تورم ریال:' : 'Devaluation Shield:'}</span>
@@ -408,7 +543,7 @@ Calculated on GriffinSwap`;
             </div>
 
             {/* Outperformance vs 22% Bank Deposit Card */}
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 space-y-2">
+            <div className="dex-card p-4 space-y-2 border-emerald-500/30">
               <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs">
                 <TrendingUp className="w-4 h-4 text-amber-400" />
                 <span>{isFa ? 'برتری نسبت به سپرده بانکی:' : 'Vs 22% Bank Deposit:'}</span>
@@ -426,7 +561,7 @@ Calculated on GriffinSwap`;
           </div>
 
           {/* Purchasing Power in Gold Coins (سکه بهار آزادی) */}
-          <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex items-center justify-between gap-4">
+          <div className="dex-card p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
                 <Coins className="w-5 h-5 text-amber-400" />
