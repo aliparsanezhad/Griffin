@@ -198,8 +198,8 @@ export const Web3CardsSection: React.FC<Web3CardsProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
+    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all dex-card ${
+      isDarkMode ? 'border-purple-500/30' : 'bg-white/95 border-purple-200'
     }`}>
       {/* Ambient background lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />

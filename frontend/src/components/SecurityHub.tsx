@@ -62,7 +62,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
       </div>
 
       {/* Griffi Security 3D Shield Showcase */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/80 via-indigo-950/60 to-emerald-950/40 border border-emerald-500/30 flex flex-col sm:flex-row items-center gap-5 text-right shadow-2xl">
+      <div className="p-5 rounded-3xl dex-card border border-emerald-500/30 flex flex-col sm:flex-row items-center gap-5 text-right shadow-2xl">
         <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-emerald-400/80 shrink-0 shadow-lg bg-black/40">
           <img src="/mascot/griffi-security.jpg" alt="Griffi Security Shield" className="w-full h-full object-cover" />
         </div>
