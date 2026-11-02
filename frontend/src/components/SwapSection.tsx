@@ -14,7 +14,8 @@ import {
   GitFork,
   Compass,
   Clock,
-  ArrowLeftRight
+  ArrowLeftRight,
+  X
 } from 'lucide-react';
 import { LIFI_CONFIG, POPULAR_CHAINS } from '../services/lifiService';
 import { toPersianDigits, formatToman, usdToToman } from '../services/tomanService';
@@ -199,11 +200,185 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
     setTimeout(() => setIsSwapping(false), 1000);
   };
 
+  const renderCompanionDesk = () => {
+    if (companionView === 'none') return null;
+    return (
+      <div className={`w-full rounded-3xl p-4 md:p-5 border shadow-2xl animate-fade-in space-y-4 dex-card ${
+        !isDarkMode ? 'glass-panel-light border-purple-200 shadow-purple-100' : 'border-purple-500/30'
+      }`}>
+        {/* Tab Switcher & Minimize Button */}
+        <div className="flex items-center justify-between border-b border-purple-500/20 pb-3 gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 flex-1">
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('chart');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                companionView === 'chart'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'نمودار زنده قیمت' : 'Price Chart'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('arbitrage');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                companionView === 'arbitrage'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'دیدبان آربیتراژ بازار ایران' : 'Arbitrage Radar'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('routes');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                companionView === 'routes'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <GitFork className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'دیدبان پل‌ها و مسیرها' : 'Route Inspector'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('cexCompare');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                companionView === 'cexCompare'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'مقایسه با نوبیتکس و CEX' : 'CEX vs DEX'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('sentiment');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                companionView === 'sentiment'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isFa ? 'سنتیمنت و ترس و طمع' : 'Sentiment'}</span>
+            </button>
+          </div>
+
+          {/* Minimize / Close button */}
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setCompanionView('none');
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all shrink-0 cursor-pointer"
+            title={isFa ? 'بستن پنل نمودار' : 'Hide panel'}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Active Content */}
+        <div>
+          {companionView === 'chart' && (
+            <PriceChart 
+              tomanRate={tomanRate} 
+              lang={lang} 
+              isDarkMode={isDarkMode} 
+              onTradePair={(base, quote) => {
+                const foundBase = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === base.toUpperCase());
+                const foundQuote = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === quote.toUpperCase());
+                if (foundBase && foundQuote) {
+                  setFromToken(foundQuote);
+                  setToToken(foundBase);
+                  window.scrollTo({ top: 120, behavior: 'smooth' });
+                }
+              }}
+            />
+          )}
+
+          {companionView === 'arbitrage' && (
+            <ArbitrageScanner 
+              tomanRate={tomanRate} 
+              lang={lang} 
+              isDarkMode={isDarkMode} 
+              onNavigateSwap={() => {
+                setCompanionView('none');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          )}
+
+          {companionView === 'routes' && (
+            <RouteInspector tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          )}
+
+          {companionView === 'cexCompare' && (
+            <CexVsDexComparison tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          )}
+
+          {companionView === 'sentiment' && (
+            <MarketSentimentGauge tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderChainsBar = () => (
+    <div className="w-full text-center py-2">
+      <span className="text-xs font-bold text-slate-400 block mb-2">
+        {isFa ? 'شبکه‌های پرکاربرد با کمترین کارمزد تراکنش:' : 'Supported High-Speed Low-Fee Networks:'}
+      </span>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {POPULAR_CHAINS.map((chain) => (
+          <div
+            key={chain.id}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition-all hover:scale-105 ${
+              isDarkMode 
+                ? 'bg-purple-950/40 border-purple-500/20 text-slate-200' 
+                : 'bg-white border-purple-200 text-slate-700'
+            }`}
+          >
+            <img src={chain.logo} alt={chain.name} className="w-4 h-4 rounded-full" />
+            <span>{chain.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="w-full py-4 px-3 md:px-4 max-w-5xl mx-auto animate-fade-in flex flex-col items-center">
+    <div className="w-full py-4 px-3 md:px-4 max-w-7xl mx-auto animate-fade-in flex flex-col items-center">
       
       {/* Sleek Compact Above-the-Fold Hero Header */}
-      <div className="text-center max-w-2xl mx-auto mb-5">
+      <div className="text-center max-w-3xl mx-auto mb-5">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/70 border border-purple-500/30 text-xs font-semibold text-purple-300 mb-2 shadow-inner">
           <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
           <span>{isFa ? 'صرافی و پل بین‌زنجیره‌ای بدون تحریم' : 'Censorship-Resistant Cross-Chain DEX'}</span>
@@ -213,13 +388,21 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             {isFa ? 'مبادله هوشمند و بدون کارمزد گس' : 'Smart Gasless Cross-Chain Swap'}
           </span>
         </h1>
-        <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium text-slate-400">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium text-slate-400 font-tabular">
           <span className="px-2.5 py-0.5 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300">
             {isFa ? '۵۸+ شبکه بلاک‌چین' : '58+ Chains'}
           </span>
           <span>•</span>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300">
-            {isFa ? '۳۵ پل نقدینگی' : '35 Bridge Routes'}
+          <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300">
+            {isFa ? 'گس صفر با Permit2 ⚡' : '0 Gas Permit2 ⚡'}
+          </span>
+          <span>•</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
+            {isFa ? 'سپر ضد MEV: فعال 🛡️' : 'MEV Shield: Active 🛡️'}
+          </span>
+          <span>•</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300 font-bold">
+            {isFa ? `اوراکل تتر: ${toPersianDigits(formatToman(tomanRate))} ت` : `USDT: ${formatToman(tomanRate, false)} T`}
           </span>
           <span>•</span>
           <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-mono">
@@ -228,8 +411,29 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
         </div>
       </div>
 
-      {/* Main Swap Card Container */}
-      <div className="w-full flex flex-col items-center">
+      {/* Pro Terminal Split Container */}
+      <div className={`w-full transition-all ${
+        swapEngine === 'limit'
+          ? 'max-w-5xl mx-auto flex flex-col items-center'
+          : companionView !== 'none'
+            ? 'max-w-7xl mx-auto flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 items-start'
+            : 'max-w-[480px] mx-auto flex flex-col items-center'
+      }`}>
+        
+        {/* Companion Desk Column (Desktop: Left Col 7, Order 1) */}
+        {swapEngine !== 'limit' && companionView !== 'none' && (
+          <div className="w-full lg:col-span-7 lg:order-1 order-2 mt-6 lg:mt-0 space-y-4">
+            {renderCompanionDesk()}
+            <div className="hidden lg:block">
+              {renderChainsBar()}
+            </div>
+          </div>
+        )}
+
+        {/* Swap Box Column (Desktop: Right Col 5, Order 2 / Mobile: Order 1) */}
+        <div className={`w-full flex flex-col items-center ${
+          swapEngine !== 'limit' && companionView !== 'none' ? 'lg:col-span-5 lg:order-2 order-1' : ''
+        }`}>
         
         {/* Persistent Engine Switcher & Auxiliary Controls */}
         <div className={`w-full flex items-center justify-between mb-3 px-1 transition-all ${
@@ -317,9 +521,9 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
         {/* MODE 1: Griffin Native Fast Swap Engine */}
         {swapEngine === 'native' && (
-          <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all overflow-hidden ${
+          <div className={`w-full max-w-[480px] rounded-3xl p-5 md:p-6 border shadow-2xl relative transition-all overflow-hidden dex-card ${
             isDarkMode 
-              ? 'cyber-gradient-card border-purple-500/35 shadow-purple-950/60 neon-glow-purple backdrop-blur-2xl' 
+              ? 'border-purple-500/35 shadow-purple-950/60 neon-glow-purple backdrop-blur-2xl' 
               : 'glass-panel-light border-purple-200 shadow-purple-100'
           }`}>
             {/* Top Laser Accent Line */}
@@ -442,8 +646,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             </div>
 
             {/* FROM TOKEN BOX with Dynamic Balance & Touch-Friendly Presets */}
-            <div className={`p-4 rounded-2xl border space-y-2 mb-2 ${
-              isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
+            <div className={`p-4 rounded-2xl border space-y-2 mb-2 dex-input-box ${
+              isDarkMode ? 'border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
             }`}>
               <div className="flex justify-between items-center text-xs">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 font-medium'}>
@@ -452,7 +656,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 
                 {/* Dynamic Token Balance & Quick Presets */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-400 font-mono">
+                  <span className="text-[11px] text-slate-400 font-mono font-tabular">
                     {isFa ? 'موجودی:' : 'Bal:'} {currentTokenBalance.toLocaleString()} {fromToken.symbol}
                   </span>
                   <div className="flex items-center gap-1 font-mono text-[10px]">
@@ -468,11 +672,19 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                         onClick={() => {
                           playClickSound();
                           const val = currentTokenBalance * btn.multiplier;
-                          if (val >= 1000) setFromAmount(val.toString());
-                          else if (val >= 1) setFromAmount(val.toFixed(2));
-                          else setFromAmount(val.toFixed(4));
+                          if (fromToken.symbol === 'SHIRDAL') {
+                            setFromAmount(Math.floor(val).toString());
+                          } else if (['ETH', 'WBTC', 'PAXG'].includes(fromToken.symbol)) {
+                            setFromAmount(val.toFixed(4));
+                          } else if (val >= 1000) {
+                            setFromAmount(Math.round(val).toString());
+                          } else if (val >= 1) {
+                            setFromAmount(val.toFixed(2));
+                          } else {
+                            setFromAmount(val.toFixed(4));
+                          }
                         }}
-                        className="px-2.5 py-1 min-h-[30px] rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 font-bold transition-all flex items-center justify-center active:scale-95 cursor-pointer shadow-sm"
+                        className="px-2.5 py-1 min-h-[30px] rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 font-bold transition-all flex items-center justify-center active:scale-95 cursor-pointer shadow-sm font-tabular"
                       >
                         {btn.label}
                       </button>
@@ -574,8 +786,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             </div>
 
             {/* TO TOKEN BOX */}
-            <div className={`p-4 rounded-2xl border space-y-2 mt-0 mb-2.5 ${
-              isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
+            <div className={`p-4 rounded-2xl border space-y-2 mt-0 mb-2.5 dex-input-box ${
+              isDarkMode ? 'border-purple-500/20' : 'bg-purple-50/70 border-purple-200'
             }`}>
               <div className="flex justify-between items-center text-xs">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500 font-medium'}>
@@ -812,7 +1024,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                   setShowPreFlightModal(true);
                 }}
                 disabled={isSwapping || numericFrom <= 0}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl dex-button-primary text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSwapping ? (
                   <>
@@ -865,150 +1077,29 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
             />
           </div>
         )}
-      </div>
-
-      {/* Popular Iranian Web3 Chains Quick Bar */}
-      <div className="mt-10 max-w-2xl w-full text-center">
-        <span className="text-xs font-bold text-slate-400 block mb-3">
-          {isFa ? 'شبکه‌های پرکاربرد با کمترین کارمزد تراکنش:' : 'Supported High-Speed Low-Fee Networks:'}
-        </span>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {POPULAR_CHAINS.map((chain) => (
-            <div
-              key={chain.id}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition-all hover:scale-105 ${
-                isDarkMode 
-                  ? 'bg-purple-950/40 border-purple-500/20 text-slate-200' 
-                  : 'bg-white border-purple-200 text-slate-700'
-              }`}
-            >
-              <img src={chain.logo} alt={chain.name} className="w-4 h-4 rounded-full" />
-              <span>{chain.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Interactive Companion Panels (Price Chart & Arbitrage Radar & Route Inspector) */}
-      <div className="mt-8 w-full max-w-5xl">
-        <div className="flex items-center justify-between mb-4 border-b border-purple-500/20 pb-3">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 w-full flex-nowrap">
-            <button
-              onClick={() => setCompanionView(companionView === 'chart' ? 'none' : 'chart')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                companionView === 'chart'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'نمودار زنده قیمت' : 'Price Chart'}</span>
-            </button>
-
-            <button
-              onClick={() => setCompanionView(companionView === 'arbitrage' ? 'none' : 'arbitrage')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                companionView === 'arbitrage'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'دیدبان آربیتراژ بازار ایران' : 'Arbitrage Radar'}</span>
-            </button>
-
-            <button
-              onClick={() => setCompanionView(companionView === 'routes' ? 'none' : 'routes')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                companionView === 'routes'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
-              }`}
-            >
-              <GitFork className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'دیدبان پل‌ها و مسیرها' : 'Route Inspector'}</span>
-            </button>
-
-            <button
-              onClick={() => setCompanionView(companionView === 'cexCompare' ? 'none' : 'cexCompare')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                companionView === 'cexCompare'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'مقایسه با نوبیتکس و صرافی‌ها' : 'CEX vs DEX'}</span>
-            </button>
-
-            <button
-              onClick={() => setCompanionView(companionView === 'sentiment' ? 'none' : 'sentiment')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                companionView === 'sentiment'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-purple-950/40 text-slate-400 hover:text-white border border-purple-500/20'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isFa ? 'سنتیمنت و ترس و طمع' : 'Sentiment Gauge'}</span>
-            </button>
-          </div>
-
-          <span className="text-[11px] text-slate-400 hidden sm:inline">
-            {isFa ? 'بروزرسانی زنده اوراکل تتر و رمزارزها' : 'Live Oracle Feeds'}
-          </span>
         </div>
 
-        {companionView === 'chart' && (
-          <div className="animate-fade-in">
-            <PriceChart 
-              tomanRate={tomanRate} 
-              lang={lang} 
-              isDarkMode={isDarkMode} 
-              onTradePair={(base, quote) => {
-                const foundBase = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === base.toUpperCase());
-                const foundQuote = AVAILABLE_TOKENS.find(t => t.symbol.toUpperCase() === quote.toUpperCase());
-                if (foundBase && foundQuote) {
-                  setFromToken(foundQuote);
-                  setToToken(foundBase);
-                  window.scrollTo({ top: 120, behavior: 'smooth' });
-                }
+        {/* 1-Click Reopen Banner when Companion is Closed */}
+        {swapEngine !== 'limit' && companionView === 'none' && (
+          <div className="w-full mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setCompanionView('chart');
               }}
-            />
+              className="w-full py-3 px-4 rounded-2xl bg-purple-950/60 hover:bg-purple-900/80 border border-purple-500/30 text-purple-300 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold shadow-md cursor-pointer group"
+            >
+              <TrendingUp className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>{isFa ? 'نمایش ترمینال تحلیلی، نمودار زنده و رادار آربیتراژ 📊' : 'Open Pro Terminal, Live Chart & Radar 📊'}</span>
+            </button>
           </div>
         )}
 
-        {companionView === 'arbitrage' && (
-          <div className="animate-fade-in">
-            <ArbitrageScanner 
-              tomanRate={tomanRate} 
-              lang={lang} 
-              isDarkMode={isDarkMode} 
-              onNavigateSwap={() => {
-                setCompanionView('none');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            />
-          </div>
-        )}
-
-        {companionView === 'routes' && (
-          <div className="animate-fade-in">
-            <RouteInspector tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
-          </div>
-        )}
-
-        {companionView === 'cexCompare' && (
-          <div className="animate-fade-in">
-            <CexVsDexComparison tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
-          </div>
-        )}
-
-        {companionView === 'sentiment' && (
-          <div className="animate-fade-in">
-            <MarketSentimentGauge tomanRate={tomanRate} lang={lang} isDarkMode={isDarkMode} />
-          </div>
-        )}
+        {/* Chains Bar for mobile or when companion closed or limit */}
+        <div className={`w-full ${swapEngine !== 'limit' && companionView !== 'none' ? 'lg:hidden order-3 mt-4' : 'mt-4'}`}>
+          {renderChainsBar()}
+        </div>
       </div>
 
       {/* Help & FAQ Modal */}
