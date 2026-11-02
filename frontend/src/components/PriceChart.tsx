@@ -268,10 +268,10 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const candleBarWidth = Math.max(4, Math.min(18, (chartWidth / candleCount) * 0.65));
 
   return (
-    <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all relative overflow-hidden ${
+    <div className={`w-full rounded-3xl p-6 transition-all relative overflow-hidden ${
       isDarkMode 
-        ? 'bg-[#100b24]/95 border-purple-500/25 text-slate-100 shadow-purple-950/40' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       {/* Top Header: Pair Selector, Chart Modes, Timeframes */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-purple-500/20">

@@ -117,10 +117,10 @@ export const RpcMonitor: React.FC<RpcMonitorProps> = ({ lang, isDarkMode }) => {
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 border shadow-2xl transition-all ${
+    <div className={`w-full rounded-3xl p-6 transition-all ${
       isDarkMode 
-        ? 'bg-[#100b24]/90 border-purple-500/25 text-slate-100 shadow-purple-950/30' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-purple-500/20">

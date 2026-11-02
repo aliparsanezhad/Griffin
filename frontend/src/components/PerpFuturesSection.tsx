@@ -267,8 +267,8 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
+    <div className={`w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all ${
+      isDarkMode ? 'dex-card text-slate-100' : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -1083,8 +1083,8 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      <div className={`mt-4 p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+        isDarkMode ? 'dex-card' : 'bg-purple-50 border-purple-200'
       }`}>
         <div className="flex items-center gap-2 text-right">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />

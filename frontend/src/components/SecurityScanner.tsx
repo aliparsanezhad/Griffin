@@ -287,10 +287,10 @@ export const SecurityScanner: React.FC<SecurityScannerProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-5 md:p-8 border shadow-2xl transition-all ${
+    <div className={`w-full rounded-3xl p-5 md:p-8 transition-all ${
       isDarkMode 
-        ? 'bg-[#100b24]/95 border-purple-500/25 text-slate-100 shadow-purple-950/40' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       
       {/* Top Header with Griffi Inspector Mascot */}

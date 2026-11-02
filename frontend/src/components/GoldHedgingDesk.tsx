@@ -693,8 +693,8 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+      <div className={`mt-4 p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+        isDarkMode ? 'dex-card' : 'bg-purple-50 border-purple-200'
       }`}>
         <div className="flex items-center gap-2 text-right">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />

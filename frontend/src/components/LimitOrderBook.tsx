@@ -207,10 +207,10 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
   ];
 
   return (
-    <div className={`w-full rounded-3xl p-5 md:p-8 border shadow-2xl transition-all ${
+    <div className={`w-full rounded-3xl p-5 md:p-8 transition-all ${
       isDarkMode 
-        ? 'bg-[#100b24]/95 border-purple-500/25 text-slate-100 shadow-purple-950/40' 
-        : 'bg-white border-purple-200 text-slate-800 shadow-xl'
+        ? 'dex-card text-slate-100' 
+        : 'bg-white border border-purple-200 text-slate-800 shadow-xl'
     }`}>
       
       {/* Header with Griffi Trader Mascot */}
@@ -821,7 +821,7 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
       {/* Permit2 EIP-712 Signing Dialog Modal */}
       {isSigning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-[#140e2e] border border-purple-500/40 shadow-2xl text-slate-100 space-y-4">
+          <div className="w-full max-w-md p-6 rounded-3xl dex-card border border-purple-500/40 shadow-2xl text-slate-100 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-purple-500/20">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
