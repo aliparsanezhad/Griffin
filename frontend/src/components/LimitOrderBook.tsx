@@ -9,7 +9,11 @@ import {
   ShieldCheck, 
   HelpCircle,
   Play,
-  RotateCcw
+  RotateCcw,
+  Bell,
+  Calendar,
+  BarChart2,
+  List
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -28,6 +32,7 @@ interface LimitOrder {
   amountToken: number;
   totalUsd: number;
   placedAt: string;
+  expiresAt?: string;
   status: 'active' | 'filled' | 'cancelled';
   signature: string;
 }
@@ -42,6 +47,9 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
   // Pair state
   const [selectedPair, setSelectedPair] = useState<'ETH/USDT' | 'BTC/USDT' | 'ARB/USDT'>('ETH/USDT');
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy');
+  const [orderExpiry, setOrderExpiry] = useState<'24h' | '7d' | '30d' | 'gtc'>('7d');
+  const [depthViewMode, setDepthViewMode] = useState<'ladder' | 'depth_chart'>('ladder');
+  const [tgAlert, setTgAlert] = useState<boolean>(true);
   
   // Market live price state
   const basePrices: Record<string, number> = {
@@ -141,6 +149,13 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
     setIsSigning(false);
     setSignSuccess(true);
 
+    const expiryLabels: Record<string, string> = {
+      '24h': isFa ? '۲۴ ساعت' : '24h',
+      '7d': isFa ? '۷ روز' : '7d',
+      '30d': isFa ? '۳۰ روز' : '30d',
+      'gtc': isFa ? 'نامحدود (GTC)' : 'GTC'
+    };
+
     const newOrder: LimitOrder = {
       id: `ord-${Math.floor(100 + Math.random() * 900)}`,
       pair: selectedPair,
@@ -149,6 +164,7 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
       amountToken: numAmount,
       totalUsd: totalUsd,
       placedAt: isFa ? 'هم‌اکنون' : 'Just now',
+      expiresAt: expiryLabels[orderExpiry] || '7d',
       status: 'active',
       signature: `0x${Math.random().toString(16).substring(2, 10)}...${Math.random().toString(16).substring(2, 6)}`
     };
@@ -408,6 +424,66 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
             </div>
           </div>
 
+          {/* Order Validity / Expiry Selection */}
+          <div className="p-4 rounded-2xl bg-black/40 border border-purple-500/25 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                <span>{isFa ? 'مدت اعتبار سفارش (Order Expiry):' : 'Order Expiry:'}</span>
+              </label>
+              <span className="text-[10px] text-purple-300 font-mono">
+                {orderExpiry === 'gtc' ? (isFa ? 'تا زمان لغو دستی (GTC)' : 'Good Till Cancelled') : (isFa ? 'انقضای خودکار هوشمند' : 'Auto-cancels upon expiry')}
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { id: '24h', labelFa: '۲۴ ساعت', labelEn: '24 Hours' },
+                { id: '7d', labelFa: '۷ روز', labelEn: '7 Days' },
+                { id: '30d', labelFa: '۳۰ روز', labelEn: '30 Days' },
+                { id: 'gtc', labelFa: 'نامحدود (GTC)', labelEn: 'GTC' }
+              ].map(exp => (
+                <button
+                  key={exp.id}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setOrderExpiry(exp.id as any);
+                  }}
+                  className={`py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    orderExpiry === exp.id
+                      ? 'bg-purple-600 text-white shadow-md border border-purple-400'
+                      : 'bg-purple-950/40 text-slate-400 border border-purple-500/20 hover:text-white'
+                  }`}
+                >
+                  {isFa ? exp.labelFa : exp.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Telegram Alert Notification */}
+          <div 
+            onClick={() => setTgAlert(!tgAlert)}
+            className="p-3.5 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex items-center justify-between cursor-pointer hover:bg-purple-900/30 transition-all select-none"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-purple-900/50 text-amber-400 shrink-0">
+                <Bell className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-white block">
+                  {isFa ? 'ارسال هشدار فوری اجرای سفارش در تلگرام' : 'Instant Telegram Execution Notification'}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {isFa ? 'اطلاع‌رسانی بلادرنگ ربات گریفین در صورت برخورد قیمت هدف' : 'Real-time alert when limit order matches on-chain'}
+                </span>
+              </div>
+            </div>
+            <div className={`w-9 h-5 rounded-full transition-colors p-0.5 flex items-center ${tgAlert ? 'bg-emerald-500 justify-end' : 'bg-slate-700 justify-start'}`}>
+              <div className="w-4 h-4 rounded-full bg-white shadow-sm" />
+            </div>
+          </div>
+
           {/* Total Value Summary Box */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/50 to-indigo-950/50 border border-purple-500/30 space-y-2">
             <div className="flex items-center justify-between text-xs">
@@ -457,7 +533,7 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
 
         </div>
 
-        {/* Right: Live Visual Depth Book Ladder (5 cols) */}
+        {/* Right: Live Visual Depth Book Ladder / Chart (5 cols) */}
         <div className="lg:col-span-5 flex flex-col justify-between p-4 rounded-2xl bg-black/50 border border-purple-500/25 space-y-4">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-purple-500/20">
@@ -465,69 +541,165 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>{isFa ? 'عمق بازار زنده (Order Book)' : 'Live Market Depth'}</span>
               </span>
-              <span className="text-[10px] text-slate-400 font-mono">
-                {selectedPair}
-              </span>
-            </div>
 
-            {/* Table headers */}
-            <div className="grid grid-cols-3 text-[10px] font-bold text-slate-400 py-2 border-b border-purple-500/10">
-              <span>{isFa ? 'قیمت (USD)' : 'Price ($)'}</span>
-              <span className="text-center">{isFa ? 'حجم' : 'Size'}</span>
-              <span className="text-left">{isFa ? 'عمق' : 'Depth'}</span>
-            </div>
-
-            {/* Asks (Sell orders in red) */}
-            <div className="space-y-1 py-1">
-              {asks.map((ask, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => setTargetPrice(ask.price.toFixed(2))}
-                  className="grid grid-cols-3 text-[11px] font-mono py-1 px-1 rounded hover:bg-rose-950/30 cursor-pointer relative items-center transition-colors"
+              {/* View mode toggle */}
+              <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded-lg border border-purple-500/20">
+                <button
+                  type="button"
+                  onClick={() => { playClickSound(); setDepthViewMode('ladder'); }}
+                  className={`px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    depthViewMode === 'ladder' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title={isFa ? 'نمایش جدولی' : 'Ladder list view'}
                 >
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 bg-rose-500/15 rounded pointer-events-none"
-                    style={{ width: `${ask.depth}%` }}
-                  />
-                  <span className="text-rose-400 font-bold z-10">
-                    ${ask.price.toFixed(2)}
-                  </span>
-                  <span className="text-slate-300 text-center z-10">{ask.amount}</span>
-                  <span className="text-slate-400 text-left z-10">${(ask.price * ask.amount).toFixed(0)}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Spread Row */}
-            <div className="my-2 py-2 px-3 rounded-xl bg-purple-950/60 border border-purple-500/20 flex items-center justify-between text-xs">
-              <span className="text-amber-300 font-mono font-bold">
-                ${currentMarketPrice.toFixed(2)}
-              </span>
-              <span className="text-[10px] text-slate-400">
-                {isFa ? 'اسپرد:' : 'Spread:'} <span className="text-emerald-400 font-mono">{spreadPercent}%</span>
-              </span>
-            </div>
-
-            {/* Bids (Buy orders in green) */}
-            <div className="space-y-1 py-1">
-              {bids.map((bid, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => setTargetPrice(bid.price.toFixed(2))}
-                  className="grid grid-cols-3 text-[11px] font-mono py-1 px-1 rounded hover:bg-emerald-950/30 cursor-pointer relative items-center transition-colors"
+                  <List className="w-3 h-3" />
+                  <span>{isFa ? 'دفتر' : 'Book'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { playClickSound(); setDepthViewMode('depth_chart'); }}
+                  className={`px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    depthViewMode === 'depth_chart' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title={isFa ? 'نمایش نمودار دیواره عمق' : 'Visual depth chart'}
                 >
-                  <div 
-                    className="absolute right-0 top-0 bottom-0 bg-emerald-500/15 rounded pointer-events-none"
-                    style={{ width: `${bid.depth}%` }}
-                  />
-                  <span className="text-emerald-400 font-bold z-10">
-                    ${bid.price.toFixed(2)}
-                  </span>
-                  <span className="text-slate-300 text-center z-10">{bid.amount}</span>
-                  <span className="text-slate-400 text-left z-10">${(bid.price * bid.amount).toFixed(0)}</span>
-                </div>
-              ))}
+                  <BarChart2 className="w-3 h-3" />
+                  <span>{isFa ? 'دیواره عمق' : 'Walls'}</span>
+                </button>
+              </div>
             </div>
+
+            {depthViewMode === 'ladder' ? (
+              <>
+                {/* Table headers */}
+                <div className="grid grid-cols-3 text-[10px] font-bold text-slate-400 py-2 border-b border-purple-500/10">
+                  <span>{isFa ? 'قیمت (USD)' : 'Price ($)'}</span>
+                  <span className="text-center">{isFa ? 'حجم' : 'Size'}</span>
+                  <span className="text-left">{isFa ? 'عمق' : 'Depth'}</span>
+                </div>
+
+                {/* Asks (Sell orders in red) */}
+                <div className="space-y-1 py-1">
+                  {asks.map((ask, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setTargetPrice(ask.price.toFixed(2))}
+                      className="grid grid-cols-3 text-[11px] font-mono py-1 px-1 rounded hover:bg-rose-950/30 cursor-pointer relative items-center transition-colors"
+                    >
+                      <div 
+                        className="absolute right-0 top-0 bottom-0 bg-rose-500/15 rounded pointer-events-none"
+                        style={{ width: `${ask.depth}%` }}
+                      />
+                      <span className="text-rose-400 font-bold z-10">
+                        ${ask.price.toFixed(2)}
+                      </span>
+                      <span className="text-slate-300 text-center z-10">{ask.amount}</span>
+                      <span className="text-slate-400 text-left z-10">${(ask.price * ask.amount).toFixed(0)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Spread Row */}
+                <div className="my-2 py-2 px-3 rounded-xl bg-purple-950/60 border border-purple-500/20 flex items-center justify-between text-xs">
+                  <span className="text-amber-300 font-mono font-bold">
+                    ${currentMarketPrice.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {isFa ? 'اسپرد:' : 'Spread:'} <span className="text-emerald-400 font-mono">{spreadPercent}%</span>
+                  </span>
+                </div>
+
+                {/* Bids (Buy orders in green) */}
+                <div className="space-y-1 py-1">
+                  {bids.map((bid, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setTargetPrice(bid.price.toFixed(2))}
+                      className="grid grid-cols-3 text-[11px] font-mono py-1 px-1 rounded hover:bg-emerald-950/30 cursor-pointer relative items-center transition-colors"
+                    >
+                      <div 
+                        className="absolute right-0 top-0 bottom-0 bg-emerald-500/15 rounded pointer-events-none"
+                        style={{ width: `${bid.depth}%` }}
+                      />
+                      <span className="text-emerald-400 font-bold z-10">
+                        ${bid.price.toFixed(2)}
+                      </span>
+                      <span className="text-slate-300 text-center z-10">{bid.amount}</span>
+                      <span className="text-slate-400 text-left z-10">${(bid.price * bid.amount).toFixed(0)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              /* Visual Depth Walls Chart */
+              <div className="py-2 space-y-3">
+                <div className="relative w-full h-44 bg-purple-950/20 rounded-xl border border-purple-500/20 p-2 overflow-hidden flex flex-col justify-between">
+                  {/* Visual SVG Depth Curve */}
+                  <svg className="w-full h-32" viewBox="0 0 300 120" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="bidGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
+                      </linearGradient>
+                      <linearGradient id="askGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.05" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Bids Area (Left/Green) */}
+                    <path
+                      d="M 10 115 L 10 25 L 50 35 L 85 55 L 120 80 L 145 110 L 145 115 Z"
+                      fill="url(#bidGrad)"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                    />
+
+                    {/* Mid price dashed line */}
+                    <line x1="150" y1="10" x2="150" y2="115" stroke="#f59e0b" strokeDasharray="3 3" strokeWidth="1.5" />
+
+                    {/* Asks Area (Right/Red) */}
+                    <path
+                      d="M 155 115 L 155 110 L 180 80 L 215 55 L 250 35 L 290 25 L 290 115 Z"
+                      fill="url(#askGrad)"
+                      stroke="#f43f5e"
+                      strokeWidth="2"
+                    />
+                  </svg>
+
+                  {/* Mid Price Tag */}
+                  <div className="flex items-center justify-between text-[10px] font-mono px-1">
+                    <span className="text-emerald-400 font-bold">
+                      {isFa ? 'دیواره خرید (Bids)' : 'Buy Wall'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                      ${currentMarketPrice.toFixed(2)}
+                    </span>
+                    <span className="text-rose-400 font-bold">
+                      {isFa ? 'دیواره فروش (Asks)' : 'Sell Wall'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pressure Ratio Bar */}
+                <div className="space-y-1.5 p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20">
+                  <div className="flex items-center justify-between text-[11px] font-bold">
+                    <span className="text-emerald-400 flex items-center gap-1">
+                      <span>{isFa ? 'فشار تقاضا:' : 'Bids Pressure:'}</span>
+                      <span className="font-mono">۶۲٪</span>
+                    </span>
+                    <span className="text-rose-400 flex items-center gap-1">
+                      <span>{isFa ? 'فشار عرضه:' : 'Asks Pressure:'}</span>
+                      <span className="font-mono">۳۸٪</span>
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full overflow-hidden flex bg-slate-800">
+                    <div className="h-full bg-emerald-500" style={{ width: '62%' }} />
+                    <div className="h-full bg-rose-500" style={{ width: '38%' }} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick Info Box on Permit2 */}
@@ -567,6 +739,7 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
                 <th className="py-2.5 px-3">{isFa ? 'قیمت هدف' : 'Target Price'}</th>
                 <th className="py-2.5 px-3">{isFa ? 'ارزش تومانی' : 'Toman Value'}</th>
                 <th className="py-2.5 px-3">{isFa ? 'حجم' : 'Amount'}</th>
+                <th className="py-2.5 px-3">{isFa ? 'اعتبار' : 'Expiry'}</th>
                 <th className="py-2.5 px-3">{isFa ? 'وضعیت' : 'Status'}</th>
                 <th className="py-2.5 px-3 text-center">{isFa ? 'عملیات' : 'Actions'}</th>
               </tr>
@@ -592,6 +765,9 @@ export const LimitOrderBook: React.FC<LimitOrderBookProps> = ({
                   </td>
                   <td className="py-3 px-3 font-mono text-slate-300">
                     {ord.amountToken} {ord.pair.split('/')[0]}
+                  </td>
+                  <td className="py-3 px-3 font-mono text-[11px] text-purple-300">
+                    {ord.expiresAt || (isFa ? '۷ روز' : '7d')}
                   </td>
                   <td className="py-3 px-3">
                     {ord.status === 'active' && (
