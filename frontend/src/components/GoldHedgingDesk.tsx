@@ -10,7 +10,10 @@ import {
   Copy, 
   Check, 
   ExternalLink,
-  Activity
+  Activity,
+  Layers,
+  Award,
+  ShieldCheck
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapSuccessSound } from '../services/soundService';
@@ -487,6 +490,138 @@ export const GoldHedgingDesk: React.FC<GoldHedgingDeskProps> = ({
               <span className="text-emerald-400 text-[10px] font-bold">{pt.gain}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 5-Year Historical Performance & Asset Class Matrix */}
+      <div className={`p-6 rounded-3xl border my-6 text-right transition-all ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-purple-950/40 via-indigo-950/30 to-black/40 border-purple-500/25' 
+          : 'bg-white border-purple-200 shadow-xl'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <Layers className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="font-black text-sm md:text-base text-white">
+                {isFa ? 'مقایسه ۵ ساله نگهداری طلای دیجیتال در برابر سایر بازارها' : '5-Year Wealth Preservation Benchmark'}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {isFa ? 'شبیه‌سازی رشد سرمایه اولیه ۱۰۰ میلیون تومانی در یک افق ۵ ساله سرمایه‌گذاری' : '100M Toman initial investment performance simulation'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+            <Award className="w-4 h-4 text-amber-400" />
+            <span>{isFa ? 'برترین بازدهی تاریخی' : 'Top Historical Performer'}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-right">
+          {/* Class 1: PAXG Digital Gold */}
+          <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-300">
+                {isFa ? 'طلای دیجیتال (PAXG)' : 'Digital Gold (PAXG)'}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold font-mono">
+                +۷۴۰٪
+              </span>
+            </div>
+            <div className="font-mono text-xl font-black text-amber-400">
+              {isFa ? '۸۴۰ میلیون تومان' : '840M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'رشد هم‌زمان اونس طلا + جهش نرخ دلار بدون ریسک حباب و بدون اجرت طلافروشی.'
+                : 'Double-engine growth: Spot gold increase + dollar parity.'}
+            </p>
+          </div>
+
+          {/* Class 2: Physical Seke Emami */}
+          <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-500/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-purple-300">
+                {isFa ? 'سکه امامی فیزیکی' : 'Physical Coin'}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-400/20 text-purple-300 font-bold font-mono">
+                +۶۱۰٪
+              </span>
+            </div>
+            <div className="font-mono text-xl font-black text-purple-200">
+              {isFa ? '۷۱۰ میلیون تومان' : '710M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'بازدهی بالا ولی همراه با ریسک سرقت فیزیکی و سوختن حباب قیمتی در زمان فروش.'
+                : 'High returns dampened by physical storage risks and bubble deflation.'}
+            </p>
+          </div>
+
+          {/* Class 3: Physical Paper USD */}
+          <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-cyan-300">
+                {isFa ? 'دلار کاغذی سنتی' : 'Cash US Dollar'}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 font-bold font-mono">
+                +۴۲۰٪
+              </span>
+            </div>
+            <div className="font-mono text-xl font-black text-cyan-300">
+              {isFa ? '۵۲۰ میلیون تومان' : '520M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'حفظ ارزش در برابر ریال، اما عقب‌تر از طلا و آسیب‌پذیر در برابر تورم خود دلار (~۲۲٪).'
+                : 'Shielded against Rial, but lagged behind gold and USD internal inflation.'}
+            </p>
+          </div>
+
+          {/* Class 4: Bank Rial Deposit */}
+          <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-rose-300">
+                {isFa ? 'سپرده بانکی ریالی' : 'Bank Deposit'}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-400/20 text-rose-300 font-bold font-mono">
+                افت ۵۵٪ قدرت خرید
+              </span>
+            </div>
+            <div className="font-mono text-xl font-black text-rose-400">
+              {isFa ? '۲۱۰ میلیون تومان' : '210M Toman'}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-relaxed">
+              {isFa
+                ? 'با وجود ۲.۱ برابر شدن رقم اسمی پول، قدرت خرید به کمتر از نصف کاهش یافته است.'
+                : 'Real purchasing power cut in half despite nominal interest compounding.'}
+            </p>
+          </div>
+        </div>
+
+        {/* LBMA Bullion Vault Physical Verification Note */}
+        <div className="mt-4 pt-3 border-t border-purple-500/15 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-emerald-300 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>
+              {isFa 
+                ? 'هر توکن PAXG معادل ۱ اونس تروا (۳۱.۱ گرم) طلای خالص لندن (LBMA Good Delivery) در خزانه‌های امن Brink’s است.' 
+                : 'Every PAXG token represents 1 troy ounce of LBMA Good Delivery gold stored in Brink’s vaults.'}
+            </span>
+          </div>
+
+          <a
+            href="https://etherscan.io/token/0x45804880De22913dAFE09f4980848ECE6EcbAf78"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] font-mono text-amber-300 hover:text-white flex items-center gap-1 transition-colors"
+          >
+            <span>{isFa ? 'مشاهده قرارداد هوشمند و ممیزی' : 'Smart Contract Audit'}</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
       </div>
 
