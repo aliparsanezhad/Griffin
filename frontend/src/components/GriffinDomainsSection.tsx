@@ -187,8 +187,8 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
+    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all dex-card ${
+      isDarkMode ? 'border-purple-500/30' : 'bg-white/95 border-purple-200'
     }`}>
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -242,8 +242,8 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
 
       {/* Domain Search & Register Interactive Bar */}
       <div className="my-8 max-w-3xl mx-auto">
-        <div className={`p-2 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 shadow-xl ${
-          isDarkMode ? 'bg-black/50 border-purple-500/30' : 'bg-white border-purple-200'
+        <div className={`p-2 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 shadow-xl dex-input-box ${
+          isDarkMode ? 'border-purple-500/30' : 'bg-white border-purple-200'
         }`}>
           {/* TLD Switcher */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-purple-950/50 border border-purple-500/20 shrink-0">
@@ -254,7 +254,7 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
                   playClickSound();
                   setSelectedTld(tld);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
                   selectedTld === tld
                     ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow'
                     : 'text-slate-400 hover:text-white'
@@ -282,7 +282,7 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
           <button
             onClick={handleRegisterDomain}
             disabled={!cleanName || !isAvailable || isMinting}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-black text-xs transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-lg ${
+            className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-black text-xs transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-lg cursor-pointer ${
               isAvailable && cleanName
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-950/50'
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed'
@@ -322,6 +322,24 @@ export const GriffinDomainsSection: React.FC<GriffinDomainsProps> = ({
               {isFa ? toPersianDigits(formatToman(domainPriceToman)) : formatToman(domainPriceToman)} {isFa ? 'تومان' : 'IRT'}
             </span>
           </div>
+        </div>
+
+        {/* 1-Tap Popular Iranian Name Suggestions */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-2.5 px-2 text-[11px]">
+          <span className="text-slate-400 shrink-0 font-medium">{isFa ? 'پیشنهادهای محبوب:' : 'Popular:'}</span>
+          {['rostam', 'tehran', 'shiraz', 'alborz', 'isfahan', 'persia', 'tabriz', 'kasra'].map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setSearchTerm(name);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/20 text-purple-300 text-[10px] font-mono shrink-0 transition-all cursor-pointer active:scale-95"
+            >
+              {name}
+            </button>
+          ))}
         </div>
       </div>
 
