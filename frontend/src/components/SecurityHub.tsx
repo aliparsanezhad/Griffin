@@ -224,9 +224,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
   )}
 
       {/* Verified Protocol Treasury Commission Transparency Card */}
-      <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all ${
-        isDarkMode ? 'dex-card' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all dex-card">
         <div className="flex items-center gap-2.5">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
