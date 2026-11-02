@@ -29,6 +29,8 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
   const [tradeAmount, setTradeAmount] = useState<number>(10000); // 10,000 USDT
   const [selectedPair, setSelectedPair] = useState<string>('USDT-ETH');
   const [copied, setCopied] = useState<boolean>(false);
+  const [routeCopied, setRouteCopied] = useState<boolean>(false);
+  const [routeToast, setRouteToast] = useState<string | null>(null);
   const [mode, setMode] = useState<'smart' | 'single'>('smart');
 
   const isFa = lang === 'fa';
@@ -53,6 +55,35 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
     setCopied(true);
     playClickSound();
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyRouteCallData = () => {
+    playClickSound();
+    const routeData = JSON.stringify({
+      pair: selectedPair,
+      mode: 'MultiHop_SmartSplit',
+      hops: [
+        { pool: 'Griffin_AMM_Arbitrum', share: `${griffinSplit}%`, fee: '0.15%' },
+        { pool: 'Uniswap_v3_Arbitrum', share: `${uniSplit}%`, fee: '0.05%' },
+        { pool: 'Sushi_Trident_Arbitrum', share: `${sushiSplit}%`, fee: '0.30%' }
+      ],
+      treasuryFee: '0.5%',
+      treasuryRecipient: COMMISSION_WALLET
+    }, null, 2);
+
+    navigator.clipboard.writeText(routeData);
+    setRouteCopied(true);
+    setTimeout(() => setRouteCopied(false), 2500);
+  };
+
+  const handleApplyRouter = () => {
+    playSwapSuccessSound();
+    setRouteToast(
+      isFa
+        ? '⚡ الگوریتم تفکیک چندمسیری گریفین با موفقیت برای معاملات فعال شد!'
+        : '⚡ Griffin Multi-Hop routing successfully activated for swaps!'
+    );
+    setTimeout(() => setRouteToast(null), 3500);
   };
 
   const tradePresets = [1000, 5000, 10000, 25000, 50000, 100000];
@@ -341,17 +372,34 @@ export const SmartRouterVisualizer: React.FC<SmartRouterVisualizerProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                playSwapSuccessSound();
-                alert(isFa ? 'مسیریابی هوشمند برای معاملات آینده شما فعال شد!' : 'Smart Routing confirmed for future swaps!');
-              }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] flex items-center gap-1.5"
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-300" />
-              <span>{isFa ? 'اعمال مسیریاب در معاملات' : 'Use Smart Router'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyRouteCallData}
+                className="px-3 py-2 rounded-xl bg-purple-950/60 hover:bg-purple-900/80 border border-purple-500/30 text-purple-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                title={isFa ? 'کپی ساختار تفکیک مسیرها' : 'Copy Route Data'}
+              >
+                {routeCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{routeCopied ? (isFa ? 'کپی شد' : 'Copied') : (isFa ? 'کپی داده مسیر' : 'Route Data')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleApplyRouter}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-300" />
+                <span>{isFa ? 'اعمال مسیریاب در معاملات' : 'Use Smart Router'}</span>
+              </button>
+            </div>
           </div>
+
+          {routeToast && (
+            <div className="mt-3 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+              <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{routeToast}</span>
+            </div>
+          )}
         </div>
       </div>
 
