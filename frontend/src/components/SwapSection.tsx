@@ -140,6 +140,8 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
   const [companionView, setCompanionView] = useState<'none' | 'chart' | 'arbitrage' | 'routes' | 'cexCompare' | 'sentiment'>('chart');
   const [selectingFor, setSelectingFor] = useState<'from' | 'to' | null>(null);
   const [invertRate, setInvertRate] = useState<boolean>(false);
+  const [isFlipping, setIsFlipping] = useState<boolean>(false);
+  const [showFeeBreakdown, setShowFeeBreakdown] = useState<boolean>(false);
 
   const currentTokenBalance = USER_BALANCES[fromToken.symbol] ?? 100.00;
 
@@ -186,11 +188,13 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
   const handleFlipTokens = () => {
     playClickSound();
+    setIsFlipping(true);
     const temp = fromToken;
     const flippedAmount = calculatedOutput > 0 ? (calculatedOutput < 0.01 ? calculatedOutput.toFixed(6) : calculatedOutput.toFixed(4)) : fromAmount;
     setFromToken(toToken);
     setToToken(temp);
     setFromAmount(flippedAmount);
+    setTimeout(() => setIsFlipping(false), 350);
   };
 
   const handleExecuteNativeSwap = () => {
@@ -692,7 +696,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                   type="number"
                   value={fromAmount}
                   onChange={(e) => setFromAmount(e.target.value)}
-                  className={`w-full bg-transparent text-3xl sm:text-4xl font-black font-mono tracking-tight focus:outline-none placeholder:text-slate-600 ${
+                  className={`w-full bg-transparent text-3xl sm:text-4xl font-black font-mono font-tabular tracking-tight focus:outline-none placeholder:text-slate-600 ${
                     isDarkMode ? 'text-white' : 'text-slate-900'
                   }`}
                   placeholder="0.0"
@@ -724,10 +728,10 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               {/* Toman & USD estimate + 1-Tap Iranian Toman Presets */}
               <div className="pt-2 border-t border-purple-500/10 space-y-2">
                 <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-slate-400 font-mono">
+                  <span className="text-slate-400 font-mono font-tabular">
                     ${fromUsd.toFixed(2)}
                   </span>
-                  <span className="font-mono font-bold text-amber-500">
+                  <span className="font-mono font-bold text-amber-500 font-tabular">
                     ≈ {isFa ? `${toPersianDigits(formatToman(fromToman))} تومان` : `${formatToman(fromToman, false)} Toman`}
                   </span>
                 </div>
@@ -753,7 +757,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                         else if (tokenAmount >= 1) setFromAmount(tokenAmount.toFixed(2));
                         else setFromAmount(tokenAmount.toFixed(4));
                       }}
-                      className="px-2.5 py-1 min-h-[26px] rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/25 font-bold transition-all shrink-0 active:scale-95 cursor-pointer flex items-center justify-center"
+                      className="px-2.5 py-1 min-h-[26px] rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/25 font-bold transition-all shrink-0 active:scale-95 cursor-pointer flex items-center justify-center font-mono font-tabular"
                       title={isFa ? `تنظیم معادل ${chip.labelFa}ومان به نرخ زنده` : `Set ${chip.labelEn}oman equivalent`}
                     >
                       {isFa ? chip.labelFa : chip.labelEn}
@@ -763,19 +767,21 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
             </div>
 
-            {/* Flip / Invert Button */}
+            {/* Flip / Invert Button with Dynamic Spin Micro-Interaction */}
             <div className="flex justify-center -my-2.5 relative z-10">
               <button
                 type="button"
                 onClick={handleFlipTokens}
-                className={`w-10 h-10 rounded-2xl border-2 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:rotate-180 duration-300 cursor-pointer ${
+                className={`w-10 h-10 rounded-2xl border-2 flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ${
+                  isFlipping ? 'rotate-180 scale-110 ring-4 ring-purple-400/50' : ''
+                } ${
                   isDarkMode 
                     ? 'bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 border-[#0f0b21] text-white shadow-purple-600/40' 
                     : 'bg-purple-600 hover:bg-purple-500 border-white text-white shadow-purple-300'
                 }`}
                 title={isFa ? 'جابه‌جایی ارز مبدأ و مقصد' : 'Flip tokens'}
               >
-                <ArrowDownUp className="w-4 h-4" />
+                <ArrowDownUp className={`w-4 h-4 transition-transform duration-300 ${isFlipping ? 'rotate-180' : ''}`} />
               </button>
             </div>
 
@@ -793,7 +799,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
               </div>
 
               <div className="flex items-center justify-between gap-3">
-                <div className={`text-3xl sm:text-4xl font-black font-mono tracking-tight truncate ${
+                <div className={`text-3xl sm:text-4xl font-black font-mono font-tabular tracking-tight truncate ${
                   isDarkMode ? 'text-emerald-400' : 'text-emerald-600'
                 }`}>
                   {calculatedOutput > 0 ? (calculatedOutput < 0.001 ? calculatedOutput.toFixed(6) : calculatedOutput.toFixed(4)) : '0.00'}
@@ -824,17 +830,17 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
               {/* Toman & USD estimate for output */}
               <div className="flex justify-between items-center text-[11px] pt-1 border-t border-purple-500/10">
-                <span className="text-slate-400 font-mono">
+                <span className="text-slate-400 font-mono font-tabular">
                   ${toUsd.toFixed(2)}
                 </span>
-                <span className="font-mono font-bold text-amber-500">
+                <span className="font-mono font-bold text-amber-500 font-tabular">
                   ≈ {isFa ? `${toPersianDigits(formatToman(toToman))} تومان` : `${formatToman(toToman, false)} Toman`}
                 </span>
               </div>
             </div>
 
             {/* Interactive Exchange Rate Pill with 1-Click Invert */}
-            <div className="flex items-center justify-between px-2 mb-3 text-[11px] font-mono">
+            <div className="flex items-center justify-between px-2 mb-3 text-[11px] font-mono font-tabular">
               <button
                 type="button"
                 onClick={() => {
@@ -857,7 +863,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
                 </span>
               </button>
               
-              <span className="text-[10px] text-amber-500/90 font-bold">
+              <span className="text-[10px] text-amber-500/90 font-bold font-mono font-tabular">
                 ≈ {isFa ? `${toPersianDigits(formatToman(unitPriceToman))} تومان` : `${formatToman(unitPriceToman, false)} Toman`}
               </span>
             </div>
@@ -975,20 +981,72 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
 
               <div className="flex justify-between items-center">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد شبکه (گس):' : 'Estimated Gas:'}</span>
-                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                <span className="font-mono font-tabular text-emerald-600 dark:text-emerald-400 font-bold">
                   {isGasless ? (isFa ? 'رایگان (پرداخت با Permit2)' : 'Sponsored (Permit2)') : '< $0.05 (≈ ۴,۵۰۰ ت)'}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center">
-                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
-                <span className="font-mono text-purple-700 dark:text-purple-300 font-bold">0.5% ({isFa ? 'تخفیف ویژه کاربران ایرانی' : 'Iran discount'})</span>
+              <div 
+                className="flex justify-between items-center cursor-pointer select-none py-1 px-1.5 -mx-1.5 rounded-xl hover:bg-purple-500/10 transition-colors border border-transparent hover:border-purple-500/20"
+                onClick={() => {
+                  playClickSound();
+                  setShowFeeBreakdown(!showFeeBreakdown);
+                }}
+              >
+                <span className={`flex items-center gap-1.5 ${isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}`}>
+                  <span>{isFa ? 'کارمزد پروتکل:' : 'Integrator Fee:'}</span>
+                  <span className="text-[10px] text-purple-400 underline decoration-dotted font-sans">
+                    {showFeeBreakdown ? (isFa ? 'بستن جزئیات ▴' : 'Hide details ▴') : (isFa ? 'مشاهده جزئیات ▾' : 'View details ▾')}
+                  </span>
+                </span>
+                <span className="font-mono font-tabular text-purple-700 dark:text-purple-300 font-bold">
+                  0.5% (${(fromUsd * 0.005).toFixed(3)})
+                </span>
               </div>
+
+              {/* Expandable Transparent Fee Breakdown Drawer */}
+              {showFeeBreakdown && (
+                <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/25 space-y-2 text-[11px] animate-fade-in text-right">
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{isFa ? 'سهم خزانه‌داری گریفین (۰.۵٪):' : 'Griffin Protocol Share (0.5%):'}</span>
+                    <span className="font-mono font-tabular font-bold text-amber-400">
+                      ${(fromUsd * 0.005).toFixed(3)} (≈ {isFa ? `${toPersianDigits(formatToman(usdToToman(fromUsd * 0.005, tomanRate)))} تومان` : `${formatToman(usdToToman(fromUsd * 0.005, tomanRate), false)} Toman`})
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{isFa ? 'سپر ضد فرانت‌ران و MEV:' : 'Anti-MEV Private Relay:'}</span>
+                    <span className="font-mono text-emerald-400 font-bold">$0.00 ({isFa ? 'رایگان' : 'Free'})</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{isFa ? 'حداکثر لغزش نرخ (اسلیپیج):' : 'Max Price Drift (Slippage):'}</span>
+                    <span className="font-mono font-tabular text-purple-300 font-bold">{slippage}%</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{isFa ? 'مقایسه با کارمزد صرافی‌های متمرکز:' : 'Savings vs Iranian CEXs:'}</span>
+                    <span className="font-mono text-emerald-400 font-bold">~1.5% {isFa ? 'صرفه‌جویی در هزینه' : 'Cheaper'}</span>
+                  </div>
+                  <div className="pt-1.5 border-t border-purple-500/20 flex justify-between items-center text-[10px]">
+                    <span className="text-slate-400">{isFa ? 'آدرس رسمی خزانه‌داری کارمزدها:' : 'Treasury Contract:'}</span>
+                    <span 
+                      className="font-mono text-amber-400 font-bold hover:underline cursor-pointer flex items-center gap-1 font-tabular"
+                      title="0xD9C10B10945D85396f0838EA045587a25FD2A2D3"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText("0xD9C10B10945D85396f0838EA045587a25FD2A2D3");
+                        playClickSound();
+                      }}
+                    >
+                      <span>0xD9C1...A2D3</span>
+                      <span className="text-[9px] bg-amber-400/20 px-1 py-0.2 rounded border border-amber-400/30">کپی 📋</span>
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-between items-center text-[10px] pt-1.5 border-t border-purple-500/15">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-600 font-medium'}>{isFa ? 'آدرس خزانه کارمزدها:' : 'Commission Wallet:'}</span>
                 <span 
-                  className="font-mono text-amber-600 dark:text-amber-300 font-semibold hover:underline cursor-pointer" 
+                  className="font-mono font-tabular text-amber-600 dark:text-amber-300 font-semibold hover:underline cursor-pointer" 
                   title="0xD9C10B10945D85396f0838EA045587a25FD2A2D3"
                   onClick={() => navigator.clipboard.writeText("0xD9C10B10945D85396f0838EA045587a25FD2A2D3")}
                 >
