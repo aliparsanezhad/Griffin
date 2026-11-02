@@ -1106,7 +1106,7 @@ export const SwapSection: React.FC<SwapSectionProps> = ({
       {showHelpModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in text-right">
           <div className={`w-full max-w-lg rounded-2xl p-6 border shadow-2xl relative ${
-            isDarkMode ? 'glass-panel border-purple-500/30' : 'glass-panel-light border-purple-200'
+            isDarkMode ? 'dex-card border-purple-500/30' : 'bg-white border-purple-200 shadow-xl'
           }`}>
             <h3 className={`font-bold text-lg mb-4 flex items-center gap-2 ${
               isDarkMode ? 'text-white' : 'text-slate-900'

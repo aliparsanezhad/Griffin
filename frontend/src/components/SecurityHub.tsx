@@ -134,9 +134,9 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
         {IRANIAN_SECURITY_TIPS.map((tip) => (
           <div
             key={tip.id}
-            className={`glass-panel p-5 rounded-2xl border ${
+            className={`dex-card p-5 rounded-2xl border ${
               tip.critical 
-                ? 'border-purple-500/30 bg-purple-950/20 shadow-purple-900/10' 
+                ? 'border-purple-500/40 shadow-purple-900/20' 
                 : 'border-purple-500/15'
             } shadow-lg space-y-2`}
           >
@@ -158,7 +158,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
       </div>
 
       {/* Recommended Anti-Censorship RPCs */}
-      <div className="glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl space-y-6">
+      <div className="dex-card p-6 md:p-8 rounded-3xl border border-purple-500/25 shadow-2xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-500/20 pb-4">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -193,7 +193,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
                 </div>
                 <button
                   onClick={() => handleCopy(rpc.url)}
-                  className="p-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-white transition-colors"
+                  className="p-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-white transition-colors cursor-pointer"
                   title="کپی آدرس RPC"
                 >
                   {copiedUrl === rpc.url ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -208,7 +208,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
       <RpcMonitor lang={lang} isDarkMode={isDarkMode ?? true} />
 
       {/* Tutorial: How to change RPC in MetaMask / Rabby */}
-      <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs text-slate-300 space-y-3">
+      <div className="dex-card p-6 rounded-2xl border border-purple-500/20 text-xs text-slate-300 space-y-3">
         <h4 className="font-bold text-white text-sm flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-purple-400" />
           <span>{isFa ? 'چگونه RPC را در متامسک (MetaMask) تغییر دهیم؟' : 'How to Change RPC in MetaMask'}</span>
@@ -225,7 +225,7 @@ export const SecurityHub: React.FC<SecurityHubProps> = ({ lang, isDarkMode = tru
 
       {/* Verified Protocol Treasury Commission Transparency Card */}
       <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+        isDarkMode ? 'dex-card' : 'bg-purple-50 border-purple-200'
       }`}>
         <div className="flex items-center gap-2.5">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />

@@ -418,8 +418,8 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
           {/* Interactive Yield Calculator Banner */}
           <div className={`p-6 md:p-8 rounded-3xl border shadow-2xl mb-8 relative overflow-hidden transition-all ${
             isDarkMode 
-              ? 'cyber-gradient-card border-purple-500/35 neon-glow-purple' 
-              : 'glass-panel-light border-purple-200'
+              ? 'dex-card border-purple-500/35 neon-glow-purple' 
+              : 'bg-white border-purple-200 shadow-lg'
           }`}>
             {/* Top Laser Accent Line */}
             <div className="laser-line -mx-6 md:-mx-8 -mt-6 md:-mt-8 mb-6" />
@@ -756,7 +756,7 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
       {/* Sharia & Halal DeFi Guidance Notice */}
       <div className={`p-5 rounded-3xl border mb-6 text-right space-y-2 transition-all ${
         isDarkMode 
-          ? 'glass-panel border-emerald-500/30 bg-emerald-950/20' 
+          ? 'dex-card border-emerald-500/30' 
           : 'bg-emerald-50 border-emerald-200 text-slate-800'
       }`}>
         <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
@@ -772,7 +772,7 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
 
       {/* Verified Protocol Treasury Commission Transparency Card */}
       <div className={`p-4 rounded-3xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-all ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
+        isDarkMode ? 'dex-card' : 'bg-purple-50 border-purple-200'
       }`}>
         <div className="flex items-center gap-2.5">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />

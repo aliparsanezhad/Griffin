@@ -210,7 +210,7 @@ export const GasTracker: React.FC<GasTrackerProps> = ({
           return (
             <div
               key={item.chain}
-              className="glass-panel p-5 rounded-2xl border border-purple-500/20 hover:border-purple-500/40 transition-all shadow-lg flex flex-col justify-between"
+              className="dex-card p-5 rounded-2xl border border-purple-500/20 hover:border-purple-400/40 transition-all shadow-lg flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -221,7 +221,7 @@ export const GasTracker: React.FC<GasTrackerProps> = ({
                 </div>
 
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-2xl font-black text-white font-mono">{item.gwei}</span>
+                  <span className="text-2xl font-black text-white font-mono font-tabular">{item.gwei}</span>
                   <span className="text-xs text-slate-400 font-semibold">Gwei</span>
                 </div>
               </div>
@@ -229,13 +229,13 @@ export const GasTracker: React.FC<GasTrackerProps> = ({
               <div className="pt-3 border-t border-purple-500/15 space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-400">{isFa ? 'تخمین هزینه سواپ:' : 'Estimated Swap Cost:'}</span>
-                  <span className="font-mono font-bold text-emerald-400">
+                  <span className="font-mono font-bold text-emerald-400 font-tabular">
                     ${item.estSwapCostUsd.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-slate-400">{isFa ? 'معادل تومانی:' : 'In Toman:'}</span>
-                  <span className="font-mono font-bold text-amber-300">
+                  <span className="font-mono font-bold text-amber-300 font-tabular">
                     ≈ {isFa ? `${toPersianDigits(formatToman(costToman))} تومان` : `${formatToman(costToman, false)} Toman`}
                   </span>
                 </div>
@@ -281,7 +281,7 @@ export const GasTracker: React.FC<GasTrackerProps> = ({
       </div>
 
       {/* Advice Box for Iranian Users */}
-      <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs text-slate-300 leading-relaxed space-y-2">
+      <div className="dex-card p-6 rounded-2xl border border-purple-500/20 text-xs text-slate-300 leading-relaxed space-y-2">
         <h4 className="font-bold text-white text-sm flex items-center gap-2 text-amber-300">
           <Zap className="w-4 h-4 text-amber-400" />
           <span>{isFa ? 'توصیه فنی گریفین برای کاهش کارمزد کاربران ایرانی:' : 'Griffin Cost-Saving Tip:'}</span>
