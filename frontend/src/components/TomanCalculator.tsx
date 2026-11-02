@@ -100,7 +100,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
     }`}>
       
       {/* Hero Banner with Griffi Financial Mascot */}
-      <div className="rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl group bg-[#110d29]">
+      <div className="dex-card rounded-3xl border border-purple-500/30 overflow-hidden relative shadow-2xl group">
         <div className="relative h-56 sm:h-64 w-full overflow-hidden">
           <img 
             src="/mascot/griffi-accountant.jpg" 
@@ -126,7 +126,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
             </div>
 
             {/* Mode Switcher Pill */}
-            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/60 border border-purple-500/30 backdrop-blur-md self-start md:self-auto">
+            <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/60 border border-purple-500/30 backdrop-blur-md self-start md:self-auto shadow-inner">
               <button
                 onClick={() => {
                   playClickSound();
@@ -134,7 +134,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                 }}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   calcMode === 'converter'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400/30'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -148,7 +148,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                 }}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   calcMode === 'pnl'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400/30'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -164,19 +164,19 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
       {calcMode === 'converter' && (
         <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl transition-all space-y-6 ${
           isDarkMode 
-            ? 'bg-[#100b24]/90 border-purple-500/25 text-slate-100 shadow-purple-950/30' 
+            ? 'dex-card text-slate-100' 
             : 'bg-white border-purple-200 text-slate-800 shadow-xl'
         }`}>
           
           {/* Live Rate Header Banner */}
-          <div className="flex flex-wrap items-center justify-between p-4 rounded-2xl bg-purple-950/50 border border-purple-500/20 text-xs gap-3">
+          <div className="flex flex-wrap items-center justify-between p-4 rounded-2xl bg-purple-950/40 border border-purple-500/20 text-xs gap-3">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-slate-300">{isFa ? 'نرخ اوراکل زنده هر تتر (USDT):' : 'Current USDT Rate:'}</span>
               <span className="font-extrabold text-amber-300 font-mono text-sm">
                 {isFa ? `${toPersianDigits(formatToman(tomanRate))} تومان` : `${formatToman(tomanRate, false)} Toman`}
               </span>
-              <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-bold font-mono">
+              <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold font-mono">
                 {rateChange || '+1.4%'}
               </span>
             </div>
@@ -191,7 +191,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
             
             {/* USDT Input */}
-            <div className="p-5 rounded-2xl bg-purple-950/40 border border-purple-500/30 space-y-2">
+            <div className="dex-input-box p-5 rounded-2xl space-y-2">
               <label className="text-xs text-slate-300 font-semibold flex items-center justify-between">
                 <span>{isFa ? 'مقدار تتر (USDT)' : 'Tether Amount (USDT)'}</span>
                 <DollarSign className="w-4 h-4 text-purple-400" />
@@ -203,13 +203,14 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                 className="w-full bg-transparent text-3xl font-mono font-black text-white focus:outline-none"
                 placeholder="0"
               />
-              <span className="text-[11px] text-slate-400 block pt-1 border-t border-purple-500/10">
+              <span className="text-[11px] text-slate-400 block pt-1 border-t border-purple-500/10 font-mono">
                 1 USDT = 1.00 USD
               </span>
             </div>
 
             {/* Toman Input */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-950/60 to-indigo-950/60 border border-purple-500/30 space-y-2">
+            <div className="dex-input-box p-5 rounded-2xl space-y-2 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
               <label className="text-xs text-amber-300 font-semibold flex items-center justify-between">
                 <span>{isFa ? 'معادل تومان (IRT)' : 'Toman Amount (IRT)'}</span>
                 <Coins className="w-4 h-4 text-amber-400" />
@@ -222,13 +223,13 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                 placeholder="0"
               />
               <div className="flex justify-between items-center text-[11px] text-slate-300 pt-1 border-t border-purple-500/10">
-                <span>
+                <span className="font-tabular">
                   {isFa ? `معادل ریال: ${toPersianDigits(formatToman(currentRial))} ریال` : `IRR: ${formatToman(currentRial, false)} Rial`}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleCopyInvoice}
-                    className="text-amber-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer"
+                    className="text-amber-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer transition-colors"
                     title={isFa ? 'کپی خلاصه فاکتور' : 'Copy Invoice'}
                   >
                     {copiedInvoice ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <FileText className="w-3.5 h-3.5" />}
@@ -236,7 +237,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                   </button>
                   <button
                     onClick={() => handleCopy(currentToman.toString())}
-                    className="text-purple-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer"
+                    className="text-purple-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer transition-colors"
                     title={isFa ? 'کپی رقم تومان' : 'Copy'}
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -262,7 +263,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                   }}
                   className={`px-3.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                     usdtValue === val.toString()
-                      ? 'bg-amber-400 text-slate-950 border-amber-300 shadow'
+                      ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md shadow-amber-400/20'
                       : 'bg-purple-950/40 hover:bg-purple-800/40 border-purple-500/20 text-purple-200 hover:text-white'
                   }`}
                 >
@@ -274,38 +275,38 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
 
           {/* Multi-Asset & Gold Equivalents */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 pt-4 border-t border-purple-500/20">
-            <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/15 flex flex-col justify-between text-xs">
+            <div className="dex-input-box p-4 rounded-xl flex flex-col justify-between text-xs">
               <span className="text-slate-400">{isFa ? 'معادل اتریوم (ETH):' : 'ETH Equivalent:'}</span>
-              <span className="font-mono font-bold text-white mt-1 text-sm">
+              <span className="font-mono font-bold text-white mt-1 text-sm font-tabular">
                 ≈ {ethEquivalent.toFixed(4)} ETH
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/15 flex flex-col justify-between text-xs">
+            <div className="dex-input-box p-4 rounded-xl flex flex-col justify-between text-xs">
               <span className="text-slate-400">{isFa ? 'معادل بیت‌کوین (BTC):' : 'BTC Equivalent:'}</span>
-              <span className="font-mono font-bold text-white mt-1 text-sm">
+              <span className="font-mono font-bold text-white mt-1 text-sm font-tabular">
                 ≈ {btcEquivalent.toFixed(6)} BTC
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+            <div className="dex-input-box p-4 rounded-xl bg-amber-400/5 border-amber-400/20 flex flex-col justify-between text-xs">
               <span className="text-amber-300 font-semibold">{isFa ? 'معادل سکه بهار آزادی:' : 'Gold Coin (Seke):'}</span>
-              <span className="font-mono font-bold text-amber-200 mt-1 text-sm">
+              <span className="font-mono font-bold text-amber-200 mt-1 text-sm font-tabular">
                 ≈ {sekeEquivalent.toFixed(3)} {isFa ? 'سکه' : 'Coins'}
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-amber-400/10 border border-amber-400/20 flex flex-col justify-between text-xs">
+            <div className="dex-input-box p-4 rounded-xl bg-amber-400/5 border-amber-400/20 flex flex-col justify-between text-xs">
               <span className="text-amber-300 font-semibold">{isFa ? 'معادل طلای ۱۸ عیار:' : '18k Gold:'}</span>
-              <span className="font-mono font-bold text-amber-200 mt-1 text-sm">
+              <span className="font-mono font-bold text-amber-200 mt-1 text-sm font-tabular">
                 ≈ {goldGramEquivalent.toFixed(2)} {isFa ? 'گرم' : 'grams'}
               </span>
             </div>
           </div>
 
           {/* CEX Hidden Fee Comparison Banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-emerald-950/20 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4 text-right">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-emerald-950/20 border border-purple-500/25 flex flex-col md:flex-row items-center justify-between gap-4 text-right shadow-inner">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">
-                  {isFa ? 'هزینه پنهان در صورت مبادله این مبلغ در صرافی‌های داخلی (نوبیتکس / والکس):' : 'Estimated Hidden CEX Cost:'}
+                  {isFa ? 'هزینه پنهان در صورت مبادله این مبلغ در صرافی‌های متمرکز داخلی:' : 'Estimated Hidden CEX Cost:'}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
                   {isFa ? 'کارمزد تیکر + برداشت تتر + کارمزد پایا' : 'Spread + Taker + Withdrawal'}
@@ -313,7 +314,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
               </div>
               <p className="text-[11px] text-slate-300 mt-1">
                 {isFa 
-                  ? `در صرافی متمرکز حدود ${toPersianDigits(formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000)))} تومان از سرمایه شما کسر می‌گردد، در حالی که در گریفین‌سواپ بدون احراز هویت و با گس آربیتروم تسویه می‌شود.` 
+                  ? `در صرافی متمرکز حدود ${toPersianDigits(formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000)))} تومان از سرمایه شما کسر می‌گردد، در حالی که در گریفین‌سواپ بدون احراز هویت و با گس بسیار کم تسویه می‌شود.` 
                   : `In centralized exchanges ~${formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000), false)} Toman is lost to hidden fees. GriffinSwap saves you money with zero KYC.`}
               </p>
             </div>
@@ -322,7 +323,7 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
               <span className="text-[10px] text-emerald-300 block font-bold">
                 {isFa ? 'صرفه‌جویی خالص در گریفین‌سواپ:' : 'Net Advantage:'}
               </span>
-              <span className="text-sm font-mono font-black text-emerald-400">
+              <span className="text-sm font-mono font-black text-emerald-400 font-tabular">
                 + {isFa ? `${toPersianDigits(formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000)))} تومان` : `${formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000), false)} T`}
               </span>
             </div>
