@@ -14,7 +14,8 @@ import {
   Pause,
   Flame,
   History,
-  Sliders
+  Sliders,
+  Trash2
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { playClickSound, playSwapStartSound } from '../services/soundService';
@@ -65,6 +66,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
   const [selectedAsset, setSelectedAsset] = useState<'PAXG' | 'USDT' | 'ETH' | 'BTC' | 'SHIRDAL'>('PAXG');
   const [durationMonths, setDurationMonths] = useState<number>(12); // Duration in months
   const [copiedWallet, setCopiedWallet] = useState(false);
+  const [createdToast, setCreatedToast] = useState<string | null>(null);
 
   // Backtest Timeframe: '3m' | '6m' | '1y'
   const [backtestPeriod, setBacktestPeriod] = useState<'3m' | '6m' | '1y'>('6m');
@@ -129,6 +131,39 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
   const growthRate = assetAnnualGrowth[selectedAsset] * (durationMonths / 12);
   const projectedFutureToman = Math.round(totalInvestedToman * (1 + growthRate));
   const profitToman = projectedFutureToman - totalInvestedToman;
+
+  const handleCreateAutomatedPlan = () => {
+    playSwapStartSound();
+    const assetNames: Record<string, string> = {
+      'PAXG': 'طلای دیجیتال PAXG',
+      'USDT': 'تتر دلار USDT',
+      'ETH': 'اتریوم Ethereum',
+      'BTC': 'بیت‌کوین Bitcoin',
+      'SHIRDAL': 'توکن بومی شیردال'
+    };
+    const newPlan: ActiveDcaPlan = {
+      id: `dca-${Date.now()}`,
+      asset: selectedAsset,
+      assetName: assetNames[selectedAsset] || selectedAsset,
+      frequency,
+      installmentToman,
+      completedOrders: 1,
+      totalOrders: totalExecutions,
+      avgBuyPriceUsd: selectedAsset === 'BTC' ? 89500 : selectedAsset === 'ETH' ? 3420 : selectedAsset === 'PAXG' ? 2685.5 : 1.0,
+      currentProfitPercent: 0.0,
+      nextExecutionDate: isFa ? 'فردا ۰۴:۰۰ بامداد (ساعت طلایی تهران)' : 'Tomorrow 04:00 IRST (Golden Hour)',
+      status: 'active'
+    };
+    setActivePlans(prev => [newPlan, ...prev]);
+    setDcaSubTab('active_plans');
+    setCreatedToast(isFa ? `برنامه خرید پله‌ای ${newPlan.assetName} با موفقیت فعال شد!` : `DCA Plan for ${newPlan.assetName} deployed successfully!`);
+    setTimeout(() => setCreatedToast(null), 3500);
+  };
+
+  const deletePlan = (id: string) => {
+    playClickSound();
+    setActivePlans(prev => prev.filter(p => p.id !== id));
+  };
 
   // Trajectory simulation
   const trajectoryPoints = useMemo(() => {
@@ -634,19 +669,30 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playSwapStartSound();
-                        if (onInitiateSwap) {
-                          onInitiateSwap('USDT', selectedAsset, (installmentToman / tomanRate).toFixed(1));
-                        }
-                      }}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-950/40 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-amber-300" />
-                      <span>{isFa ? 'شروع قسط اول در سواپ ⚡' : 'Start Installment in Swap ⚡'}</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleCreateAutomatedPlan}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>{isFa ? 'فعال‌سازی قرارداد خودکار DCA' : 'Deploy Automated DCA'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playSwapStartSound();
+                          if (onInitiateSwap) {
+                            onInitiateSwap('USDT', selectedAsset, (installmentToman / tomanRate).toFixed(1));
+                          }
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-950/40 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Zap className="w-3.5 h-3.5 text-amber-300" />
+                        <span>{isFa ? 'شروع قسط اول در سواپ ⚡' : 'Start in Swap ⚡'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -721,6 +767,12 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
             {/* TAB CONTENT: Active DCA Plans */}
             {dcaSubTab === 'active_plans' && (
               <div className="space-y-4">
+                {createdToast && (
+                  <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{createdToast}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <Clock className="w-4 h-4 text-emerald-400" />
@@ -795,7 +847,7 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                         <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                           <button
                             onClick={() => togglePlanStatus(plan.id)}
-                            className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            className={`p-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                               plan.status === 'active'
                                 ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30'
                                 : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30'
@@ -803,6 +855,15 @@ export const DcaSection: React.FC<DcaSectionProps> = ({
                           >
                             {plan.status === 'active' ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                             <span>{plan.status === 'active' ? (isFa ? 'توقف موقت' : 'Pause') : (isFa ? 'ادامه اجرا' : 'Resume')}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => deletePlan(plan.id)}
+                            title={isFa ? 'لغو و حذف برنامه' : 'Cancel & Delete Plan'}
+                            className="p-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/25 transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
