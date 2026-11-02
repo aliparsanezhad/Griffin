@@ -146,7 +146,7 @@ export const CrossChainTrackerModal: React.FC<CrossChainTrackerModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in text-right">
       <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl relative overflow-hidden transition-all ${
         isDarkMode 
-          ? 'bg-[#120c2b] border-purple-500/30 text-slate-100 shadow-purple-950/70' 
+          ? 'dex-card text-slate-100 shadow-purple-950/70' 
           : 'bg-white border-purple-200 text-slate-900 shadow-2xl'
       }`}>
         

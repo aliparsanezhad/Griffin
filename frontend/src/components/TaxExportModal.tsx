@@ -205,7 +205,7 @@ export const TaxExportModal: React.FC<TaxExportModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 lg:p-6 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
       <div className={`w-full max-w-4xl rounded-3xl p-6 lg:p-8 border shadow-2xl relative my-auto transition-all ${
-        isDarkMode ? 'bg-[#120c24] border-purple-500/30' : 'bg-white border-purple-200'
+        isDarkMode ? 'dex-card text-slate-100' : 'bg-white border-purple-200 text-slate-900'
       }`}>
         {/* Close Button */}
         <button

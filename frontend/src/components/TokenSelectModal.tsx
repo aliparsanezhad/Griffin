@@ -119,7 +119,7 @@ export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
       <div 
         className={`w-full max-w-md rounded-3xl p-6 border shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden ${
           isDarkMode 
-            ? 'bg-[#120c24] border-purple-500/30 text-slate-100 shadow-purple-950/40' 
+            ? 'dex-card text-slate-100' 
             : 'bg-white border-purple-200 text-slate-900 shadow-xl'
         }`}
       >
@@ -145,7 +145,7 @@ export const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
             placeholder={isFa ? 'جستجوی نام، نماد یا آدرس قرارداد...' : 'Search token name or address...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-purple-950/40 border border-purple-500/30 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-purple-400 transition-colors font-sans"
+            className="dex-input-box w-full rounded-2xl pr-10 pl-4 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none transition-colors font-sans"
             autoFocus
           />
         </div>
