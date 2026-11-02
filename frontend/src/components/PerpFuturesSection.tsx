@@ -267,9 +267,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all ${
-      isDarkMode ? 'dex-card text-slate-100' : 'bg-white/95 border border-purple-200 text-slate-800 shadow-xl'
-    }`}>
+    <div className="w-full rounded-3xl p-6 lg:p-8 relative overflow-hidden transition-all dex-card text-slate-100">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -789,9 +787,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
 
           {/* TAB 1: Active Open Positions */}
           {rightTab === 'positions' && (
-            <div className={`p-5 rounded-2xl border animate-fade-in ${
-              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
-            }`}>
+            <div className="p-5 rounded-2xl border animate-fade-in dex-card">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-purple-400" />
@@ -928,9 +924,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
 
           {/* TAB 2: Dynamic Live Order Book Depth */}
           {rightTab === 'orderbook' && (
-            <div className={`p-5 rounded-2xl border animate-fade-in ${
-              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
-            }`}>
+            <div className="p-5 rounded-2xl border animate-fade-in dex-card">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-purple-400" />
@@ -938,13 +932,13 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                     {isFa ? `دفترچه سفارشات زنده ${selectedPair.symbol}` : `Live Order Book (${selectedPair.symbol})`}
                   </h3>
                 </div>
-                <span className="text-[11px] font-mono text-slate-400">
+                <span className="text-[11px] font-mono font-tabular text-slate-400">
                   Spread: ${orderBookData.spread}
                 </span>
               </div>
 
               {/* Table Headers */}
-              <div className="grid grid-cols-3 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono">
+              <div className="grid grid-cols-3 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono font-tabular">
                 <span className="text-right">{isFa ? 'قیمت (USD)' : 'Price (USD)'}</span>
                 <span className="text-center">{isFa ? 'حجم' : 'Size'}</span>
                 <span className="text-left">{isFa ? 'عمق تجمیعی' : 'Cumulative'}</span>
@@ -959,7 +953,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                       playClickSound();
                       setTakeProfitPrice(ask.price.toFixed(2));
                     }}
-                    className="relative grid grid-cols-3 text-xs font-mono py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
+                    className="relative grid grid-cols-3 text-xs font-mono font-tabular py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
                   >
                     <div 
                       className="absolute inset-y-0 right-0 bg-rose-500/15 rounded pointer-events-none"
@@ -973,15 +967,15 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               </div>
 
               {/* Middle: Live Mark Price Indicator */}
-              <div className="my-2.5 py-2 px-3 rounded-xl bg-black/60 border border-purple-500/30 flex items-center justify-between">
+              <div className="my-2.5 py-2 px-3 rounded-xl bg-black/60 border border-purple-500/30 flex items-center justify-between font-mono font-tabular">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-mono font-black text-sm text-emerald-400">
+                  <span className="font-mono font-black font-tabular text-sm text-emerald-400">
                     ${selectedPair.price.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-slate-400">Mark Price</span>
+                  <span className="text-[10px] text-slate-400 font-sans">Mark Price</span>
                 </div>
-                <span className="text-[11px] font-mono text-purple-300">
+                <span className="text-[11px] font-mono font-tabular text-purple-300">
                   {isFa ? toPersianDigits(formatToman(usdToToman(selectedPair.price, tomanRate))) : formatToman(usdToToman(selectedPair.price, tomanRate))} ت
                 </span>
               </div>
@@ -995,7 +989,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                       playClickSound();
                       setStopLossPrice(bid.price.toFixed(2));
                     }}
-                    className="relative grid grid-cols-3 text-xs font-mono py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
+                    className="relative grid grid-cols-3 text-xs font-mono font-tabular py-1 px-1.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
                   >
                     <div 
                       className="absolute inset-y-0 right-0 bg-emerald-500/15 rounded pointer-events-none"
@@ -1016,9 +1010,7 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
 
           {/* TAB 3: Live Recent Market Trades Tape */}
           {rightTab === 'trades' && (
-            <div className={`p-5 rounded-2xl border animate-fade-in ${
-              isDarkMode ? 'bg-purple-950/30 border-purple-500/25' : 'bg-purple-50/70 border-purple-200'
-            }`}>
+            <div className="p-5 rounded-2xl border animate-fade-in dex-card">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-emerald-400" />
@@ -1026,14 +1018,14 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
                     {isFa ? `جریان لحظه‌ای معاملات بازار (${selectedPair.symbol})` : `Real-Time Market Trades (${selectedPair.symbol})`}
                   </h3>
                 </div>
-                <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
+                <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono font-tabular">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                   Live Feed
                 </span>
               </div>
 
               {/* Table Headers */}
-              <div className="grid grid-cols-4 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono">
+              <div className="grid grid-cols-4 text-[11px] text-slate-400 border-b border-purple-500/20 pb-2 mb-2 font-mono font-tabular">
                 <span className="text-right">{isFa ? 'قیمت' : 'Price'}</span>
                 <span className="text-center">{isFa ? 'حجم' : 'Amount'}</span>
                 <span className="text-center">{isFa ? 'ارزش (تومان)' : 'Value (IRT)'}</span>
@@ -1041,11 +1033,11 @@ export const PerpFuturesSection: React.FC<PerpFuturesProps> = ({
               </div>
 
               {/* Trades Stream Rows */}
-              <div className="space-y-1.5 max-h-[340px] overflow-y-auto no-scrollbar">
+              <div className="space-y-1.5 max-h-[340px] overflow-y-auto no-scrollbar font-tabular">
                 {recentTrades.map((tr) => (
                   <div 
                     key={tr.id}
-                    className="grid grid-cols-4 text-xs font-mono py-1.5 px-2 rounded-xl bg-black/30 border border-purple-500/10 items-center hover:bg-black/50 transition-colors"
+                    className="grid grid-cols-4 text-xs font-mono font-tabular py-1.5 px-2 rounded-xl bg-black/30 border border-purple-500/10 items-center hover:bg-black/50 transition-colors"
                   >
                     <span className={`text-right font-bold ${tr.side === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
                       ${tr.price.toLocaleString()}
