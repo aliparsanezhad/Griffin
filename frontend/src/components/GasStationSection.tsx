@@ -212,9 +212,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
   ];
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
-    }`}>
+    <div className="w-full rounded-3xl p-6 lg:p-8 dex-card relative overflow-hidden transition-all text-right">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -230,7 +228,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
             />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl lg:text-2xl font-black griffin-gradient-text">
                 {isFa ? 'جایگاه سوخت گریفین | پرداخت کارمزد با تتر (ERC-4337)' : 'Griffin Gas Station & ERC-4337 Paymaster'}
               </h2>
@@ -238,6 +236,14 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
                 <Fuel className="w-3 h-3 text-amber-400" />
                 Zero ETH Needed
               </span>
+              {/* Live Gas Pulse Beacon */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>{isFa ? 'شبکه روان (۰.۱ Gwei)' : 'Optimal Gas (0.1 Gwei)'}</span>
+              </div>
             </div>
             <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
               {isFa
@@ -248,9 +254,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
         </div>
 
         {/* Paymaster Mode Toggle Button */}
-        <div className={`p-1.5 rounded-2xl border flex items-center gap-2 ${
-          isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-        }`}>
+        <div className="p-1.5 rounded-2xl dex-card flex items-center gap-2">
           <span className="text-xs font-bold px-2 text-slate-300">
             {isFa ? 'حالت پرداخت با تتر:' : 'Paymaster Mode:'}
           </span>
@@ -275,9 +279,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
         
         {/* Fuel Tank Gauge */}
-        <div className={`p-6 rounded-2xl border flex flex-col justify-between ${
-          isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/80 border-purple-200'
-        }`}>
+        <div className="dex-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -335,9 +337,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
         </div>
 
         {/* Middle Column: Instant Top-Up with USDT */}
-        <div className={`p-6 rounded-2xl border flex flex-col justify-between ${
-          isDarkMode ? 'bg-purple-950/20 border-purple-500/20' : 'bg-white border-purple-200'
-        }`}>
+        <div className="dex-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-300">
@@ -408,9 +408,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
         </div>
 
         {/* Right Column: Multi-Chain Live Gas Rates */}
-        <div className={`p-6 rounded-2xl border flex flex-col justify-between ${
-          isDarkMode ? 'bg-purple-950/20 border-purple-500/20' : 'bg-white border-purple-200'
-        }`}>
+        <div className="dex-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -453,9 +451,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
       </div>
 
       {/* Tehran Time Zone (IRST) 24h Gas Heatmap */}
-      <div className={`p-5 rounded-2xl border my-6 ${
-        isDarkMode ? 'bg-purple-950/25 border-purple-500/25' : 'bg-purple-50/50 border-purple-200'
-      }`}>
+      <div className="dex-card p-5 my-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 text-right">
           <div>
             <div className="flex items-center gap-2">
@@ -542,9 +538,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
       </div>
 
       {/* Operation Cost Estimator Matrix */}
-      <div className={`p-5 rounded-2xl border my-6 ${
-        isDarkMode ? 'bg-purple-950/30 border-purple-500/20' : 'bg-purple-50/60 border-purple-200'
-      }`}>
+      <div className="dex-card p-5 my-6">
         <h4 className="text-xs font-bold text-slate-300 mb-3 flex items-center gap-1.5 text-right">
           <Layers className="w-4 h-4 text-purple-400" />
           <span>{isFa ? 'محاسبه کارمزد عملیات‌های رایج بر حسب تومان:' : 'Standard Operations Fee Estimator:'}</span>
@@ -586,9 +580,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
         
         {/* Module 1: Gas Alert Radar & Telegram Bot Link */}
-        <div className={`p-5 rounded-2xl border flex flex-col justify-between text-right ${
-          isDarkMode ? 'bg-purple-950/25 border-purple-500/25' : 'bg-white border-purple-200'
-        }`}>
+        <div className="dex-card p-5 flex flex-col justify-between text-right">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -686,9 +678,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
         </div>
 
         {/* Module 2: L2 Paymaster vs L1 Gas Savings Calculator */}
-        <div className={`p-5 rounded-2xl border flex flex-col justify-between text-right ${
-          isDarkMode ? 'bg-purple-950/25 border-purple-500/25' : 'bg-white border-purple-200'
-        }`}>
+        <div className="dex-card p-5 flex flex-col justify-between text-right">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -776,9 +766,7 @@ export const GasStationSection: React.FC<GasStationSectionProps> = ({
       </div>
 
       {/* Protocol Commission & Treasury Notice */}
-      <div className={`mt-4 p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
-        isDarkMode ? 'bg-purple-950/40 border-purple-500/20' : 'bg-purple-50 border-purple-200'
-      }`}>
+      <div className="dex-card mt-4 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 text-right">
           <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>
