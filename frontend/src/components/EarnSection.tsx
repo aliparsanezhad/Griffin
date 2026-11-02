@@ -244,9 +244,9 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
     <div className="w-full py-6 px-4 max-w-6xl mx-auto animate-fade-in text-right">
       
       {/* 3D Mascot Hero Banner: Griffi Yield Guardian */}
-      <div className={`relative overflow-hidden rounded-3xl border p-6 md:p-8 mb-8 transition-all ${
+      <div className={`relative overflow-hidden rounded-3xl border p-6 md:p-8 mb-8 transition-all dex-card ${
         isDarkMode 
-          ? 'bg-gradient-to-br from-[#1c1236] via-[#140c2a] to-[#0c081a] border-purple-500/30 shadow-2xl' 
+          ? 'border-purple-500/30 shadow-2xl' 
           : 'bg-gradient-to-br from-purple-100 via-indigo-50 to-amber-50 border-purple-200 shadow-xl'
       }`}>
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
@@ -397,7 +397,8 @@ export const EarnSection: React.FC<EarnSectionProps> = ({
                     <button
                       onClick={() => {
                         playClickSound();
-                        alert(isFa ? 'درخواست برداشت اصل سپرده ثبت شد و ظرف ۲ ساعت به ولت شما واریز می‌گردد.' : 'Unstake request initiated.');
+                        setClaimedToast(isFa ? 'درخواست خروج از استخر و برداشت اصل سپرده با موفقیت ثبت شد و ظرف ۲ ساعت به ولت شما واریز می‌گردد.' : 'Unstake request initiated successfully.');
+                        setTimeout(() => setClaimedToast(null), 4000);
                       }}
                       className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-bold transition-all cursor-pointer"
                     >
