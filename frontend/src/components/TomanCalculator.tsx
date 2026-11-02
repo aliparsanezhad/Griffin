@@ -9,7 +9,8 @@ import {
   Scale,
   Sparkles,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import { toPersianDigits, formatToman } from '../services/tomanService';
 import { InflationPnlTracker } from './InflationPnlTracker';
@@ -39,7 +40,18 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
   const [usdtValue, setUsdtValue] = useState<string>('500');
   const [tomanValue, setTomanValue] = useState<string>((500 * tomanRate).toString());
   const [copied, setCopied] = useState<boolean>(false);
+  const [copiedInvoice, setCopiedInvoice] = useState<boolean>(false);
   const [copiedWallet, setCopiedWallet] = useState<boolean>(false);
+
+  const handleCopyInvoice = () => {
+    const text = isFa 
+      ? `فاکتور تبدیل گریفین‌سواپ:\nمقدار: ${parseFloat(usdtValue || '0').toLocaleString()} USDT\nمعادل تومان: ${formatToman(parseFloat(tomanValue || '0'), false)} تومان\nنرخ برابری: ${formatToman(tomanRate, false)} تومان\nپلتفرم غیرحضانتی GriffinSwap`
+      : `GriffinSwap Exchange Receipt:\nAmount: ${parseFloat(usdtValue || '0').toLocaleString()} USDT\nToman Equivalent: ${formatToman(parseFloat(tomanValue || '0'), false)} Toman\nRate: ${formatToman(tomanRate, false)} Toman\nGriffinSwap Non-Custodial Protocol`;
+    navigator.clipboard.writeText(text);
+    setCopiedInvoice(true);
+    playClickSound();
+    setTimeout(() => setCopiedInvoice(false), 2000);
+  };
 
   const handleUsdtChange = (val: string) => {
     setUsdtValue(val);
@@ -213,14 +225,24 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
                 <span>
                   {isFa ? `معادل ریال: ${toPersianDigits(formatToman(currentRial))} ریال` : `IRR: ${formatToman(currentRial, false)} Rial`}
                 </span>
-                <button
-                  onClick={() => handleCopy(currentToman.toString())}
-                  className="text-purple-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer"
-                  title={isFa ? 'کپی رقم' : 'Copy'}
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{isFa ? (copied ? 'کپی شد' : 'کپی رقم') : (copied ? 'Copied' : 'Copy')}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopyInvoice}
+                    className="text-amber-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer"
+                    title={isFa ? 'کپی خلاصه فاکتور' : 'Copy Invoice'}
+                  >
+                    {copiedInvoice ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <FileText className="w-3.5 h-3.5" />}
+                    <span>{isFa ? (copiedInvoice ? 'فاکتور کپی شد' : 'کپی فاکتور') : (copiedInvoice ? 'Copied' : 'Invoice')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleCopy(currentToman.toString())}
+                    className="text-purple-300 hover:text-white flex items-center gap-1 font-bold cursor-pointer"
+                    title={isFa ? 'کپی رقم تومان' : 'Copy'}
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{isFa ? (copied ? 'کپی شد' : 'کپی رقم') : (copied ? 'Copied' : 'Copy')}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -274,6 +296,34 @@ export const TomanCalculator: React.FC<TomanCalculatorProps> = ({
               <span className="text-amber-300 font-semibold">{isFa ? 'معادل طلای ۱۸ عیار:' : '18k Gold:'}</span>
               <span className="font-mono font-bold text-amber-200 mt-1 text-sm">
                 ≈ {goldGramEquivalent.toFixed(2)} {isFa ? 'گرم' : 'grams'}
+              </span>
+            </div>
+          </div>
+
+          {/* CEX Hidden Fee Comparison Banner */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-emerald-950/20 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4 text-right">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white">
+                  {isFa ? 'هزینه پنهان در صورت مبادله این مبلغ در صرافی‌های داخلی (نوبیتکس / والکس):' : 'Estimated Hidden CEX Cost:'}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                  {isFa ? 'کارمزد تیکر + برداشت تتر + کارمزد پایا' : 'Spread + Taker + Withdrawal'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-1">
+                {isFa 
+                  ? `در صرافی متمرکز حدود ${toPersianDigits(formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000)))} تومان از سرمایه شما کسر می‌گردد، در حالی که در گریفین‌سواپ بدون احراز هویت و با گس آربیتروم تسویه می‌شود.` 
+                  : `In centralized exchanges ~${formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000), false)} Toman is lost to hidden fees. GriffinSwap saves you money with zero KYC.`}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center shrink-0">
+              <span className="text-[10px] text-emerald-300 block font-bold">
+                {isFa ? 'صرفه‌جویی خالص در گریفین‌سواپ:' : 'Net Advantage:'}
+              </span>
+              <span className="text-sm font-mono font-black text-emerald-400">
+                + {isFa ? `${toPersianDigits(formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000)))} تومان` : `${formatToman(Math.round(currentToman * 0.0035 + 1.5 * tomanRate + 15000), false)} T`}
               </span>
             </div>
           </div>
