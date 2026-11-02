@@ -76,6 +76,31 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   const [showDisputeModal, setShowDisputeModal] = useState<boolean>(false);
   const [disputeTriggered, setDisputeTriggered] = useState<boolean>(false);
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'sheba' | 'card' | 'vip'>('all');
+  const [showLiveChat, setShowLiveChat] = useState<boolean>(true);
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'merchant' | 'user' | 'system'; text: string; time: string }>>([
+    { sender: 'system', text: 'تترها در قرارداد هوشمند گریفین قفل گردید. مهلت پرداخت: ۱۵ دقیقه.', time: '14:20' },
+    { sender: 'merchant', text: 'سلام، حساب من آنلاین است. پس از واریز پایا یا ساتنا شناسه پیگیری را در این فرم ثبت بفرمایید.', time: '14:21' }
+  ]);
+  const [chatInput, setChatInput] = useState<string>('');
+
+  const handleSendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    playClickSound();
+    const newMsg = {
+      sender: 'user' as const,
+      text: chatInput.trim(),
+      time: 'هم‌اکنون'
+    };
+    setChatMessages(prev => [...prev, newMsg]);
+    setChatInput('');
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, {
+        sender: 'merchant',
+        text: 'در حال استعلام از سامانه بانکی... به محض رویت رسید وجه شما آزاد خواهد شد.',
+        time: 'هم‌اکنون'
+      }]);
+    }, 1500);
+  };
 
   const handleCardNumberChange = (raw: string) => {
     const cleaned = raw.replace(/\D/g, '').slice(0, 16);
@@ -240,8 +265,8 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-      isDarkMode ? 'bg-[#120c24]/90 border-purple-500/30' : 'bg-white/95 border-purple-200'
+    <div className={`w-full rounded-3xl p-6 lg:p-8 border shadow-2xl relative overflow-hidden transition-all dex-card ${
+      isDarkMode ? 'border-purple-500/30' : 'bg-white/95 border-purple-200'
     }`}>
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -550,14 +575,34 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
             {escrowStep === 2 && (
               <div className="space-y-4 animate-fade-in">
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>{isFa ? 'تترها در قرارداد هوشمند قفل شدند!' : 'USDT locked in escrow!'}</span>
+                    <span className="font-bold">{isFa ? 'تترها در قرارداد هوشمند قفل شدند!' : 'USDT locked in escrow!'}</span>
                   </div>
-                  {/* Countdown Timer */}
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/40 text-amber-300 font-mono text-[11px] border border-amber-500/20">
-                    <Clock className="w-3 h-3 text-amber-400" />
-                    <span>
+                  {/* Circular SVG Countdown Timer Ring */}
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-black/50 text-amber-300 font-mono text-[11px] border border-amber-500/30 font-tabular shadow-inner">
+                    <div className="relative w-5 h-5 shrink-0 flex items-center justify-center">
+                      <svg className="w-5 h-5 -rotate-90 transform" viewBox="0 0 36 36">
+                        <path
+                          className="text-purple-900/50"
+                          strokeWidth="4"
+                          stroke="currentColor"
+                          fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                        <path
+                          className={`transition-all duration-1000 ease-linear ${countdownSeconds < 180 ? 'text-rose-400 animate-pulse' : 'text-amber-400'}`}
+                          strokeDasharray={`${(countdownSeconds / 900) * 100}, 100`}
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                          stroke="currentColor"
+                          fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                      </svg>
+                      <Clock className="w-2.5 h-2.5 text-amber-400 absolute" />
+                    </div>
+                    <span className="font-black text-amber-400">
                       {Math.floor(countdownSeconds / 60)}:{String(countdownSeconds % 60).padStart(2, '0')}
                     </span>
                   </div>
@@ -589,6 +634,101 @@ export const P2pEscrowSection: React.FC<P2pEscrowSectionProps> = ({
                       {isFa ? toPersianDigits(formatToman(escrowAmountUsdt * selectedOffer.priceToman)) : formatToman(escrowAmountUsdt * selectedOffer.priceToman)} {isFa ? 'تومان' : 'IRT'}
                     </span>
                   </div>
+                </div>
+
+                {/* Simulated Peer-to-Peer Escrow Live Chat Box */}
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-500/25 space-y-2.5 text-right">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setShowLiveChat(!showLiveChat)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-white cursor-pointer"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>{isFa ? `گفت‌وگوی زنده با فروشنده (${selectedOffer.name})` : `P2P Live Chat (${selectedOffer.name})`}</span>
+                    </button>
+                    <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold">
+                      {isFa ? 'آنلاین و آماده پاسخگویی' : 'Merchant Online'}
+                    </span>
+                  </div>
+
+                  {showLiveChat && (
+                    <div className="space-y-2 pt-1 border-t border-purple-500/15">
+                      {/* Messages scroll area */}
+                      <div className="max-h-36 overflow-y-auto space-y-2 pr-1 text-xs">
+                        {chatMessages.map((msg, i) => (
+                          <div
+                            key={i}
+                            className={`flex flex-col ${
+                              msg.sender === 'user'
+                                ? 'items-end'
+                                : msg.sender === 'system'
+                                  ? 'items-center'
+                                  : 'items-start'
+                            }`}
+                          >
+                            <div
+                              className={`p-2 rounded-xl max-w-[85%] text-[11px] leading-relaxed ${
+                                msg.sender === 'user'
+                                  ? 'bg-purple-600 text-white rounded-br-none'
+                                  : msg.sender === 'system'
+                                    ? 'bg-purple-950/60 border border-purple-500/30 text-amber-300 text-center font-mono text-[10px]'
+                                    : 'bg-slate-800/80 border border-white/10 text-slate-200 rounded-bl-none'
+                              }`}
+                            >
+                              {msg.text}
+                            </div>
+                            <span className="text-[9px] text-slate-500 mt-0.5 px-1 font-mono">
+                              {msg.time}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Chat Input Bar */}
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <input
+                          type="text"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSendChatMessage();
+                          }}
+                          placeholder={isFa ? 'پیامی برای فروشنده ارسال کنید...' : 'Type message to merchant...'}
+                          className="flex-1 px-3 py-1.5 rounded-xl bg-purple-950/50 border border-purple-500/30 text-white text-xs focus:outline-none focus:border-purple-400 text-right"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendChatMessage}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-sm"
+                        >
+                          {isFa ? 'ارسال' : 'Send'}
+                        </button>
+                      </div>
+
+                      {/* Quick Chat Reply Chips */}
+                      <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pt-0.5 text-[10px]">
+                        {[
+                          'واریز انجام شد ✅',
+                          'کد رهگیری پایا ارسال گردید 📋',
+                          'لطفاً تایید بفرمایید 🙏',
+                          'حساب سامان است 💳'
+                        ].map((chip) => (
+                          <button
+                            key={chip}
+                            type="button"
+                            onClick={() => {
+                              playClickSound();
+                              setChatInput(chip);
+                            }}
+                            className="px-2 py-0.5 rounded-md bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/20 text-purple-300 shrink-0 transition-colors cursor-pointer"
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Originating Bank Card Verification */}
